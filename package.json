@@ -1,0 +1,27 @@
+{
+  "name": "transcription-system",
+  "version": "1.0.0",
+  "description": "議会議事録作成システム - セクション番号付与ツール",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/section-numbering/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "process": "ts-node src/section-numbering/index.ts"
+  },
+  "keywords": ["transcription", "notta", "section-numbering"],
+  "author": "Flatto Legal Office",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "commander": "^12.0.0"
+  }
+}
