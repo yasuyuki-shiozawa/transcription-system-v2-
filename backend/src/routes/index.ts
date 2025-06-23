@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import sessionRoutes from './sessionRoutes';
+import uploadRoutes from './uploadRoutes';
 
 const router = Router();
 
 // Mount routes
 router.use('/sessions', sessionRoutes);
+router.use('/sessions/:id/upload', uploadRoutes);
 
 // API info endpoint
 router.get('/', (_req, res) => {
