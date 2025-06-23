@@ -1,0 +1,24 @@
+{
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.postCommitCommand": "sync",
+  "git.suggestSmartCommit": true,
+  "git.fetchOnPull": true,
+  "git.pullBeforeCheckout": true,
+  "git.pruneOnFetch": true,
+  "git.autoStash": true,
+  "git.defaultCloneDirectory": "${workspaceFolder}",
+  "git.enableCommitSigning": false,
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.codeLens.enabled": false,
+  "gitlens.currentLine.enabled": true,
+  "gitlens.hovers.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 30000
+}

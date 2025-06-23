@@ -13,11 +13,13 @@ build/
 !jest.config.js
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# VSCode settings (included for team)
+# .vscode/
 
 # OS
 .DS_Store

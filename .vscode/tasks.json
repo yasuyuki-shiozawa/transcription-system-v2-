@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Git: コミットして同期",
+      "type": "shell",
+      "command": "git add . && git commit -m '更新: ${input:commitMessage}' && git push",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "terminal"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: 自動バックアップ",
+      "type": "shell",
+      "command": "git add . && git commit -m '自動バックアップ: ${workspaceFolderBasename} - ${date:yyyy-MM-dd HH:mm}' && git push",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "terminal"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: ステータス確認",
+      "type": "shell",
+      "command": "git status",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "terminal"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "コミットメッセージを入力してください",
+      "default": "更新"
+    }
+  ]
+}
