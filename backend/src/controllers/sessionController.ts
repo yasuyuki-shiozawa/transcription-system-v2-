@@ -19,7 +19,8 @@ export class SessionController {
           success: false,
           error: 'Missing required fields: name and date',
         };
-        return res.status(400).json(response);
+        res.status(400).json(response);
+        return;
       }
 
       const session = await this.sessionService.createSession(data);
@@ -61,7 +62,8 @@ export class SessionController {
           success: false,
           error: 'Session not found',
         };
-        return res.status(404).json(response);
+        res.status(404).json(response);
+        return;
       }
       
       const response: ApiResponse = {
@@ -95,7 +97,8 @@ export class SessionController {
           success: false,
           error: 'Session not found',
         };
-        return res.status(404).json(response);
+        res.status(404).json(response);
+        return;
       }
       next(error);
     }
@@ -119,7 +122,8 @@ export class SessionController {
           success: false,
           error: 'Session not found',
         };
-        return res.status(404).json(response);
+        res.status(404).json(response);
+        return;
       }
       next(error);
     }
@@ -135,7 +139,8 @@ export class SessionController {
           success: false,
           error: 'Session not found',
         };
-        return res.status(404).json(response);
+        res.status(404).json(response);
+        return;
       }
       
       const response: ApiResponse = {

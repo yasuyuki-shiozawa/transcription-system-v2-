@@ -23,7 +23,8 @@ export class UploadController {
           success: false,
           error: 'No file uploaded',
         };
-        return res.status(400).json(response);
+        res.status(400).json(response);
+        return;
       }
 
       const result = await this.uploadService.processUploadedFile(
@@ -58,7 +59,8 @@ export class UploadController {
           success: false,
           error: 'No file uploaded',
         };
-        return res.status(400).json(response);
+        res.status(400).json(response);
+        return;
       }
 
       const result = await this.uploadService.processUploadedFile(
