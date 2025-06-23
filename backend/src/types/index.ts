@@ -1,0 +1,32 @@
+import { Session, TranscriptionData, Section, SectionMapping } from '@prisma/client';
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+// Session related types
+export interface CreateSessionDto {
+  name: string;
+  date: string; // ISO string
+}
+
+export interface UpdateSessionDto {
+  name?: string;
+  date?: string;
+  status?: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
+}
+
+// Export Prisma types for convenience
+export type {
+  Session,
+  TranscriptionData,
+  Section,
+  SectionMapping,
+  SessionStatus,
+  DataSource,
+  ProcessingStatus
+} from '@prisma/client';

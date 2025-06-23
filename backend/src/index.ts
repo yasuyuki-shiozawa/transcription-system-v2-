@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import routes from './routes';
+import { ApiResponse } from './types';
 
 dotenv.config();
 
@@ -23,23 +25,21 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// API routes placeholder
-app.get('/api', (_req: Request, res: Response) => {
-  res.json({ 
-    message: 'Transcription System API', 
-    version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      sessions: '/api/sessions',
-      upload: '/api/sessions/:id/upload'
-    }
-  });
-});
+// API routes
+app.use('/api', routes);
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  
+  const response: ApiResponse = {
+    success: false,
+    error: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message,
+  };
+  
+  res.status(500).json(response);
 });
 
 // Start server
