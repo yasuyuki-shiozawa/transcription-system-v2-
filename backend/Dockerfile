@@ -1,21 +1,39 @@
+# ビルドステージ
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# 依存関係のインストール
+COPY package*.json ./
+RUN npm ci
+
+# Prismaの設定とクライアント生成
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# ソースコードのコピーとビルド
+COPY . .
+RUN npm run build
+
+# 本番ステージ
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
+# 本番用の依存関係のみインストール
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm ci
+# Prismaの設定とクライアント
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Copy source code
-COPY . .
+# ビルド済みのコード
+COPY --from=builder /app/dist ./dist
 
-# Build TypeScript
-RUN npm run build
+# アップロードディレクトリ
+RUN mkdir -p ./uploads
 
-# Expose port
 EXPOSE 3001
 
-# Start application
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

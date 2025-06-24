@@ -1,95 +1,67 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-// 議会セッション
 model Session {
-  id        String   @id @default(cuid())
-  name      String
-  date      DateTime
-  status    SessionStatus @default(DRAFT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  transcriptions TranscriptionData[]
+  id             String              @id @default(cuid())
+  name           String
+  date           DateTime
+  status         String              @default("DRAFT")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
   mappings       SectionMapping[]
+  transcriptions TranscriptionData[]
 }
 
-// 文字起こしデータ
 model TranscriptionData {
+  id               String    @id @default(cuid())
+  sessionId        String
+  source           String
+  originalFileName String
+  uploadedAt       DateTime  @default(now())
+  processedAt      DateTime?
+  status           String    @default("UPLOADED")
+  sections         Section[]
+  session          Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model Section {
+  id                  String            @id @default(cuid())
+  transcriptionDataId String
+  sectionNumber       String
+  speaker             String
+  timestamp           String
+  endTimestamp        String?
+  content             String
+  order               Int
+  isExcluded          Boolean           @default(false)
+  transcriptionData   TranscriptionData @relation(fields: [transcriptionDataId], references: [id], onDelete: Cascade)
+  manusMappings       SectionMapping[]  @relation("ManusSection")
+  nottaMappings       SectionMapping[]  @relation("NottaSection")
+
+  @@unique([transcriptionDataId, sectionNumber])
+  @@index([transcriptionDataId])
+}
+
+model SectionMapping {
   id               String   @id @default(cuid())
   sessionId        String
-  source           DataSource
-  originalFileName String
-  uploadedAt       DateTime @default(now())
-  processedAt      DateTime?
-  status           ProcessingStatus @default(UPLOADED)
-  
-  session  Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  sections Section[]
-  
-  @@index([sessionId])
-}
+  nottaSectionId   String
+  manusSectionId   String
+  confidence       Float
+  isManuallyMapped Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  manusSection     Section  @relation("ManusSection", fields: [manusSectionId], references: [id])
+  nottaSection     Section  @relation("NottaSection", fields: [nottaSectionId], references: [id])
+  session          Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-// セクション（発言単位）
-model Section {
-  id                  String   @id @default(cuid())
-  transcriptionDataId String
-  sectionNumber       String   // 例: "0001"
-  speaker             String   // 例: "話者1"
-  timestamp           String   // 例: "05:18"
-  content             String   @db.Text
-  order               Int
-  
-  transcriptionData TranscriptionData @relation(fields: [transcriptionDataId], references: [id], onDelete: Cascade)
-  nottaMappings     SectionMapping[]  @relation("NottaSection")
-  manusMappings     SectionMapping[]  @relation("ManusSection")
-  
-  @@index([transcriptionDataId])
-  @@unique([transcriptionDataId, sectionNumber])
-}
-
-// セクションマッピング（nottaとManusの対応付け）
-model SectionMapping {
-  id                String   @id @default(cuid())
-  sessionId         String
-  nottaSectionId    String
-  manusSectionId    String
-  confidence        Float    // マッチング確信度 (0-1)
-  isManuallyMapped  Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  
-  session      Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  nottaSection Section @relation("NottaSection", fields: [nottaSectionId], references: [id])
-  manusSection Section @relation("ManusSection", fields: [manusSectionId], references: [id])
-  
-  @@index([sessionId])
   @@unique([nottaSectionId, manusSectionId])
-}
-
-// Enums
-enum SessionStatus {
-  DRAFT
-  IN_PROGRESS
-  COMPLETED
-}
-
-enum DataSource {
-  NOTTA
-  MANUS
-}
-
-enum ProcessingStatus {
-  UPLOADED
-  PROCESSING
-  PROCESSED
-  ERROR
+  @@index([sessionId])
 }

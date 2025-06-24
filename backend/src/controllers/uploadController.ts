@@ -27,11 +27,14 @@ export class UploadController {
         return;
       }
 
+      // Fix encoding for Japanese filenames
+      const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      
       const result = await this.uploadService.processUploadedFile(
         sessionId,
         DataSource.NOTTA,
         file.path,
-        file.originalname
+        originalName
       );
 
       // Try auto-matching after upload
@@ -63,11 +66,14 @@ export class UploadController {
         return;
       }
 
+      // Fix encoding for Japanese filenames
+      const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      
       const result = await this.uploadService.processUploadedFile(
         sessionId,
         DataSource.MANUS,
         file.path,
-        file.originalname
+        originalName
       );
 
       // Try auto-matching after upload

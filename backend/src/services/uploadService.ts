@@ -28,9 +28,12 @@ export class UploadService {
       });
 
       // Parse file based on source
+      console.log(`Processing file: ${filePath}`);
       const statements = source === DataSource.NOTTA
         ? await this.parserService.parseNottaFile(filePath)
         : await this.parserService.parseManusFile(filePath);
+      
+      console.log(`Parsed ${statements.length} statements`);
 
       // Convert to sections
       const sections = this.parserService.convertToSections(
@@ -52,8 +55,8 @@ export class UploadService {
         }
       });
 
-      // Clean up uploaded file
-      await fs.unlink(filePath);
+      // Clean up uploaded file (temporarily disabled for debugging)
+      // await fs.unlink(filePath);
 
       return transcriptionData;
     } catch (error) {

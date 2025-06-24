@@ -13,7 +13,10 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    // Encode filename to handle Japanese characters
+    const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const ext = path.extname(originalName);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
   }
 });
 

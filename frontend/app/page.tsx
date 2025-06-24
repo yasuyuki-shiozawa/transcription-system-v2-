@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+// DEBUG: Add console log at module load
+console.log('=== HOME PAGE MODULE LOADED ===', new Date().toISOString());
+
 interface Session {
   id: string;
   name: string;
@@ -13,24 +16,48 @@ interface Session {
 }
 
 export default function Home() {
+  console.log('🏠 HOME PAGE COMPONENT RENDERING', new Date().toISOString());
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
   const [newSession, setNewSession] = useState({ name: '', date: '' });
 
   useEffect(() => {
+    console.log('📋 HOME PAGE useEffect - Fetching sessions');
     fetchSessions();
   }, []);
 
   const fetchSessions = async () => {
+    console.log('🔄 FETCHING SESSIONS from /api/sessions');
     try {
       const response = await fetch('/api/sessions');
+      console.log('📡 RESPONSE STATUS:', response.status);
+      
+      if (!response.ok) {
+        console.error('Server returned error:', response.status);
+        // バックエンドが停止している場合は、空の配列を表示
+        if (response.status === 500 || response.status === 502) {
+          console.error('バックエンドサーバーが停止している可能性があります。');
+          setSessions([]);
+          return;
+        }
+        return;
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error('Server returned non-JSON response');
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
         setSessions(data.data);
       }
     } catch (error) {
       console.error('Error fetching sessions:', error);
+      // ネットワークエラーの場合も空の配列を表示
+      setSessions([]);
     } finally {
       setLoading(false);
     }
@@ -44,14 +71,25 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSession),
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error:', errorText);
+        alert('セッションの作成に失敗しました。サーバーが起動していることを確認してください。');
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
         setShowNewSessionForm(false);
         setNewSession({ name: '', date: '' });
         fetchSessions();
+      } else {
+        alert(data.error || 'セッションの作成に失敗しました');
       }
     } catch (error) {
       console.error('Error creating session:', error);
+      alert('セッションの作成中にエラーが発生しました');
     }
   };
 

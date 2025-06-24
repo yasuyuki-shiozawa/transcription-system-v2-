@@ -43,7 +43,28 @@ app.use((err: Error, _req: Request, res: Response, _next: any) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
   console.log(`⚡️[server]: Health check at http://localhost:${PORT}/health`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // アプリケーションを終了しない
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // 重大なエラーの場合のみ終了
+  if (error.message.includes('EADDRINUSE')) {
+    process.exit(1);
+  }
 });

@@ -1,4 +1,4 @@
-import { Session, TranscriptionData, Section, SectionMapping } from '@prisma/client';
+// Import types that are re-exported below
 
 // API Response types
 export interface ApiResponse<T = any> {

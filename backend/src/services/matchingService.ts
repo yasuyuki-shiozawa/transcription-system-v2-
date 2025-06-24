@@ -50,8 +50,7 @@ export class MatchingService {
     // Bulk create mappings
     if (mappings.length > 0) {
       await prisma.sectionMapping.createMany({
-        data: mappings,
-        skipDuplicates: true
+        data: mappings
       });
     }
 

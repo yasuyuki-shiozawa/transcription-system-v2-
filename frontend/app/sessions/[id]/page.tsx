@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import EditableManusSection from '@/components/EditableManusSection';
+
+// DEBUG: Add console log at module load
+console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
 
 interface Session {
   id: string;
@@ -15,7 +19,9 @@ interface Section {
   sectionNumber: string;
   speaker: string;
   timestamp: string;
+  endTimestamp?: string | null;
   content: string;
+  isExcluded?: boolean;
 }
 
 interface TranscriptionData {
@@ -34,9 +40,11 @@ interface SectionMapping {
 }
 
 export default function SessionDetail() {
+  console.log('📄 SESSION DETAIL COMPONENT RENDERING', new Date().toISOString());
   const params = useParams();
   const router = useRouter();
   const sessionId = params.id as string;
+  console.log('🆔 Session ID:', sessionId);
 
   const [session, setSession] = useState<Session | null>(null);
   const [transcriptions, setTranscriptions] = useState<TranscriptionData[]>([]);
@@ -45,15 +53,44 @@ export default function SessionDetail() {
   const [uploadingNotta, setUploadingNotta] = useState(false);
   const [uploadingManus, setUploadingManus] = useState(false);
   const [viewMode, setViewMode] = useState<'upload' | 'compare'>('upload');
+  const [excludedSections, setExcludedSections] = useState<Set<string>>(new Set());
+  const [showTimeCalculation, setShowTimeCalculation] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    console.log('🔄 SESSION DETAIL useEffect - Fetching session data for ID:', sessionId);
     fetchSessionData();
   }, [sessionId]);
 
+  // ページ読み込み時に除外状態を復元
+  useEffect(() => {
+    if (!isInitialized && transcriptions.length > 0) {
+      const manusData = transcriptions.find(t => t.source === 'MANUS');
+      if (manusData) {
+        const excluded = new Set(
+          manusData.sections
+            .filter(section => section.isExcluded === true)
+            .map(section => section.id)
+        );
+        console.log('Restoring excluded sections:', {
+          total: manusData.sections.length,
+          excluded: excluded.size,
+          excludedIds: Array.from(excluded),
+          sections: manusData.sections.slice(0, 5).map(s => ({ id: s.id, isExcluded: s.isExcluded }))
+        });
+        setExcludedSections(excluded);
+        setIsInitialized(true);
+      }
+    }
+  }, [transcriptions, isInitialized]);
+
   const fetchSessionData = async () => {
+    console.log('🔍 FETCHING SESSION DATA...');
     try {
       // Fetch session details
+      console.log(`📡 Fetching from: /api/sessions/${sessionId}`);
       const sessionRes = await fetch(`/api/sessions/${sessionId}`);
+      console.log('📡 Session response status:', sessionRes.status);
       const sessionData = await sessionRes.json();
       if (sessionData.success) {
         setSession(sessionData.data);
@@ -162,6 +199,195 @@ export default function SessionDetail() {
     return syncedData;
   };
 
+  const updateManusSection = async (sectionId: string, updates: { speaker?: string; timestamp?: string; endTimestamp?: string | null; content?: string }) => {
+    try {
+      const response = await fetch(`/api/sections/${sectionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update section');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // Refresh data to show updates
+        await fetchSessionData();
+      }
+    } catch (error) {
+      console.error('Error updating section:', error);
+      throw error;
+    }
+  };
+
+  const toggleExcludeSection = async (sectionId: string) => {
+    const isCurrentlyExcluded = excludedSections.has(sectionId);
+    const newExcludedState = !isCurrentlyExcluded;
+
+    console.log('Toggling section exclusion:', {
+      sectionId,
+      isCurrentlyExcluded,
+      newExcludedState
+    });
+
+    // 楽観的にUIを更新
+    setExcludedSections(prev => {
+      const newSet = new Set(prev);
+      if (newExcludedState) {
+        newSet.add(sectionId);
+      } else {
+        newSet.delete(sectionId);
+      }
+      return newSet;
+    });
+
+    // データベースに保存
+    try {
+      const response = await fetch(`/api/sections/${sectionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isExcluded: newExcludedState }),
+      });
+
+      console.log('PATCH response:', {
+        status: response.status,
+        ok: response.ok
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update section');
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+      
+      // Update the local transcriptions data to reflect the change
+      if (data.success) {
+        setTranscriptions(prev => prev.map(trans => {
+          if (trans.source === 'MANUS') {
+            return {
+              ...trans,
+              sections: trans.sections.map(section => 
+                section.id === sectionId 
+                  ? { ...section, isExcluded: newExcludedState }
+                  : section
+              )
+            };
+          }
+          return trans;
+        }));
+      }
+    } catch (error) {
+      console.error('Error updating section exclusion:', error);
+      // エラーの場合は元に戻す
+      setExcludedSections(prev => {
+        const newSet = new Set(prev);
+        if (isCurrentlyExcluded) {
+          newSet.add(sectionId);
+        } else {
+          newSet.delete(sectionId);
+        }
+        return newSet;
+      });
+    }
+  };
+
+  // 時刻を秒数に変換する関数
+  const timeToSeconds = (timeStr: string): number => {
+    const parts = timeStr.split(':').map(Number);
+    if (parts.length === 2) {
+      // MM:SS形式
+      return parts[0] * 60 + parts[1];
+    } else if (parts.length === 3) {
+      // HH:MM:SS形式
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+    return 0;
+  };
+
+  // 秒数を時間形式に変換する関数
+  const secondsToTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}時間${minutes}分${secs}秒`;
+    } else if (minutes > 0) {
+      return `${minutes}分${secs}秒`;
+    } else {
+      return `${secs}秒`;
+    }
+  };
+
+  // 除外されていないセクションの合計時間を計算
+  const calculateTotalTime = () => {
+    const manusData = transcriptions.find(t => t.source === 'MANUS');
+    if (!manusData) return { totalSeconds: 0, missingSections: [] as Section[] };
+
+    const includedSections = manusData.sections.filter(
+      section => !excludedSections.has(section.id)
+    );
+
+    let totalSeconds = 0;
+    const missingSections: Section[] = [];
+
+    includedSections.forEach(section => {
+      if (section.endTimestamp) {
+        const duration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
+        if (duration > 0) {
+          totalSeconds += duration;
+        }
+      } else {
+        missingSections.push(section);
+      }
+    });
+
+    return { totalSeconds, missingSections };
+  };
+
+  const downloadFilteredManusData = async () => {
+    const manusData = transcriptions.find(t => t.source === 'MANUS');
+    if (!manusData) return;
+
+    // 除外されていないセクションのみをフィルタリング
+    const includedSections = manusData.sections.filter(
+      section => !excludedSections.has(section.id)
+    );
+
+    // セクション番号付きのテキストを生成
+    let content = `${session?.name || 'セッション'}\n`;
+    content += `開催日: ${session?.date ? new Date(session.date).toLocaleDateString('ja-JP') : ''}\n`;
+    content += `出力セクション数: ${includedSections.length}/${manusData.sections.length}\n`;
+    content += '='.repeat(50) + '\n\n';
+
+    content += includedSections
+      .map(section => {
+        const header = `【セクション：${section.sectionNumber}】[${section.speaker}][${section.timestamp}${
+          section.endTimestamp ? ` 〜 ${section.endTimestamp}` : ''
+        }]`;
+        return `${header}\n${section.content}`;
+      })
+      .join('\n\n');
+
+    // ダウンロード処理
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `manus_filtered_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -244,9 +470,32 @@ export default function SessionDetail() {
                   <p className="text-sm text-gray-600">
                     ファイル: {transcriptions.find(t => t.source === 'NOTTA')?.originalFileName}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 mb-4">
                     セクション数: {getNottaSections().length}
                   </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`/api/sessions/${params.id}/upload/download/notta`);
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.style.display = 'none';
+                          a.href = url;
+                          a.download = `notta_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                        }
+                      } catch (error) {
+                        console.error('Download error:', error);
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                  >
+                    セクション番号付きデータをダウンロード
+                  </button>
                 </div>
               ) : (
                 <div>
@@ -276,9 +525,32 @@ export default function SessionDetail() {
                   <p className="text-sm text-gray-600">
                     ファイル: {transcriptions.find(t => t.source === 'MANUS')?.originalFileName}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 mb-4">
                     セクション数: {getManusSections().length}
                   </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`/api/sessions/${params.id}/upload/download/manus`);
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.style.display = 'none';
+                          a.href = url;
+                          a.download = `manus_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                        }
+                      } catch (error) {
+                        console.error('Download error:', error);
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                  >
+                    セクション番号付きデータをダウンロード
+                  </button>
                 </div>
               ) : (
                 <div>
@@ -315,8 +587,84 @@ export default function SessionDetail() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }) => (
+              <div>
+                {/* フィルター済みダウンロードボタン */}
+                {getManusSections().length > 0 && (() => {
+                  const { totalSeconds, missingSections } = calculateTotalTime();
+                  return (
+                    <div className="mb-4 bg-white p-4 rounded-lg shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4">
+                            <p className="text-sm text-gray-600">
+                              除外セクション数: {excludedSections.size} / {getManusSections().length}
+                            </p>
+                            {showTimeCalculation && (
+                              <p className="text-sm font-semibold text-green-600">
+                                合計時間: {secondsToTime(totalSeconds)}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <button
+                              onClick={() => setShowTimeCalculation(!showTimeCalculation)}
+                              className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                            >
+                              {showTimeCalculation ? '計算を非表示' : '合計時間を計算'}
+                            </button>
+                            {excludedSections.size > 0 && (
+                              <button
+                                onClick={() => setExcludedSections(new Set())}
+                                className="text-xs text-blue-600 hover:text-blue-800"
+                              >
+                                すべての除外を解除
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={downloadFilteredManusData}
+                          disabled={excludedSections.size === getManusSections().length}
+                          className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          選択したセクションをダウンロード
+                        </button>
+                      </div>
+                      {showTimeCalculation && missingSections.length > 0 && (
+                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="text-sm text-yellow-800 font-medium mb-1">
+                                ⚠️ 終了時間が未入力のセクションがあります
+                              </p>
+                              <p className="text-xs text-yellow-700">
+                                以下のセクションに終了時間を入力してください（合計時間に含まれていません）：
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => setShowTimeCalculation(false)}
+                              className="text-yellow-800 hover:text-yellow-900 ml-2"
+                              title="警告を閉じる"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                          <ul className="mt-2 text-xs text-yellow-700 space-y-1 max-h-32 overflow-y-auto">
+                            {missingSections.map(section => (
+                              <li key={section.id}>
+                                • セクション {section.sectionNumber} - {section.speaker} [{section.timestamp}]
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+                <div className="space-y-4">
+                  {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }) => (
                   <div key={sectionNumber} className="bg-white rounded-lg shadow overflow-hidden">
                     {/* Section Header */}
                     <div className="bg-gray-50 px-4 py-2 border-b">
@@ -351,12 +699,13 @@ export default function SessionDetail() {
                       <div className="p-4">
                         <h3 className="font-semibold text-green-600 mb-2">Manus</h3>
                         {manus ? (
-                          <div>
-                            <p className="text-sm text-gray-600 mb-1">
-                              {manus.speaker} [{manus.timestamp}]
-                            </p>
-                            <p className="text-sm whitespace-pre-wrap">{manus.content}</p>
-                          </div>
+                          <EditableManusSection 
+                            section={manus} 
+                            onUpdate={updateManusSection}
+                            isExcluded={excludedSections.has(manus.id)}
+                            onToggleExclude={toggleExcludeSection}
+                            showWarning={showTimeCalculation}
+                          />
                         ) : (
                           <p className="text-sm text-gray-400">データなし</p>
                         )}
@@ -364,6 +713,7 @@ export default function SessionDetail() {
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
             )}
           </div>

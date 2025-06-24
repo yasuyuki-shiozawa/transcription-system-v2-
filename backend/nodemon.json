@@ -1,0 +1,9 @@
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": ["src/**/*.spec.ts", "uploads/*"],
+  "exec": "node --max-old-space-size=512 -r ts-node/register ./src/index.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

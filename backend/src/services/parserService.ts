@@ -17,10 +17,18 @@ export class ParserService {
     
     let currentStatement: ParsedStatement | null = null;
     const sectionPattern = /^【セクション：(\d+)】\[話者(\d+)\]\[(\d{2}:\d{2})\]$/;
+    const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;  // MM:SSまたはHH:MM:SS形式に対応
+    let sectionCounter = 1;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
+      // Skip empty lines and header sections
+      if (!line || line.includes('録音版') || line.includes('AI要約') || line.includes('文字起こし')) {
+        continue;
+      }
+      
+      // Check for section pattern first
       if (sectionPattern.test(line)) {
         // Save previous statement if exists
         if (currentStatement) {
@@ -36,6 +44,25 @@ export class ParserService {
             timestamp: match[3],
             content: ''
           };
+        }
+      } 
+      // Check for NOTTA standard format
+      else if (nottaPattern.test(line)) {
+        // Save previous statement if exists
+        if (currentStatement) {
+          statements.push(currentStatement);
+        }
+        
+        // Parse NOTTA format
+        const match = line.match(nottaPattern);
+        if (match) {
+          currentStatement = {
+            sectionNumber: String(sectionCounter).padStart(4, '0'),
+            speaker: `話者${match[1]}`,
+            timestamp: match[2],
+            content: ''
+          };
+          sectionCounter++;
         }
       } else if (currentStatement && line) {
         // Add content to current statement
@@ -59,9 +86,16 @@ export class ParserService {
     
     let currentStatement: ParsedStatement | null = null;
     const sectionPattern = /^【セクション：(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
+    const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;  // MM:SSまたはHH:MM:SS形式に対応
+    let sectionCounter = 1;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
+      
+      // Skip empty lines and header sections
+      if (!line || line.includes('録音版') || line.includes('AI要約') || line.includes('文字起こし')) {
+        continue;
+      }
       
       if (sectionPattern.test(line)) {
         // Save previous statement if exists
@@ -78,6 +112,25 @@ export class ParserService {
             timestamp: match[3],
             content: ''
           };
+        }
+      } 
+      // Check for NOTTA standard format (same as Manus files might use this format)
+      else if (nottaPattern.test(line)) {
+        // Save previous statement if exists
+        if (currentStatement) {
+          statements.push(currentStatement);
+        }
+        
+        // Parse NOTTA format
+        const match = line.match(nottaPattern);
+        if (match) {
+          currentStatement = {
+            sectionNumber: String(sectionCounter).padStart(4, '0'),
+            speaker: `話者${match[1]}`,
+            timestamp: match[2],
+            content: ''
+          };
+          sectionCounter++;
         }
       } else if (currentStatement && line) {
         // Add content to current statement
@@ -100,8 +153,10 @@ export class ParserService {
       sectionNumber: statement.sectionNumber,
       speaker: statement.speaker,
       timestamp: statement.timestamp,
+      endTimestamp: null,
       content: statement.content.trim(),
-      order: index + 1
+      order: index + 1,
+      isExcluded: false
     }));
   }
 }
