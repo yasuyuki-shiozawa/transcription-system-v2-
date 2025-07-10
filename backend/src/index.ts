@@ -8,6 +8,7 @@ import routes from './routes';
 import sectionSelectionRoutes from './routes/sectionSelectionRoutes';
 import speakersRoutes from './routes/speakers';
 import { ApiResponse } from './types';
+import { initDatabase } from './utils/initDatabase';
 
 dotenv.config();
 
@@ -120,21 +121,25 @@ app.use((err: Error, _req: Request, res: Response, _next: any) => {
   res.status(500).json(response);
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
-  console.log(`⚡️[server]: Health check at http://localhost:${PORT}/health`);
-});
+// Initialize database before starting server
+initDatabase().then(() => {
+  // Start server
+  const server = app.listen(PORT, () => {
+    console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+    console.log(`⚡️[server]: Health check at http://localhost:${PORT}/health`);
+  });
 
-// Initialize WebSocket service for transcription progress
-import { initializeWebSocketService } from './services/websocketService';
-initializeWebSocketService(server);
+  // Initialize WebSocket service for transcription progress
+  import('./services/websocketService').then(({ initializeWebSocketService }) => {
+    initializeWebSocketService(server);
+  });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      console.log('HTTP server closed');
+    });
   });
 });
 
