@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { NetworkStatus } from "../components/NetworkStatus";
 
 // DEBUG: Console log at app start
 console.log('🚀🚀🚀 TRANSCRIPTION SYSTEM APP STARTING 🚀🚀🚀');
@@ -44,7 +46,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ErrorBoundary>
+          <NetworkStatus />
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   );

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # 共有用フロントエンド（ポート3000）
+  frontend-shared:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcription-frontend-shared
+    ports:
+      - "3000:3000"  # 共有用ポート
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://backend-shared:3001
+      - NEXT_PUBLIC_VPN_OPTIMIZATION=true
+    depends_on:
+      - backend-shared
+    networks:
+      - transcription-shared-network
+
+  # 共有用バックエンド（ポート3001）
+  backend-shared:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transcription-backend-shared
+    ports:
+      - "3001:3001"  # 共有用ポート
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./prisma/shared.db
+      - VPN_OPTIMIZATION=true
+      - JWT_SECRET=shared-secret-key-change-this
+    volumes:
+      - ./backend/uploads-shared:/app/uploads
+      - ./backend/prisma/shared.db:/app/prisma/shared.db
+    networks:
+      - transcription-shared-network
+
+networks:
+  transcription-shared-network:
+    driver: bridge

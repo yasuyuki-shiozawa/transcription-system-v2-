@@ -1,0 +1,66 @@
+{
+  "committee_info": {
+    "name": "技術委員会",
+    "chair": "Hephaestus",
+    "members": ["Iris", "Hermes"],
+    "established": "2025-06-26T12:00:00Z"
+  },
+  "internal_messages": [
+    {
+      "id": "tech-msg-001",
+      "from": "Hephaestus",
+      "to": ["Iris", "Hermes"],
+      "subject": "技術委員会初回会議の開催について",
+      "content": "技術委員会を正式に開始します。音声アップロード機能の技術仕様を24時間以内に決定する必要があります。",
+      "timestamp": "2025-06-26T15:30:00Z",
+      "priority": "high",
+      "read_by": []
+    }
+  ],
+  "task_assignments": [
+    {
+      "task_id": "tech-task-001",
+      "title": "Whisper API統合設計",
+      "assigned_to": "Hephaestus",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "OpenAI Whisper APIの統合設計と実装方針の策定"
+    },
+    {
+      "task_id": "tech-task-002", 
+      "title": "フロントエンド音声UI改善",
+      "assigned_to": "Iris",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "既存の音声アップロードUIの技術的改善とバックエンド連携"
+    },
+    {
+      "task_id": "tech-task-003",
+      "title": "音声処理インフラ設計",
+      "assigned_to": "Hermes", 
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "音声ファイル処理のインフラ要件設計とCI/CD対応"
+    }
+  ],
+  "member_status": [
+    {
+      "member": "Hephaestus",
+      "status": "active",
+      "last_activity": "2025-06-26T15:30:00Z",
+      "current_tasks": ["tech-task-001"]
+    },
+    {
+      "member": "Iris",
+      "status": "pending",
+      "last_activity": "2025-06-26T12:00:00Z", 
+      "current_tasks": ["tech-task-002"]
+    },
+    {
+      "member": "Hermes",
+      "status": "pending",
+      "last_activity": "2025-06-26T12:00:00Z",
+      "current_tasks": ["tech-task-003"]
+    }
+  ]
+}

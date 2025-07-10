@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import routes from './routes';
+import sectionSelectionRoutes from './routes/sectionSelectionRoutes';
+import speakersRoutes from './routes/speakers';
 import { ApiResponse } from './types';
 
 dotenv.config();
@@ -15,18 +17,94 @@ const PORT = process.env.PORT || 3001;
 // Middlewares
 app.use(helmet());
 app.use(cors());
-app.use(compression());
+
+// VPN最適化設定
+const isVPNOptimizationEnabled = process.env.VPN_OPTIMIZATION === 'true';
+if (isVPNOptimizationEnabled) {
+  // 圧縮設定（VPN環境でのデータ転送最適化）
+  app.use(compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+    level: 6, // 圧縮レベル（1-9、6がバランス良い）
+  }));
+  
+  // タイムアウト設定
+  app.use((req, res, next) => {
+    const timeout = parseInt(process.env.REQUEST_TIMEOUT || '120000');
+    req.setTimeout(timeout);
+    res.setTimeout(timeout);
+    next();
+  });
+} else {
+  // 通常の圧縮設定
+  app.use(compression());
+}
+
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/health', async (_req: Request, res: Response) => {
+  const healthCheck = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV,
+    checks: {
+      database: 'pending',
+      memory: 'pending',
+      disk: 'pending'
+    }
+  };
+
+  try {
+    // データベース接続チェック
+    const { prisma } = await import('./utils/prisma');
+    await prisma.$queryRaw`SELECT 1`;
+    healthCheck.checks.database = 'healthy';
+  } catch (error) {
+    healthCheck.checks.database = 'unhealthy';
+    healthCheck.status = 'DEGRADED';
+  }
+
+  // メモリ使用率チェック
+  const memoryUsage = process.memoryUsage();
+  const memoryThreshold = 1024 * 1024 * 1024; // 1GB
+  if (memoryUsage.heapUsed < memoryThreshold) {
+    healthCheck.checks.memory = 'healthy';
+  } else {
+    healthCheck.checks.memory = 'warning';
+    healthCheck.status = 'DEGRADED';
+  }
+
+  // ディスク容量チェック（uploadsディレクトリ）
+  try {
+    const fs = await import('fs').then(m => m.promises);
+    const stats = await fs.statfs(process.env.UPLOAD_DIR || './uploads');
+    const freeSpaceGB = stats.bfree * stats.bsize / (1024 * 1024 * 1024);
+    healthCheck.checks.disk = freeSpaceGB > 1 ? 'healthy' : 'warning';
+  } catch {
+    healthCheck.checks.disk = 'unknown';
+  }
+
+  const statusCode = healthCheck.status === 'OK' ? 200 : 503;
+  res.status(statusCode).json(healthCheck);
+});
+
+// 簡易ヘルスチェック（ロードバランサー用）
+app.get('/health/live', (_req: Request, res: Response) => {
+  res.status(200).send('OK');
 });
 
 // API routes
 app.use('/api', routes);
+app.use('/api', sectionSelectionRoutes);
+app.use('/api/speakers', speakersRoutes);
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
@@ -47,6 +125,10 @@ const server = app.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
   console.log(`⚡️[server]: Health check at http://localhost:${PORT}/health`);
 });
+
+// Initialize WebSocket service for transcription progress
+import { initializeWebSocketService } from './services/websocketService';
+initializeWebSocketService(server);
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

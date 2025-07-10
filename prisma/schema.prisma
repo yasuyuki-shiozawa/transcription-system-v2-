@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  status    String   @default("DRAFT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  transcriptions TranscriptionData[]
+  mappings       SectionMapping[]
+  speakers       SessionSpeaker[]
+}
+
+// 話者マスターテーブル
+model Speaker {
+  id           String   @id @default(cuid())
+  fullName     String   // 正式名称（例：比嘉武宏）
+  displayName  String   // 表示名（例：比嘉武宏議員）
+  aliases      String   // カンマ区切りの別名（例：比嘉,ヒガ,比嘉議員）
+  speakerType  String   @default("MEMBER") // MEMBER（議員）, STAFF（職員）, OTHER（その他）
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  sessionSpeakers SessionSpeaker[]
+}
+
+// セッションと話者の関連テーブル
+model SessionSpeaker {
+  id         String   @id @default(cuid())
+  sessionId  String
+  speakerId  String
+  orderIndex Int      // 発言順序
+  
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  speaker    Speaker  @relation(fields: [speakerId], references: [id])
+  
+  @@unique([sessionId, speakerId])
+}
+
+model TranscriptionData {
+  id               String   @id @default(cuid())
+  sessionId        String
+  source           String   // "NOTTA" or "MANUS"
+  originalFileName String
+  uploadedAt       DateTime @default(now())
+  processedAt      DateTime?
+  status           String   @default("PENDING")
+  fileType         String?
+  fileSize         Int?
+  duration         Int?     // in seconds
+  audioFormat      String?
+  transcriptionId  String?  // External transcription service ID
+  
+  session          Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sections         Section[]
+}
+
+model Section {
+  id                  String   @id @default(cuid())
+  transcriptionDataId String
+  sectionNumber       String
+  speaker             String
+  speakerId           String?  // 話者マスターへの参照（NULL可）
+  timestamp           String
+  endTimestamp        String?
+  content             String
+  order               Int
+  isExcluded          Boolean  @default(false)
+  
+  transcriptionData   TranscriptionData @relation(fields: [transcriptionDataId], references: [id], onDelete: Cascade)
+  mappingsAsNotta     SectionMapping[]  @relation("NottaSection")
+  mappingsAsManus     SectionMapping[]  @relation("ManusSection")
+}
+
+model SectionMapping {
+  id               String   @id @default(cuid())
+  sessionId        String
+  nottaSectionId   String
+  manusSectionId   String
+  confidence       Float
+  isManuallyMapped Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  
+  session          Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  nottaSection     Section  @relation("NottaSection", fields: [nottaSectionId], references: [id])
+  manusSection     Section  @relation("ManusSection", fields: [manusSectionId], references: [id])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+}

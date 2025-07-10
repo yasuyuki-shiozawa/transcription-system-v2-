@@ -1,0 +1,45 @@
+# ビルドステージ
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 依存関係のインストール（キャッシュ効率化）
+COPY package*.json ./
+RUN npm ci
+
+# ソースコードのコピー
+COPY . .
+
+# 環境変数をビルド時に設定
+ARG NEXT_PUBLIC_VPN_OPTIMIZATION
+ARG NEXT_PUBLIC_API_TIMEOUT
+ARG NEXT_PUBLIC_API_BASE_URL
+
+# Next.jsアプリケーションのビルド
+RUN npm run build
+
+# 本番ステージ
+FROM node:20-alpine
+
+# セキュリティのため非rootユーザーを作成
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# 本番用の依存関係のみインストール
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# ビルド済みのNext.jsアプリケーション
+COPY --from=builder --chown=nodejs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nodejs:nodejs /app/public ./public
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+
+# 非rootユーザーに切り替え
+USER nodejs
+
+EXPOSE 3000
+
+# Next.jsの本番サーバーを起動
+CMD ["npm", "start"]

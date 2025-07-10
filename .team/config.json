@@ -1,0 +1,28 @@
+{
+  "team": {
+    "name": "Transcription System Development Team",
+    "created": "2025-06-25T14:00:00Z",
+    "version": "1.0.0"
+  },
+  "terminals": {
+    "maxActive": 5,
+    "heartbeatInterval": 60,
+    "staleTimeout": 900
+  },
+  "communication": {
+    "messageFile": ".team/messages.json",
+    "pollInterval": 20
+  },
+  "tasks": {
+    "autoAssign": true,
+    "maxTasksPerTerminal": 3
+  },
+  "ports": {
+    "reserved": {
+      "backend": 3001,
+      "frontend-local": 3000,
+      "frontend-vpn": 3002,
+      "frontend-dev": [3003, 3004, 3005]
+    }
+  }
+}

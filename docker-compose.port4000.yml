@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  frontend-4000:
+    image: node:18-alpine
+    container_name: transcription-frontend-4000
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "4000:3000"  # 4000番ポートを使用
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:4001
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - backend-4000
+
+  backend-4000:
+    image: node:18-alpine
+    container_name: transcription-backend-4000
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "4001:3001"  # 4001番ポートを使用
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-4000:5432/transcription_db
+    command: sh -c "npm install && npx prisma generate && npx prisma db push && npm run dev"
+    depends_on:
+      - postgres-4000
+
+  postgres-4000:
+    image: postgres:15-alpine
+    container_name: transcription-postgres-4000
+    environment:
+      POSTGRES_DB: transcription_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_4000_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_4000_data:

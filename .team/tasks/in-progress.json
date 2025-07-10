@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "音声ファイルアップロード機能の実装",
+      "description": "MP3/WAVファイルを直接アップロードできる機能",
+      "priority": "high",
+      "requiredRole": "frontend_developer",
+      "estimatedHours": 8,
+      "dependencies": [],
+      "createdAt": "2025-06-25T14:00:00Z",
+      "assignedTo": "Iris",
+      "startedAt": "2025-06-25T17:25:00Z"
+    }
+  ]
+}

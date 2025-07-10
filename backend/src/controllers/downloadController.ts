@@ -1,7 +1,55 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
-import { DataSource } from '@prisma/client';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+
+// 累積時間計算のためのヘルパー関数
+const timeToSeconds = (timeStr: string): number => {
+  const parts = timeStr.split(':').map(Number);
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  } else if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return 0;
+};
+
+const secondsToTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  // 常にHH:MM:SS形式で返す
+  return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
+};
+
+// 話者別累積時間計算 - TODO: 話者管理システムとの統合後に実装
+// const calculateCumulativeTime = (sections: any[], currentSectionId: string, isEndTime = false): number => {
+//   let cumulativeSeconds = 0;
+//   
+//   for (const section of sections) {
+//     if (section.endTimestamp) {
+//       const duration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
+//       if (duration > 0) {
+//         cumulativeSeconds += duration;
+//       }
+//     }
+//     
+//     // 現在のセクションに到達したら停止
+//     if (section.id === currentSectionId) {
+//       if (isEndTime && section.endTimestamp) {
+//         // 終了時間の場合は現在のセクションの時間も含める
+//         const duration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
+//         if (duration > 0) {
+//           cumulativeSeconds += duration;
+//         }
+//       }
+//       break;
+//     }
+//   }
+//   
+//   return cumulativeSeconds;
+// };
 
 export class DownloadController {
   downloadManusData = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +61,7 @@ export class DownloadController {
         where: {
           id: transcriptionId,
           sessionId: sessionId,
-          source: DataSource.MANUS
+          source: 'MANUS'
         },
         include: {
           sections: {
@@ -60,7 +108,7 @@ export class DownloadController {
       const manusData = await prisma.transcriptionData.findFirst({
         where: {
           sessionId: sessionId,
-          source: DataSource.MANUS
+          source: 'MANUS'
         },
         include: {
           sections: {
@@ -112,7 +160,7 @@ export class DownloadController {
         where: {
           id: transcriptionId,
           sessionId: sessionId,
-          source: DataSource.NOTTA
+          source: 'NOTTA'
         },
         include: {
           sections: {
@@ -159,7 +207,7 @@ export class DownloadController {
       const nottaData = await prisma.transcriptionData.findFirst({
         where: {
           sessionId: sessionId,
-          source: DataSource.NOTTA
+          source: 'NOTTA'
         },
         include: {
           sections: {
@@ -200,6 +248,186 @@ export class DownloadController {
       res.send(content);
     } catch (error) {
       next(error);
+    }
+  };
+
+  downloadFilteredManusAsWord = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+      // sessionIdはURLパスから取得（親ルーターから継承）
+      const sessionId = req.params.id || req.params.sessionId;
+      const { includedSections = [] } = req.body;
+      
+      console.log('downloadFilteredManusAsWord called:', {
+        sessionId,
+        includedSections,
+        includedSectionsLength: includedSections.length
+      });
+
+      // Get MANUS data with included sections only
+      const manusData = await prisma.transcriptionData.findFirst({
+        where: {
+          sessionId: sessionId,
+          source: 'MANUS'
+        },
+        include: {
+          sections: {
+            where: {
+              id: {
+                in: includedSections as string[]
+              }
+            },
+            orderBy: { order: 'asc' }
+          },
+          session: true
+        }
+      });
+
+      if (!manusData) {
+        console.log('No MANUS transcription data found for session:', sessionId);
+        const response: ApiResponse = {
+          success: false,
+          error: 'No MANUS data found for this session'
+        };
+        res.status(404).json(response);
+        return;
+      }
+      
+      if (manusData.sections.length === 0) {
+        console.log('MANUS data found but no sections matched included IDs:', {
+          sessionId,
+          includedSectionsCount: includedSections.length,
+          includedSections: includedSections.slice(0, 5) // 最初の5個のIDを表示
+        });
+        const response: ApiResponse = {
+          success: false,
+          error: 'No sections found with the specified IDs'
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Create Word document
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            // Title
+            new Paragraph({
+              text: manusData.session.name,
+              heading: HeadingLevel.TITLE,
+              alignment: 'center'
+            }),
+            // Date
+            new Paragraph({
+              text: `開催日: ${new Date(manusData.session.date).toLocaleDateString('ja-JP')}`,
+              spacing: { after: 200 }
+            }),
+            // Section count
+            new Paragraph({
+              text: `出力セクション数: ${manusData.sections.length}`,
+              spacing: { after: 400 }
+            }),
+            // Separator
+            new Paragraph({
+              text: '─'.repeat(50),
+              spacing: { after: 400 }
+            }),
+            // Sections with proper timestamp format
+            ...manusData.sections.flatMap((section, index) => {
+              // 現在のセクションまでの全体経過時間を計算
+              let totalElapsedSeconds = 0;
+              for (let i = 0; i < index; i++) {
+                const prevSection = manusData.sections[i];
+                if (prevSection.endTimestamp) {
+                  const duration = timeToSeconds(prevSection.endTimestamp) - timeToSeconds(prevSection.timestamp);
+                  if (duration > 0) {
+                    totalElapsedSeconds += duration;
+                  }
+                }
+              }
+              
+              // このセクションの開始時の全体経過時間
+              const totalStartTime = secondsToTime(totalElapsedSeconds);
+              
+              // このセクションの長さ
+              let sectionDuration = 0;
+              if (section.endTimestamp) {
+                sectionDuration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
+              }
+              
+              // このセクションの終了時の全体経過時間
+              const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
+              
+              // 話者名の整形（「議員」を付ける場合など）
+              const speakerName = section.speaker.includes('議員') ? section.speaker : `${section.speaker}議員`;
+              
+              return [
+                // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: `（${totalStartTime}）（00：00：00）`,
+                      color: '000000',
+                      size: 22
+                    })
+                  ],
+                  spacing: { before: 200, after: 100 }
+                }),
+                
+                // 話者名
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: `${speakerName}：`,
+                      bold: true,
+                      size: 24
+                    })
+                  ],
+                  spacing: { after: 100 }
+                }),
+                
+                // セクション内容（インデント付き）
+                new Paragraph({
+                  text: section.content,
+                  indent: { left: 360 }, // 全角スペース2つ分のインデント
+                  spacing: { after: 100 }
+                }),
+                
+                // 終了タイムスタンプ（全体経過時間）（このセクションの長さ）
+                ...(section.endTimestamp ? [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `（${totalEndTime}）（${secondsToTime(sectionDuration)}）`,
+                        color: '000000',
+                        size: 22
+                      })
+                    ],
+                    spacing: { after: 400 }
+                  })
+                ] : [])
+              ];
+            })
+          ]
+        }]
+      });
+
+      // Generate buffer
+      const buffer = await Packer.toBuffer(doc);
+
+      // Set headers for Word file download
+      const filename = `manus_filtered_${new Date().toISOString().split('T')[0]}.docx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error in downloadFilteredManusAsWord:', error);
+      const response: ApiResponse = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Word形式のダウンロード中にエラーが発生しました'
+      };
+      res.status(500).json(response);
     }
   };
 }

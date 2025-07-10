@@ -16,12 +16,13 @@ interface Section {
 interface EditableManusSectonProps {
   section: Section;
   onUpdate: (sectionId: string, updates: { speaker?: string; timestamp?: string; endTimestamp?: string | null; content?: string }) => Promise<void>;
-  isExcluded?: boolean;
-  onToggleExclude?: (sectionId: string) => void;
+  isIncluded?: boolean;
+  onToggleInclude?: (sectionId: string) => void;
   showWarning?: boolean;
 }
 
-export default function EditableManusSection({ section, onUpdate, isExcluded = false, onToggleExclude, showWarning = false }: EditableManusSectonProps) {
+export default function EditableManusSection({ section, onUpdate, isIncluded = false, onToggleInclude, showWarning = false }: EditableManusSectonProps) {
+  console.log(`📝 EditableManusSection for ${section.id}:`, { isIncluded, sectionNumber: section.sectionNumber });
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editedSpeaker, setEditedSpeaker] = useState(section.speaker);
@@ -30,27 +31,38 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
   const [editedContent, setEditedContent] = useState(section.content);
   const [isSaving, setIsSaving] = useState(false);
 
-  // 時刻入力を自動フォーマットする関数
-  const formatTimeInput = (value: string): string => {
-    // 数字以外を除去
-    const numbers = value.replace(/[^\d]/g, '');
+  // 時刻入力のハンドラー（シンプルなアプローチ）
+  const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
+    const value = e.target.value;
     
-    if (numbers.length <= 2) {
-      return numbers;
-    } else if (numbers.length <= 4) {
-      // MM:SS形式
-      return `${numbers.slice(0, 2)}:${numbers.slice(2)}`;
-    } else if (numbers.length <= 6) {
-      // HH:MM:SS形式
-      return `${numbers.slice(0, 2)}:${numbers.slice(2, 4)}:${numbers.slice(4)}`;
-    }
-    // 6桁を超える場合は最初の6桁のみ使用
-    return `${numbers.slice(0, 2)}:${numbers.slice(2, 4)}:${numbers.slice(4, 6)}`;
+    // 数字とコロンのみ許可
+    const filtered = value.replace(/[^0-9:]/g, '');
+    setter(filtered);
   };
 
-  // 時刻入力のハンドラー
-  const handleTimeChange = (value: string, setter: (value: string) => void) => {
-    const formatted = formatTimeInput(value);
+  // フォーカスが外れた時に時刻をフォーマット
+  const handleTimeBlur = (value: string, setter: (value: string) => void) => {
+    // 数字のみ抽出
+    const numbers = value.replace(/[^\d]/g, '');
+    
+    if (numbers.length === 0) {
+      return;
+    }
+    
+    let formatted = '';
+    if (numbers.length <= 4) {
+      // MMSS -> MM:SS
+      const mm = numbers.slice(0, 2).padStart(2, '0');
+      const ss = numbers.slice(2, 4).padStart(2, '0');
+      formatted = ss ? `${mm}:${ss}` : mm;
+    } else {
+      // HHMMSS -> HH:MM:SS
+      const hh = numbers.slice(0, 2).padStart(2, '0');
+      const mm = numbers.slice(2, 4).padStart(2, '0');
+      const ss = numbers.slice(4, 6).padStart(2, '0');
+      formatted = ss ? `${hh}:${mm}:${ss}` : `${hh}:${mm}`;
+    }
+    
     setter(formatted);
   };
 
@@ -152,7 +164,8 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
             <input
               type="text"
               value={editedTimestamp}
-              onChange={(e) => handleTimeChange(e.target.value, setEditedTimestamp)}
+              onChange={(e) => handleTimeInputChange(e, setEditedTimestamp)}
+              onBlur={(e) => handleTimeBlur(e.target.value, setEditedTimestamp)}
               className="px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-green-500 w-24"
               placeholder="0518"
               title="数字のみ入力（例: 0518 → 05:18）"
@@ -162,7 +175,8 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
             <input
               type="text"
               value={editedEndTimestamp}
-              onChange={(e) => handleTimeChange(e.target.value, setEditedEndTimestamp)}
+              onChange={(e) => handleTimeInputChange(e, setEditedEndTimestamp)}
+              onBlur={(e) => handleTimeBlur(e.target.value, setEditedEndTimestamp)}
               className="px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-green-500 w-24"
               placeholder="0545"
               title="数字のみ入力（例: 0545 → 05:45, 013005 → 01:30:05）"
@@ -252,16 +266,16 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
   })() : 0;
 
   return (
-    <div className={isExcluded ? 'opacity-50' : ''}>
+    <div className={!isIncluded ? 'opacity-50' : ''}>
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center space-x-2">
-          {onToggleExclude && (
+          {onToggleInclude && (
             <input
               type="checkbox"
-              checked={isExcluded}
-              onChange={() => onToggleExclude(section.id)}
-              className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
-              title="チェックすると出力から除外されます"
+              checked={isIncluded}
+              onChange={() => onToggleInclude(section.id)}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              title="チェックすると出力に含まれます"
             />
           )}
           <div>
@@ -274,7 +288,7 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
                   <span className="text-gray-500 ml-1">({duration}秒)</span>
                 </>
               )}]
-              {showWarning && !section.endTimestamp && !isExcluded && (
+              {showWarning && !section.endTimestamp && isIncluded && (
                 <span className="ml-2 text-xs text-yellow-600 font-medium">
                   ⚠️ 終了時間未入力
                 </span>
@@ -299,7 +313,7 @@ export default function EditableManusSection({ section, onUpdate, isExcluded = f
           </button>
         </div>
       </div>
-      <p className={`text-sm whitespace-pre-wrap ${isExcluded ? 'line-through text-gray-400' : ''}`}>{section.content}</p>
+      <p className={`text-sm whitespace-pre-wrap ${!isIncluded ? 'line-through text-gray-400' : ''}`}>{section.content}</p>
     </div>
   );
-}// trigger rebuild
+} // force reload

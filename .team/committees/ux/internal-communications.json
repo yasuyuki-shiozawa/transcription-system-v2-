@@ -1,0 +1,66 @@
+{
+  "committee_info": {
+    "name": "UX委員会",
+    "chair": "Aphrodite",
+    "members": ["Iris", "Minerva"], 
+    "established": "2025-06-26T12:00:00Z"
+  },
+  "internal_messages": [
+    {
+      "id": "ux-msg-001",
+      "from": "Aphrodite",
+      "to": ["Iris", "Minerva"],
+      "subject": "UX委員会初回会議の開催について", 
+      "content": "UX委員会を正式に開始します。音声アップロード機能のデザインシステムを24時間以内に構築する必要があります。",
+      "timestamp": "2025-06-26T15:30:00Z",
+      "priority": "high",
+      "read_by": []
+    }
+  ],
+  "task_assignments": [
+    {
+      "task_id": "ux-task-001",
+      "title": "音声UIデザインシステム構築",
+      "assigned_to": "Aphrodite",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "音声アップロード機能のデザインシステムとUI/UX改善計画の策定"
+    },
+    {
+      "task_id": "ux-task-002",
+      "title": "音声UI実装改善と連携",
+      "assigned_to": "Iris", 
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "既存音声UIの改善とデザインシステムとの整合性確保"
+    },
+    {
+      "task_id": "ux-task-003",
+      "title": "ユーザビリティ分析と改善提案",
+      "assigned_to": "Minerva",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending",
+      "description": "音声機能のユーザビリティ分析と戦略的改善提案"
+    }
+  ],
+  "member_status": [
+    {
+      "member": "Aphrodite",
+      "status": "active", 
+      "last_activity": "2025-06-26T15:30:00Z",
+      "current_tasks": ["ux-task-001"]
+    },
+    {
+      "member": "Iris",
+      "status": "pending",
+      "last_activity": "2025-06-26T12:00:00Z",
+      "current_tasks": ["ux-task-002"]
+    },
+    {
+      "member": "Minerva",
+      "status": "pending", 
+      "last_activity": "2025-06-26T12:00:00Z",
+      "current_tasks": ["ux-task-003"]
+    }
+  ]
+}

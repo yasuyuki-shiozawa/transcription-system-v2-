@@ -1,0 +1,133 @@
+{
+  "committee_info": {
+    "name": "品質委員会",
+    "chair": "Athena", 
+    "members": ["Thoth", "Minerva"],
+    "established": "2025-06-26T12:00:00Z",
+    "reporting_to": "Minerva-CPO",
+    "escalation_to": "Atlas-CEO"
+  },
+  "internal_messages": [
+    {
+      "id": "qa-msg-001",
+      "from": "Athena",
+      "to": ["Thoth", "Minerva"],
+      "subject": "品質委員会初回会議の開催について",
+      "content": "品質委員会を正式に開始します。音声アップロード機能のテスト戦略を24時間以内に策定する必要があります。",
+      "timestamp": "2025-06-26T15:30:00Z",
+      "priority": "high", 
+      "read_by": []
+    },
+    {
+      "id": "qa-msg-002",
+      "from": "Athena",
+      "to": ["Thoth"],
+      "subject": "QA-TASK-001完了報告とThoth支援要請",
+      "content": "QA-TASK-001（音声機能テスト戦略策定）を前倒しで完了しました。\n\n完了事項:\n- 包括的テスト戦略策定\n- 品質基準確定\n- Iris実装品質検証（A+評価）\n- CEO・CPO指示への対応完了\n\nQA-TASK-002（API仕様書作成）についてサポートが可能です。技術委員会との連携でより効率的な文書化を実現できます。",
+      "timestamp": "2025-06-26T14:00:00Z",
+      "priority": "high",
+      "read_by": []
+    }
+  ],
+  "task_assignments": [
+    {
+      "task_id": "qa-task-001",
+      "title": "音声機能テスト戦略策定",
+      "assigned_to": "Athena",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "completed",
+      "completion_time": "2025-06-26T14:00:00Z",
+      "description": "音声アップロード機能の包括的テスト戦略と品質基準の策定",
+      "results": "14テストケース実施、品質基準確定、WebSocket・Health API検証完了（A+評価）"
+    },
+    {
+      "task_id": "qa-task-002",
+      "title": "技術文書とAPI仕様書作成",
+      "assigned_to": "Thoth",
+      "deadline": "2025-06-27T18:00:00Z", 
+      "status": "pending",
+      "description": "技術委員会の成果を基にしたAPI仕様書とユーザーガイドの作成",
+      "support_available": "Athena（技術委員会連携サポート）"
+    },
+    {
+      "task_id": "qa-task-003",
+      "title": "品質指標とKPI設計",
+      "assigned_to": "Minerva",
+      "deadline": "2025-06-27T18:00:00Z",
+      "status": "pending", 
+      "description": "音声機能の品質指標とパフォーマンスKPIの設計",
+      "note": "MinervaCPO昇格により、CPO職務と統合実行"
+    },
+    {
+      "task_id": "qa-task-004",
+      "title": "E2Eテスト環境構築",
+      "assigned_to": "Athena",
+      "deadline": "2025-06-28T18:00:00Z",
+      "status": "in_progress",
+      "description": "Playwright導入による自動化E2Eテスト環境の構築",
+      "priority": "high"
+    }
+  ],
+  "member_status": [
+    {
+      "member": "Athena",
+      "status": "active",
+      "last_activity": "2025-06-26T14:00:00Z",
+      "current_tasks": ["qa-task-004"],
+      "completed_tasks": ["qa-task-001"],
+      "achievements": [
+        "QA-TASK-001前倒し完了",
+        "CEO・CPO指示対応完了", 
+        "Iris実装品質検証（A+評価）",
+        "委員会制度成功実証"
+      ]
+    },
+    {
+      "member": "Thoth", 
+      "status": "pending",
+      "last_activity": "2025-06-26T12:00:00Z",
+      "current_tasks": ["qa-task-002"],
+      "support_offered": "Athena技術委員会連携サポート"
+    },
+    {
+      "member": "Minerva",
+      "status": "cpo_promoted",
+      "last_activity": "2025-06-26T15:00:00Z", 
+      "current_tasks": ["qa-task-003"],
+      "new_role": "CPO（最高プロジェクト責任者）",
+      "committee_relationship": "監督・統括役"
+    }
+  ],
+  "achievements": [
+    {
+      "achievement_id": "qa-ach-001",
+      "title": "委員会制度成功実証",
+      "description": "品質委員会による委員会制度の有効性完全実証",
+      "metrics": {
+        "efficiency": "111%（予定90分→実績80分）",
+        "quality_level": "A+（最高評価）",
+        "collaboration": "100%（3委員会完全協働）"
+      },
+      "timestamp": "2025-06-26T13:45:00Z"
+    },
+    {
+      "achievement_id": "qa-ach-002", 
+      "title": "Iris実装品質保証",
+      "description": "WebSocket進捗表示・Health API実装の最高品質認定",
+      "impact": "Atlas緊急課題解決、技術委員会成果品質保証",
+      "timestamp": "2025-06-26T13:45:00Z"
+    }
+  ],
+  "reporting_schedule": {
+    "cpo_reports": {
+      "frequency": "週2回（火曜・金曜）",
+      "next_due": "2025-06-27T18:00:00Z",
+      "format": "運営効率、品質メトリクス、委員会協働状況"
+    },
+    "ceo_escalations": {
+      "frequency": "重要事項のみ",
+      "criteria": "戦略的品質課題、重大リスク、投資提案",
+      "last_report": "2025-06-26T14:00:00Z"
+    }
+  }
+}

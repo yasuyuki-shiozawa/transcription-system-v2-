@@ -1,0 +1,47 @@
+{
+  "portfolio": {
+    "name": "Claude Code Virtual Team Portfolio",
+    "established": "2025-06-25",
+    "mission": "効率的で革新的なソフトウェア開発を仮想チームで実現"
+  },
+  "projects": [
+    {
+      "id": "transcription-system",
+      "name": "議会議事録作成システム",
+      "type": "web-application",
+      "status": "active",
+      "progress": 75,
+      "startDate": "2025-06-01",
+      "targetDate": "2025-08-31",
+      "repository": "/mnt/c/Users/shioz/Downloads/transcription-system",
+      "teamSize": 5,
+      "technologies": ["Next.js", "Express", "Prisma", "SQLite"],
+      "currentPhase": "feature-development"
+    }
+  ],
+  "capabilities": {
+    "maxConcurrentProjects": 3,
+    "totalMembers": 5,
+    "skillMatrix": {
+      "frontend": ["React", "Next.js", "Vue", "TypeScript"],
+      "backend": ["Node.js", "Express", "Python", "Go"],
+      "database": ["PostgreSQL", "MySQL", "MongoDB", "Redis"],
+      "devops": ["Docker", "Kubernetes", "AWS", "CI/CD"],
+      "ai_ml": ["OpenAI API", "LangChain", "TensorFlow"]
+    }
+  },
+  "futureProjects": [
+    {
+      "name": "AIアシスタントダッシュボード",
+      "type": "ai-application",
+      "estimatedStart": "2025-09-01",
+      "requiredSkills": ["React", "Python", "OpenAI API"]
+    },
+    {
+      "name": "リアルタイムコラボレーションツール",
+      "type": "real-time-app",
+      "estimatedStart": "2025-10-01",
+      "requiredSkills": ["WebSocket", "React", "Node.js"]
+    }
+  ]
+}

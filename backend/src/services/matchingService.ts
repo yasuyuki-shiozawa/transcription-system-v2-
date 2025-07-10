@@ -1,5 +1,4 @@
 import { prisma } from '../utils/prisma';
-import { DataSource } from '@prisma/client';
 
 export class MatchingService {
   async performAutoMatching(sessionId: string) {
@@ -15,11 +14,11 @@ export class MatchingService {
 
     // Separate NOTTA and Manus sections
     const nottaSections = transcriptions
-      .filter(t => t.source === DataSource.NOTTA)
+      .filter(t => t.source === 'NOTTA')
       .flatMap(t => t.sections);
     
     const manusSections = transcriptions
-      .filter(t => t.source === DataSource.MANUS)
+      .filter(t => t.source === 'MANUS')
       .flatMap(t => t.sections);
 
     // Match sections by section number

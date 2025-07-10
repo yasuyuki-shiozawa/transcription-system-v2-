@@ -1,0 +1,63 @@
+databases:
+  - name: transcription-db
+    databaseName: transcription_db
+    user: transcription_user
+    plan: starter # または standard（本番環境用）
+
+services:
+  # バックエンドAPI
+  - type: web
+    name: transcription-backend
+    runtime: node
+    plan: starter # または standard（本番環境用）
+    buildCommand: cd backend && npm ci && npx prisma generate && npm run build
+    startCommand: cd backend && npx prisma migrate deploy && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: transcription-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: VPN_OPTIMIZATION
+        value: true
+      - key: REQUEST_TIMEOUT
+        value: 120000
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+    disk:
+      name: uploads
+      mountPath: /var/data
+      sizeGB: 10
+
+  # フロントエンド
+  - type: web
+    name: transcription-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build:vpn
+    staticPublishPath: frontend/out
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NEXT_PUBLIC_VPN_OPTIMIZATION
+        value: true
+      - key: NEXT_PUBLIC_API_TIMEOUT
+        value: 30000
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://transcription-backend.onrender.com
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block

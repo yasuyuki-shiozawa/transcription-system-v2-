@@ -1,0 +1,25 @@
+{
+  "lastUpdate": "2025-06-25T14:50:00Z",
+  "services": {
+    "frontend": {
+      "status": "online",
+      "port": 3000,
+      "pid": 80925,
+      "uptime": "22m"
+    },
+    "backend": {
+      "status": "online", 
+      "port": 3001,
+      "pid": 72128,
+      "uptime": "3h"
+    }
+  },
+  "activeTerminals": [
+    {
+      "id": "terminal-1",
+      "role": "coordinator",
+      "status": "active"
+    }
+  ],
+  "notes": "VPN設定を行った隣のターミナルは閉じる予定"
+}

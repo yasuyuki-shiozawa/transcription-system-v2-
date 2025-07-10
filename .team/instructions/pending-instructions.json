@@ -1,0 +1,74 @@
+{
+  "instructions": [
+    {
+      "id": "inst-001",
+      "target": "Hephaestus",
+      "type": "召集_技術委員会",
+      "message": "技術委員会を召集してください。音声アップロード機能の技術仕様を決定する緊急会議です。",
+      "priority": "high",
+      "deadline": "2025-06-27T12:00:00Z",
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-002", 
+      "target": "Athena",
+      "type": "召集_品質委員会",
+      "message": "品質委員会を召集してください。音声アップロード機能のテスト戦略を策定する会議です。",
+      "priority": "high",
+      "deadline": "2025-06-27T12:00:00Z", 
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-003",
+      "target": "Aphrodite", 
+      "type": "召集_UX委員会",
+      "message": "UX委員会を召集してください。音声アップロード機能のユーザー体験を改善する会議です。",
+      "priority": "high",
+      "deadline": "2025-06-27T12:00:00Z",
+      "status": "pending", 
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-004",
+      "target": "Iris",
+      "type": "委員会参加",
+      "message": "技術委員会とUX委員会の両方に積極的に参加してください。実装経験を活かした貢献をお願いします。",
+      "priority": "medium",
+      "deadline": "2025-06-27T12:00:00Z",
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-005",
+      "target": "Hermes", 
+      "type": "委員会参加_DevOps対応",
+      "message": "技術委員会に参加し、同時にテストサイトのデプロイ診断を実施してください。",
+      "priority": "high",
+      "deadline": "2025-06-27T12:00:00Z",
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-006",
+      "target": "Minerva",
+      "type": "委員会参加",
+      "message": "全ての委員会でアドバイザーとして戦略的支援を提供してください。",
+      "priority": "medium", 
+      "deadline": "2025-06-27T12:00:00Z",
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    },
+    {
+      "id": "inst-007",
+      "target": "Thoth",
+      "type": "委員会参加",
+      "message": "品質委員会に参加し、技術委員会の成果を文書化してください。API仕様書の作成も並行してお願いします。",
+      "priority": "medium",
+      "deadline": "2025-06-27T12:00:00Z", 
+      "status": "pending",
+      "created": "2025-06-26T13:00:00Z"
+    }
+  ]
+}

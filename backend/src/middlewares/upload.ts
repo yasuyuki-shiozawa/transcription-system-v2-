@@ -22,13 +22,13 @@ const storage = multer.diskStorage({
 
 // File filter
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedExtensions = ['.txt', '.docx'];
+  const allowedExtensions = ['.txt', '.docx', '.mp3', '.wav'];
   const ext = path.extname(file.originalname).toLowerCase();
   
   if (allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only .txt and .docx files are allowed'));
+    cb(new Error('Only .txt, .docx, .mp3, and .wav files are allowed'));
   }
 };
 
@@ -37,6 +37,6 @@ export const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE || '52428800') // 50MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE || '104857600') // 100MB default
   }
 });

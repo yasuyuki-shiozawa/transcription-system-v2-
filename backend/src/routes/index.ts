@@ -25,8 +25,10 @@ router.get('/', (_req, res) => {
         sections: 'GET /api/sessions/:id/sections',
       },
       upload: {
-        notta: 'POST /api/sessions/:id/upload/notta (coming soon)',
-        manus: 'POST /api/sessions/:id/upload/manus (coming soon)',
+        notta: 'POST /api/sessions/:id/upload/notta',
+        manus: 'POST /api/sessions/:id/upload/manus',
+        audio: 'POST /api/sessions/:id/upload/audio/:source',
+        text: 'POST /api/sessions/:id/upload/text/:source',
       },
     },
   });

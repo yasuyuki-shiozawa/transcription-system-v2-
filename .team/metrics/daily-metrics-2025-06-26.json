@@ -1,0 +1,39 @@
+{
+  "date": "2025-06-26",
+  "team_health": {
+    "active_members": 2,
+    "total_members": 3,
+    "activity_rate": 0.67
+  },
+  "task_metrics": {
+    "tasks_in_progress": 1,
+    "tasks_completed_today": 1,
+    "average_task_duration_hours": 17,
+    "blocked_tasks": 0
+  },
+  "communication_metrics": {
+    "messages_sent": 8,
+    "messages_with_urgent_tag": 1,
+    "average_response_time_minutes": {
+      "urgent": null,
+      "normal": 180
+    },
+    "unanswered_messages": 4
+  },
+  "heartbeat_metrics": {
+    "compliant_terminals": 1,
+    "stale_terminals": 1,
+    "average_heartbeat_interval_minutes": 540
+  },
+  "achievements": {
+    "iris_audio_upload_complete": true,
+    "hephaestus_onboarding_prepared": true,
+    "metrics_system_initialized": true
+  },
+  "recommendations": [
+    "config.json のポーリング間隔を20秒に変更",
+    "staleTimeout を900秒に延長",
+    "Irisへの月間MVP推薦",
+    "週次レビュー会議の設定"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "instructions": [
+    {
+      "id": "cpo-inst-001",
+      "from": "Minerva-CPO",
+      "to": "all_committees",
+      "subject": "CPO就任に伴う新体制開始",
+      "content": "私がCPOに就任しました。今後の委員会運営は以下の通りです：\n\n1. 各委員会は週2回の進捗報告を提出\n2. 重要な決定事項は24時間以内に報告\n3. 委員会間の調整が必要な場合は即座に連絡\n4. 毎週金曜日に委員長会議を開催\n\n新体制での効率的な運営を開始してください。",
+      "priority": "high",
+      "deadline": "2025-06-27T18:00:00Z",
+      "timestamp": "2025-06-26T15:00:00Z",
+      "created_by": "Minerva-CPO",
+      "targets": ["technical-committee", "qa-committee", "ux-committee"]
+    }
+  ]
+}

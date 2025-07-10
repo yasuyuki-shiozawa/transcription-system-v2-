@@ -25,8 +25,10 @@ export type {
   Session,
   TranscriptionData,
   Section,
-  SectionMapping,
-  SessionStatus,
-  DataSource,
-  ProcessingStatus
+  SectionMapping
 } from '@prisma/client';
+
+// Define types that were previously enums
+export type SessionStatus = 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
+export type DataSource = 'NOTTA' | 'MANUS';
+export type ProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED';

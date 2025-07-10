@@ -1,0 +1,82 @@
+{
+  "announcements": [
+    {
+      "id": "announce-001",
+      "title": "新役員制度導入のお知らせ",
+      "content": "本日より以下の新体制で運営します：\n\n- Atlas: CEO（最高経営責任者）- 戦略・重要判断\n- Minerva: CPO（最高プロジェクト責任者）- 日常管理・委員会統括\n\n各委員会は CPO(Minerva) に報告し、重要事項のみ CEO(Atlas) にエスカレーションします。",
+      "priority": "critical",
+      "created_by": "Atlas-CEO",
+      "timestamp": "2025-06-26T15:00:00Z",
+      "expires": "2025-07-26T15:00:00Z",
+      "mandatory_read": true,
+      "read_by": []
+    },
+    {
+      "id": "announce-002",
+      "title": "音声アップロード機能開発の最優先化",
+      "content": "音声アップロード機能の完成を最優先事項とします。\n\n目標期限: 72時間以内\n\n各委員会は以下に集中してください：\n- 技術委員会: API仕様とWhisper統合\n- 品質委員会: テスト戦略と品質基準  \n- UX委員会: デザインシステムと改善\n\nこの期間中、他の機能開発は一時停止します。",
+      "priority": "high",
+      "created_by": "Atlas-CEO",
+      "timestamp": "2025-06-26T15:30:00Z",
+      "expires": "2025-06-29T15:30:00Z",
+      "mandatory_read": true,
+      "read_by": []
+    },
+    {
+      "id": "announce-003",
+      "title": "🔥 新役員任命: Chief System Architect 就任",
+      "content": "組織強化のため、新しく Chief System Architect を任命しました。\n\n👤 **新メンバー**: Prometheus (terminal-9)\n🎯 **役職**: Chief System Architect (最高システム設計責任者)\n📋 **責務**: \n- システム全体のアーキテクチャ設計統括\n- 技術戦略の立案と標準策定\n- 各委員会への技術指導・支援\n- 設計と実装の分離による品質向上\n\n🏗️ **新体制**:\n- Atlas (CEO): 戦略・経営判断\n- Minerva (CPO): 日常運営・委員会管理\n- Prometheus (Chief System Architect): 技術設計統括\n\n各委員会は技術的な設計指針をPrometheusから、運営指示をMinervaから受けることになります。",
+      "priority": "critical",
+      "created_by": "Atlas-CEO",
+      "timestamp": "2025-06-26T16:00:00Z",
+      "expires": "2025-07-26T16:00:00Z",
+      "mandatory_read": true,
+      "read_by": []
+    },
+    {
+      "id": "announce-004",
+      "title": "📊 完成された組織構造のお知らせ",
+      "content": "最終的な組織構造が確定しました。全メンバーは以下の体制を理解してください。\n\n🏢 **役員レベル**:\n- Atlas (CEO, terminal-1): 戦略・重要判断\n- Minerva (CPO, terminal-4): 日常管理・委員会統括\n- Prometheus (Chief System Architect, terminal-9): 技術設計統括\n\n🏛️ **委員会レベル**:\n- 🔨 技術委員会 (委員長: Hephaestus, terminal-3)\n- 🛡️ 品質委員会 (委員長: Athena, terminal-5)\n- 🎨 UX委員会 (委員長: Aphrodite, terminal-7)\n\n👥 **専門家レベル**:\n- Iris (terminal-2): フロントエンド実装\n- Hermes (terminal-6): DevOps・インフラ\n- Thoth (terminal-8): テクニカルライター\n\n📋 **報告ライン**:\n- 日常運営: 委員会 → CPO(Minerva) → CEO(Atlas)\n- 技術設計: 委員会 → Chief Architect(Prometheus) → CEO(Atlas)\n- 緊急事項: 直接CEO(Atlas)へ\n\n全メンバーは新体制での効率的な協働をお願いします。",
+      "priority": "high",
+      "created_by": "Atlas-CEO",
+      "timestamp": "2025-06-26T16:15:00Z",
+      "expires": "2025-08-26T16:15:00Z",
+      "mandatory_read": true,
+      "read_by": []
+    },
+    {
+      "id": "announce-005",
+      "title": "🚀 新メンバー任命: Release Manager 就任",
+      "content": "環境管理・リリースプロセス強化のため、新しくRelease Managerを任命しました。\n\n👤 **新メンバー**: Apollo (terminal-10)\n🎯 **役職**: Release Manager (リリースマネージャー)\n📋 **責務**: \n- 開発・テスト・本番環境の構築と管理\n- URL発行・ポート管理・サーバー管理\n- リリースプロセスの統括とデプロイ実行\n- GitHub運用・バージョン管理\n- 環境状態の報告とアクセス情報提供\n\n🌐 **重要な役割**:\nApolloは各環境のURLを発行し、以下の情報を提供します：\n- テスト環境URL: https://test.transcription-system.com\n- 本番環境URL: https://transcription-system.com\n- ポート情報・アクセス方法\n\n🔄 **連携体制**:\n- Hermes (DevOps): 開発環境・CI/CD連携\n- Hephaestus (技術委員長): デプロイ要件調整\n- Athena (品質委員長): リリース前品質承認\n- Prometheus: インフラ設計・アーキテクチャ\n\n音声アップロード機能の本番リリースに向けて、Apolloが環境管理を統括します。",
+      "priority": "high",
+      "created_by": "Atlas-CEO",
+      "timestamp": "2025-06-26T17:30:00Z",
+      "expires": "2025-08-26T17:30:00Z",
+      "mandatory_read": true,
+      "read_by": []
+    }
+  ],
+  "company_policies": [
+    {
+      "id": "policy-001",
+      "title": "委員会報告義務",
+      "content": "全委員会は以下の報告義務があります：\n\n1. 週2回の進捗報告（火曜・金曜）\n2. 重要決定事項の24時間以内報告\n3. 問題発生時の即座報告\n4. 委員会間調整が必要な場合の即座連絡",
+      "effective_date": "2025-06-26T15:00:00Z",
+      "mandatory_compliance": true
+    }
+  ],
+  "shared_resources": [
+    {
+      "id": "resource-001",
+      "title": "委員会アジェンダテンプレート",
+      "location": ".team/committee-meetings/",
+      "description": "各委員会の会議アジェンダテンプレート"
+    },
+    {
+      "id": "resource-002", 
+      "title": "報告書テンプレート",
+      "location": ".team/reports/committee-reports.json",
+      "description": "委員会報告書の標準フォーマット"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "date": "YYYY-MM-DD",
+  "team_health": {
+    "active_members": 0,
+    "total_members": 0,
+    "activity_rate": 0.0
+  },
+  "task_metrics": {
+    "tasks_in_progress": 0,
+    "tasks_completed_today": 0,
+    "average_task_duration_hours": 0,
+    "blocked_tasks": 0
+  },
+  "communication_metrics": {
+    "messages_sent": 0,
+    "messages_with_urgent_tag": 0,
+    "average_response_time_minutes": {
+      "urgent": 0,
+      "normal": 0
+    },
+    "unanswered_messages": 0
+  },
+  "heartbeat_metrics": {
+    "compliant_terminals": 0,
+    "stale_terminals": 0,
+    "average_heartbeat_interval_minutes": 0
+  },
+  "code_metrics": {
+    "commits_today": 0,
+    "files_changed": 0,
+    "lines_added": 0,
+    "lines_removed": 0
+  }
+}

@@ -10,6 +10,10 @@ const downloadController = new DownloadController();
 // Upload routes
 router.post('/notta', upload.single('file'), uploadController.uploadNotta);
 router.post('/manus', upload.single('file'), uploadController.uploadManus);
+router.post('/audio/:source', upload.single('file'), uploadController.uploadAudio);
+
+// Text upload route (手動入力)
+router.post('/text/:source', uploadController.uploadText);
 
 // Get transcriptions for a session
 router.get('/transcriptions', uploadController.getTranscriptions);
@@ -23,5 +27,6 @@ router.get('/download/notta', downloadController.downloadAllSections);
 router.get('/download/notta/:transcriptionId', downloadController.downloadNottaData);
 router.get('/download/manus', downloadController.downloadAllManusData);
 router.get('/download/manus/:transcriptionId', downloadController.downloadManusData);
+router.post('/download/manus/word', downloadController.downloadFilteredManusAsWord);
 
 export default router;

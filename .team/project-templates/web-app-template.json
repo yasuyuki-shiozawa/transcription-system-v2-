@@ -1,0 +1,28 @@
+{
+  "template": "web-application",
+  "structure": {
+    "frontend": {
+      "framework": ["Next.js", "React", "Vue"],
+      "styling": ["Tailwind CSS", "Material-UI", "Chakra UI"],
+      "language": ["TypeScript", "JavaScript"]
+    },
+    "backend": {
+      "framework": ["Express", "Fastify", "NestJS"],
+      "database": ["PostgreSQL", "MySQL", "MongoDB", "SQLite"],
+      "orm": ["Prisma", "TypeORM", "Mongoose"]
+    },
+    "devops": {
+      "containerization": ["Docker", "Docker Compose"],
+      "ci_cd": ["GitHub Actions", "GitLab CI"],
+      "hosting": ["Vercel", "AWS", "Heroku"]
+    }
+  },
+  "requiredRoles": [
+    "frontend_developer",
+    "backend_developer",
+    "devops_engineer",
+    "qa_tester"
+  ],
+  "estimatedDuration": "3-6 months",
+  "scalability": "high"
+}

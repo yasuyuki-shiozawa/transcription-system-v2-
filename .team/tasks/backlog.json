@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "task-002",
+      "title": "リアルタイム編集同期機能",
+      "description": "複数ユーザーが同時に編集できる機能",
+      "priority": "medium",
+      "requiredRole": "backend_developer",
+      "estimatedHours": 16,
+      "dependencies": [],
+      "createdAt": "2025-06-25T14:00:00Z"
+    },
+    {
+      "id": "task-003",
+      "title": "自動バックアップ機能",
+      "description": "定期的なデータバックアップシステム",
+      "priority": "medium",
+      "requiredRole": "devops_engineer",
+      "estimatedHours": 6,
+      "dependencies": [],
+      "createdAt": "2025-06-25T14:00:00Z"
+    }
+  ]
+}

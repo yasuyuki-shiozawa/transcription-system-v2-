@@ -1,0 +1,46 @@
+{
+  "roles": {
+    "coordinator": {
+      "id": "coordinator",
+      "name": "プロジェクトコーディネーター",
+      "description": "タスクの振り分けと全体の進捗管理を担当",
+      "capabilities": ["task_assignment", "status_monitoring", "conflict_resolution"],
+      "currentAssignee": "terminal-1"
+    },
+    "frontend_developer": {
+      "id": "frontend_developer",
+      "name": "フロントエンド開発者",
+      "description": "React/Next.jsのUI開発を担当",
+      "capabilities": ["react_development", "ui_design", "frontend_testing"],
+      "currentAssignee": "terminal-2"
+    },
+    "backend_developer": {
+      "id": "backend_developer",
+      "name": "バックエンド開発者",
+      "description": "Express/Prismaのサーバー開発を担当",
+      "capabilities": ["api_development", "database_management", "backend_testing"],
+      "currentAssignee": null
+    },
+    "devops_engineer": {
+      "id": "devops_engineer",
+      "name": "DevOpsエンジニア",
+      "description": "環境構築とデプロイメントを担当",
+      "capabilities": ["environment_setup", "deployment", "monitoring"],
+      "currentAssignee": null
+    },
+    "qa_tester": {
+      "id": "qa_tester",
+      "name": "QAテスター",
+      "description": "テストとバグ検証を担当",
+      "capabilities": ["testing", "bug_reporting", "quality_assurance"],
+      "currentAssignee": null
+    },
+    "advisor": {
+      "id": "advisor",
+      "name": "チームアドバイザー",
+      "description": "組織設計とプロセス改善の助言を提供",
+      "capabilities": ["process_improvement", "team_dynamics", "strategic_planning"],
+      "currentAssignee": null
+    }
+  }
+}

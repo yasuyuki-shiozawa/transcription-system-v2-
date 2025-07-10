@@ -16,7 +16,7 @@
   "gitlens.hovers.enabled": true,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": true
+    "source.fixAll": "explicit"
   },
   "typescript.updateImportsOnFileMove.enabled": "always",
   "files.autoSave": "afterDelay",

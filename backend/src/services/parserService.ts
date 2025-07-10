@@ -152,6 +152,7 @@ export class ParserService {
       transcriptionDataId,
       sectionNumber: statement.sectionNumber,
       speaker: statement.speaker,
+      speakerId: null, // 話者IDは後で話者認識処理で設定
       timestamp: statement.timestamp,
       endTimestamp: null,
       content: statement.content.trim(),

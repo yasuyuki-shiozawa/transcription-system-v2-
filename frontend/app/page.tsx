@@ -29,8 +29,16 @@ export default function Home() {
 
   const fetchSessions = async () => {
     console.log('🔄 FETCHING SESSIONS from /api/sessions');
+    
+    // タイムアウト設定 (10秒)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     try {
-      const response = await fetch('/api/sessions');
+      const response = await fetch('/api/sessions', {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
       console.log('📡 RESPONSE STATUS:', response.status);
       
       if (!response.ok) {
@@ -54,8 +62,15 @@ export default function Home() {
       if (data.success) {
         setSessions(data.data);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      clearTimeout(timeoutId);
       console.error('Error fetching sessions:', error);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Request timeout - セッション取得がタイムアウトしました');
+        alert('サーバーへの接続がタイムアウトしました。ネットワーク接続を確認してください。');
+      }
+      
       // ネットワークエラーの場合も空の配列を表示
       setSessions([]);
     } finally {
@@ -65,12 +80,19 @@ export default function Home() {
 
   const createSession = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // タイムアウト設定 (15秒 - 作成処理により長い時間)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    
     try {
       const response = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSession),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -87,9 +109,15 @@ export default function Home() {
       } else {
         alert(data.error || 'セッションの作成に失敗しました');
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      clearTimeout(timeoutId);
       console.error('Error creating session:', error);
-      alert('セッションの作成中にエラーが発生しました');
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        alert('セッション作成がタイムアウトしました。ネットワーク接続を確認してください。');
+      } else {
+        alert('セッションの作成中にエラーが発生しました');
+      }
     }
   };
 
@@ -135,9 +163,27 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+        <div className="mb-8 relative">
           <h1 className="text-3xl font-bold text-gray-900">議会議事録作成システム</h1>
           <p className="mt-2 text-gray-600">セッションを選択して議事録の作成・編集を行います</p>
+          
+          {/* 設定リンク */}
+          <div className="absolute top-0 right-0 flex space-x-4">
+            <Link
+              href="/settings/speakers"
+              className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1"
+            >
+              <span>👥</span>
+              <span>話者管理</span>
+            </Link>
+            <Link
+              href="/settings/word-format"
+              className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1"
+            >
+              <span>⚙️</span>
+              <span>Word書式設定</span>
+            </Link>
+          </div>
         </div>
 
         {/* New Session Form */}

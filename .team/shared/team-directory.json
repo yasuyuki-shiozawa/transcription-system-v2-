@@ -1,0 +1,138 @@
+{
+  "team_directory": {
+    "last_updated": "2025-06-26T17:30:00Z",
+    "total_members": 10,
+    "organization_structure": {
+      "executives": [
+        {
+          "name": "Atlas",
+          "role": "CEO (Chief Executive Officer)",
+          "terminal": "terminal-1",
+          "responsibilities": ["戦略立案", "重要判断", "ビジョン設定", "最終承認"],
+          "reports_to": "なし",
+          "direct_reports": ["Minerva", "Prometheus"],
+          "joined_date": "2025-06-25T14:00:00Z"
+        },
+        {
+          "name": "Minerva", 
+          "role": "CPO (Chief Project Officer)",
+          "terminal": "terminal-4",
+          "responsibilities": ["日常運営", "委員会統括", "プロジェクト管理", "CEO報告"],
+          "reports_to": "Atlas (CEO)",
+          "direct_reports": ["技術委員会", "品質委員会", "UX委員会"],
+          "joined_date": "2025-06-25T17:40:00Z",
+          "promoted_date": "2025-06-26T15:00:00Z"
+        },
+        {
+          "name": "Prometheus",
+          "role": "Chief System Architect", 
+          "terminal": "terminal-9",
+          "responsibilities": ["技術設計統括", "アーキテクチャ策定", "技術戦略", "技術標準策定"],
+          "reports_to": "Atlas (CEO)",
+          "direct_reports": ["技術指導対象: 全委員会"],
+          "joined_date": "2025-06-26T16:00:00Z"
+        }
+      ],
+      "committee_chairs": [
+        {
+          "name": "Hephaestus",
+          "role": "技術委員会委員長",
+          "terminal": "terminal-3", 
+          "committee": "技術委員会",
+          "responsibilities": ["バックエンド実装", "API開発", "技術実装統括"],
+          "reports_to": "Minerva (CPO)",
+          "technical_guidance_from": "Prometheus",
+          "joined_date": "2025-06-26T10:30:00Z"
+        },
+        {
+          "name": "Athena",
+          "role": "品質委員会委員長",
+          "terminal": "terminal-5",
+          "committee": "品質委員会", 
+          "responsibilities": ["品質保証", "テスト戦略", "QA統括"],
+          "reports_to": "Minerva (CPO)",
+          "technical_guidance_from": "Prometheus",
+          "joined_date": "2025-06-26T11:05:00Z"
+        },
+        {
+          "name": "Aphrodite",
+          "role": "UX委員会委員長",
+          "terminal": "terminal-7",
+          "committee": "UX委員会",
+          "responsibilities": ["UI/UXデザイン", "デザインシステム", "ユーザー体験"],
+          "reports_to": "Minerva (CPO)",
+          "technical_guidance_from": "Prometheus", 
+          "joined_date": "2025-06-26T11:15:00Z"
+        }
+      ],
+      "specialists": [
+        {
+          "name": "Apollo",
+          "role": "Release Manager",
+          "terminal": "terminal-10",
+          "specialization": "環境管理・リリース管理・GitHub運用",
+          "responsibilities": ["環境構築・管理", "URL発行・ポート管理", "デプロイ実行", "GitHub運用"],
+          "reports_to": "Minerva (CPO) / Atlas (CEO)",
+          "joined_date": "2025-06-26T17:30:00Z"
+        },
+        {
+          "name": "Iris",
+          "role": "フロントエンド開発者",
+          "terminal": "terminal-2",
+          "specialization": "フロントエンド実装",
+          "committee_memberships": ["技術委員会", "UX委員会"],
+          "reports_to": "各委員会委員長",
+          "joined_date": "2025-06-25T16:15:00Z"
+        },
+        {
+          "name": "Hermes", 
+          "role": "DevOpsエンジニア",
+          "terminal": "terminal-6",
+          "specialization": "インフラ・運用・CI/CD",
+          "committee_memberships": ["技術委員会"],
+          "reports_to": "技術委員会委員長",
+          "joined_date": "2025-06-26T11:00:00Z"
+        },
+        {
+          "name": "Thoth",
+          "role": "テクニカルライター", 
+          "terminal": "terminal-8",
+          "specialization": "ドキュメント作成・API仕様書",
+          "committee_memberships": ["品質委員会"],
+          "reports_to": "品質委員会委員長",
+          "joined_date": "2025-06-26T11:20:00Z"
+        }
+      ]
+    },
+    "communication_channels": {
+      "ceo_instructions": ".team/atlas-instructions/",
+      "cpo_instructions": ".team/cpo-instructions/", 
+      "architect_guidance": ".team/architect-guidance/",
+      "committee_internal": ".team/committees/",
+      "company_announcements": ".team/shared/company-announcements.json",
+      "team_directory": ".team/shared/team-directory.json"
+    },
+    "recent_changes": [
+      {
+        "date": "2025-06-26T17:30:00Z",
+        "change": "新メンバー任命: Apollo (Release Manager)",
+        "impact": "環境管理・リリースプロセスの専門化"
+      },
+      {
+        "date": "2025-06-26T16:00:00Z",
+        "change": "新役員任命: Prometheus (Chief System Architect)",
+        "impact": "技術設計統括体制の確立"
+      },
+      {
+        "date": "2025-06-26T15:00:00Z", 
+        "change": "Minerva を CPO に昇格",
+        "impact": "日常運営管理体制の確立"
+      },
+      {
+        "date": "2025-06-26T12:00:00Z",
+        "change": "専門委員会制度導入",
+        "impact": "技術・品質・UX の専門化"
+      }
+    ]
+  }
+}

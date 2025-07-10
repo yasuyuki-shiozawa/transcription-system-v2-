@@ -1,43 +1,86 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production
+build/
+dist/
+.next/
+out/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build output
-dist/
-build/
-*.js
-*.js.map
-*.d.ts
-!jest.config.js
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# Uploads
+uploads/
+temp/
 
 # IDE
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# VSCode settings (included for team)
-# .vscode/
-
 # OS
-.DS_Store
 Thumbs.db
 
-# Test coverage
-coverage/
-*.lcov
+# Logs
+logs/
+*.log
 
-# Environment
-.env
-.env.local
-.env.*.local
+# Backend specific
+backend/node_modules/
+backend/dist/
+backend/*.db
+backend/*.db-journal
+backend/.env
+backend/build/
+backend/*.js
+backend/*.js.map
+backend/*.d.ts
+!backend/jest.config.js
+
+# Frontend specific
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
 
 # Temporary files
 *.tmp
 *.temp
-*.log
 
 # Output files (except samples)
 *_sectioned.txt

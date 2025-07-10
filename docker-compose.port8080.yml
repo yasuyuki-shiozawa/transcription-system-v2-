@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # ポート8080で起動する設定
+  frontend-8080:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcription-frontend-8080
+    ports:
+      - "8080:3000"  # 8080番ポートを使用
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://backend-8080:3001
+      - NEXT_PUBLIC_VPN_OPTIMIZATION=true
+    depends_on:
+      - backend-8080
+    networks:
+      - transcription-8080-network
+
+  backend-8080:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transcription-backend-8080
+    ports:
+      - "8081:3001"  # 8081番ポートを使用
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./prisma/shared.db
+      - VPN_OPTIMIZATION=true
+      - JWT_SECRET=shared-secret-key-change-this
+    volumes:
+      - ./backend/uploads-shared:/app/uploads
+      - ./backend/prisma/shared.db:/app/prisma/shared.db
+    networks:
+      - transcription-8080-network
+
+networks:
+  transcription-8080-network:
+    driver: bridge
