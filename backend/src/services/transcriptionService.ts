@@ -12,7 +12,7 @@ interface SectionData {
 }
 
 export class TranscriptionService {
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
   private retryConfig = {
     maxRetries: 3,
     retryDelay: 1000,
@@ -20,15 +20,23 @@ export class TranscriptionService {
   };
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // APIキーがある場合のみOpenAIクライアントを初期化
+    if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== '') {
+      this.openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    }
   }
 
   async transcribeAudio(
     filePath: string,
     source: 'NOTTA' | 'MANUS'
   ): Promise<{ text: string; sections: SectionData[] }> {
+    // APIキーがない場合はダミー転写結果を返す
+    if (!this.openai) {
+      return this.getDummyTranscription(source);
+    }
+
     // let lastError: Error;
     
     for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
@@ -131,5 +139,26 @@ export class TranscriptionService {
     return `${hours.toString().padStart(2, '0')}:${minutes
       .toString()
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  private getDummyTranscription(source: 'NOTTA' | 'MANUS'): { text: string; sections: SectionData[] } {
+    const dummyText = "これはダミーの転写結果です。OpenAI APIキーが設定されていないため、実際の音声転写は行われていません。";
+    
+    const sections: SectionData[] = [
+      {
+        sectionNumber: source === 'NOTTA' ? 'NOTTA_001' : '1',
+        speaker: 'システム',
+        timestamp: '00:00:00',
+        endTimestamp: '00:00:10',
+        content: dummyText,
+        order: 1,
+        isExcluded: false,
+      }
+    ];
+
+    return {
+      text: dummyText,
+      sections,
+    };
   }
 }
