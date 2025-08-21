@@ -5,11 +5,8 @@ WORKDIR /app
 
 # 依存関係のインストール
 COPY package*.json ./
-RUN npm install
-
-# Prismaの設定とクライアント生成
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm install
 
 # ソースコードのコピーとビルド
 COPY . .
