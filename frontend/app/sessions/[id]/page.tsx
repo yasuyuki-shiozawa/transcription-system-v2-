@@ -449,7 +449,7 @@ export default function SessionDetail() {
           try {
             const error = await response.json();
             errorMessage = error.error || errorMessage;
-          } catch (e) {
+          } catch {
             errorMessage = `HTTP ${response.status}: ${response.statusText}`;
           }
         } else {

@@ -66,7 +66,7 @@ const SupportContact: React.FC<SupportContactProps> = ({
       } else {
         throw new Error('送信に失敗しました');
       }
-    } catch (error) {
+    } catch {
       alert('エラーが発生しました。別の方法でお問い合わせください。');
     } finally {
       setSending(false);

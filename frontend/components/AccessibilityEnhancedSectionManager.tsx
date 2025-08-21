@@ -123,7 +123,7 @@ const AccessibilityEnhancedSectionManager: React.FC<AccessibilityEnhancedSection
         announce('キーボードナビゲーションを終了しました');
         break;
     }
-  }, [keyboardNavMode, focusedSectionId, sections, selectedSections, onSelectionChange, onToggleExclude, announce]);
+  }, [keyboardNavMode, focusedSectionId, sections, selectedSections, onSelectionChange, onToggleInclude, announce]);
 
   // キーボードイベントリスナー
   useEffect(() => {
