@@ -33,8 +33,8 @@ RUN mkdir -p ./uploads
 
 # 起動スクリプトを作成
 RUN echo '#!/bin/sh' > /app/start.sh && \
-    echo 'echo "Running Prisma migrations..."' >> /app/start.sh && \
-    echo 'npx prisma migrate deploy' >> /app/start.sh && \
+    echo 'echo "Pushing Prisma schema to database..."' >> /app/start.sh && \
+    echo 'npx prisma db push' >> /app/start.sh && \
     echo 'echo "Starting server..."' >> /app/start.sh && \
     echo 'node dist/index.js' >> /app/start.sh && \
     chmod +x /app/start.sh
