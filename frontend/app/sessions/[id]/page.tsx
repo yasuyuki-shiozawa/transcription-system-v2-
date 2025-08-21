@@ -820,9 +820,3 @@ export default function SessionDetail() {
   );
 }
 
-// Required for static export with dynamic routes
-export async function generateStaticParams() {
-  // Return empty array to allow dynamic generation at runtime
-  return [];
-}
-
