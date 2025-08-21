@@ -31,6 +31,14 @@ COPY --from=builder /app/dist ./dist
 # アップロードディレクトリ
 RUN mkdir -p ./uploads
 
+# 起動スクリプトを作成
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'echo "Running Prisma migrations..."' >> /app/start.sh && \
+    echo 'npx prisma migrate deploy' >> /app/start.sh && \
+    echo 'echo "Starting server..."' >> /app/start.sh && \
+    echo 'node dist/index.js' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
 EXPOSE 3001
 
-CMD ["node", "dist/index.js"]
+CMD ["/app/start.sh"]
