@@ -22,10 +22,10 @@ WORKDIR /app
 
 # 本番用の依存関係のみインストール
 COPY package*.json ./
+COPY --from=builder /app/prisma ./prisma
 RUN npm install --production
 
-# Prismaの設定とクライアント
-COPY --from=builder /app/prisma ./prisma
+# Prismaクライアント
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # ビルド済みのコード
