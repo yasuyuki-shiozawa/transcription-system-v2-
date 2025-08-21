@@ -5,7 +5,7 @@ WORKDIR /app
 
 # 依存関係のインストール
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Prismaの設定とクライアント生成
 COPY prisma ./prisma
@@ -22,7 +22,7 @@ WORKDIR /app
 
 # 本番用の依存関係のみインストール
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --production
 
 # Prismaの設定とクライアント
 COPY --from=builder /app/prisma ./prisma
