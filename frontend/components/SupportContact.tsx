@@ -37,7 +37,7 @@ const SupportContact: React.FC<SupportContactProps> = ({
 
     try {
       // APIエンドポイントに送信
-      const response = await fetch('/api/support/contact', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/support/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

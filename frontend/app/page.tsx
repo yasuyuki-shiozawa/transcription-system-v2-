@@ -28,14 +28,15 @@ export default function Home() {
   }, []);
 
   const fetchSessions = async () => {
-    console.log('🔄 FETCHING SESSIONS from /api/sessions');
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/sessions`;
+    console.log('🔄 FETCHING SESSIONS from', apiUrl);
     
     // タイムアウト設定 (10秒)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     try {
-      const response = await fetch('/api/sessions', {
+      const response = await fetch(apiUrl, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -86,7 +87,7 @@ export default function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     
     try {
-      const response = await fetch('/api/sessions', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSession),
@@ -125,7 +126,7 @@ export default function Home() {
     if (!confirm('本当にこのセッションを削除しますか？')) return;
     
     try {
-      const response = await fetch(`/api/sessions/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {

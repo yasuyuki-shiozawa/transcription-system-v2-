@@ -31,7 +31,7 @@ export default function SpeakersSettings() {
 
   const fetchSpeakers = async () => {
     try {
-      const response = await fetch('/api/speakers');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/speakers`);
       const data = await response.json();
       if (data.success) {
         setSpeakers(data.data);

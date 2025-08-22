@@ -98,8 +98,8 @@ export default function SessionDetail() {
     console.log('🔍 FETCHING SESSION DATA...');
     try {
       // Fetch session details
-      console.log(`📡 Fetching from: /api/sessions/${sessionId}`);
-      const sessionRes = await fetch(`/api/sessions/${sessionId}`);
+      console.log(`📡 Fetching from: ${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}`);
+      const sessionRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}`);
       console.log('📡 Session response status:', sessionRes.status);
       const sessionData = await sessionRes.json();
       if (sessionData.success) {
@@ -107,14 +107,14 @@ export default function SessionDetail() {
       }
 
       // Fetch transcriptions
-      const transcriptionsRes = await fetch(`/api/sessions/${sessionId}/upload/transcriptions`);
+      const transcriptionsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/upload/transcriptions`);
       const transcriptionsData = await transcriptionsRes.json();
       if (transcriptionsData.success) {
         setTranscriptions(transcriptionsData.data);
       }
 
       // Fetch mappings
-      const mappingsRes = await fetch(`/api/sessions/${sessionId}/upload/mappings`);
+      const mappingsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/upload/mappings`);
       const mappingsData = await mappingsRes.json();
       if (mappingsData.success) {
         setMappings(mappingsData.data);
@@ -134,7 +134,7 @@ export default function SessionDetail() {
     setUploading(true);
 
     try {
-      const response = await fetch(`/api/sessions/${sessionId}/upload/${source}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/upload/${source}`, {
         method: 'POST',
         body: formData,
       });
@@ -211,7 +211,7 @@ export default function SessionDetail() {
 
   const updateManusSection = async (sectionId: string, updates: { speaker?: string; timestamp?: string; endTimestamp?: string | null; content?: string }) => {
     try {
-      const response = await fetch(`/api/sections/${sectionId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sections/${sectionId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -257,7 +257,7 @@ export default function SessionDetail() {
 
     // データベースに保存（isExcludedの逆を保存）
     try {
-      const response = await fetch(`/api/sections/${sectionId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sections/${sectionId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -551,7 +551,7 @@ export default function SessionDetail() {
                   <button
                     onClick={async () => {
                       try {
-                        const response = await fetch(`/api/sessions/${params.id}/upload/download/notta`);
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${params.id}/upload/download/notta`);
                         if (response.ok) {
                           const blob = await response.blob();
                           const url = window.URL.createObjectURL(blob);
@@ -606,7 +606,7 @@ export default function SessionDetail() {
                   <button
                     onClick={async () => {
                       try {
-                        const response = await fetch(`/api/sessions/${params.id}/upload/download/manus`);
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${params.id}/upload/download/manus`);
                         if (response.ok) {
                           const blob = await response.blob();
                           const url = window.URL.createObjectURL(blob);
