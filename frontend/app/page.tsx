@@ -206,7 +206,7 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-medium text-gray-700">開催日</label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={newSession.date}
                   onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
