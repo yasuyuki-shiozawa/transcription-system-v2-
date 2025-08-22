@@ -87,10 +87,16 @@ export default function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     
     try {
+      // 日付を適切な形式に変換
+      const sessionData = {
+        name: newSession.name,
+        date: newSession.date ? new Date(newSession.date).toISOString() : new Date().toISOString()
+      };
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSession),
+        body: JSON.stringify(sessionData),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
