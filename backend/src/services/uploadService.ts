@@ -19,24 +19,7 @@ export class UploadService {
     originalFileName: string
   ) {
     try {
-      // First, delete any existing transcription data for this session and source
-      const existingTranscriptions = await prisma.transcriptionData.findMany({
-        where: {
-          sessionId,
-          source
-        }
-      });
-
-      // Delete existing transcription data and related sections
-      for (const existing of existingTranscriptions) {
-        await prisma.section.deleteMany({
-          where: { transcriptionDataId: existing.id }
-        });
-        await prisma.transcriptionData.delete({
-          where: { id: existing.id }
-        });
-      }
-
+      // 既存データを削除せず、新しいデータを追加する
       // Create new transcription data record
       const transcriptionData = await prisma.transcriptionData.create({
         data: {
@@ -55,7 +38,7 @@ export class UploadService {
       
       console.log(`Parsed ${statements.length} statements`);
 
-      // Convert to sections
+      // Convert to sections with unique section numbers
       const sections = this.parserService.convertToSections(
         statements,
         transcriptionData.id
