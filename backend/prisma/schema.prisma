@@ -79,7 +79,6 @@ model Section {
   manusMappings       SectionMapping[]  @relation("ManusSection")
   nottaMappings       SectionMapping[]  @relation("NottaSection")
 
-  @@unique([transcriptionDataId, sectionNumber])
   @@index([transcriptionDataId])
 }
 

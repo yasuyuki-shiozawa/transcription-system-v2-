@@ -148,13 +148,9 @@ export class ParserService {
   
   // Convert parsed statements to Section format for database
   convertToSections(statements: ParsedStatement[], transcriptionDataId: string): Omit<Section, 'id'>[] {
-    // 現在のタイムスタンプをプレフィックスとして使用して一意性を確保
-    const timestamp = new Date().getTime().toString();
-    
     return statements.map((statement, index) => ({
       transcriptionDataId,
-      // タイムスタンプとインデックスを組み合わせて一意のセクション番号を生成
-      sectionNumber: `${timestamp}-${statement.sectionNumber}`,
+      sectionNumber: statement.sectionNumber,
       speaker: statement.speaker,
       speakerId: null, // 話者IDは後で話者認識処理で設定
       timestamp: statement.timestamp,
