@@ -43,6 +43,11 @@ export class UploadService {
         transcriptionData.id
       );
 
+      // Delete existing sections for this transcription data to avoid duplicates
+      await prisma.section.deleteMany({
+        where: { transcriptionDataId: transcriptionData.id }
+      });
+
       // Bulk create sections
       await prisma.section.createMany({
         data: sections
