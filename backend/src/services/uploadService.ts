@@ -19,7 +19,25 @@ export class UploadService {
     originalFileName: string
   ) {
     try {
-      // Create transcription data record
+      // First, delete any existing transcription data for this session and source
+      const existingTranscriptions = await prisma.transcriptionData.findMany({
+        where: {
+          sessionId,
+          source
+        }
+      });
+
+      // Delete existing transcription data and related sections
+      for (const existing of existingTranscriptions) {
+        await prisma.section.deleteMany({
+          where: { transcriptionDataId: existing.id }
+        });
+        await prisma.transcriptionData.delete({
+          where: { id: existing.id }
+        });
+      }
+
+      // Create new transcription data record
       const transcriptionData = await prisma.transcriptionData.create({
         data: {
           sessionId,
@@ -43,11 +61,6 @@ export class UploadService {
         transcriptionData.id
       );
 
-      // Delete existing sections for this transcription data to avoid duplicates
-      await prisma.section.deleteMany({
-        where: { transcriptionDataId: transcriptionData.id }
-      });
-
       // Bulk create sections
       await prisma.section.createMany({
         data: sections
@@ -67,6 +80,7 @@ export class UploadService {
 
       return transcriptionData;
     } catch (error) {
+      console.error('Error processing uploaded file:', error);
       // Clean up on error
       try {
         await fs.unlink(filePath);
