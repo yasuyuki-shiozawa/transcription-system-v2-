@@ -91,9 +91,10 @@ export default function Home() {
     
     try {
       // 日付を適切な形式に変換
+      // Fix date processing to prevent incorrect conversion
       const sessionData = {
         name: newSession.name,
-        date: newSession.date ? new Date(newSession.date).toISOString() : new Date().toISOString()
+        date: newSession.date ? `${newSession.date}T00:00:00.000Z` : new Date().toISOString()
       };
       
       const response = await fetch(`${API_URL}/api/sessions`, {
