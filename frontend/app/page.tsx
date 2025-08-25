@@ -27,8 +27,11 @@ export default function Home() {
     fetchSessions();
   }, []);
 
+  // Hardcoded API URL to resolve environment variables issue
+  const API_URL = 'https://transcription-system-obfr.onrender.com';
+
   const fetchSessions = async () => {
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/sessions`;
+    const apiUrl = `${API_URL}/api/sessions`;
     console.log('🔄 FETCHING SESSIONS from', apiUrl);
     
     // タイムアウト設定 (10秒)
@@ -93,7 +96,7 @@ export default function Home() {
         date: newSession.date ? new Date(newSession.date).toISOString() : new Date().toISOString()
       };
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions`, {
+      const response = await fetch(`${API_URL}/api/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionData),
@@ -132,7 +135,7 @@ export default function Home() {
     if (!confirm('本当にこのセッションを削除しますか？')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${id}`, {
+      const response = await fetch(`${API_URL}/api/sessions/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
