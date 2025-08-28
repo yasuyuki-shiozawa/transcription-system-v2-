@@ -3,10 +3,21 @@ import path from 'path';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { Section } from '../types';
 
+export interface WordTemplateSection {
+  id: string;
+  sectionNumber: string;
+  timestamp: string;
+  endTimestamp: string;
+  speaker: string;
+  content: string;
+  order: number;
+  sectionDuration: string;
+}
+
 export interface WordTemplateData {
   sessionName: string;
   sessionDate: string;
-  sections: Section[];
+  sections: WordTemplateSection[];
 }
 
 export class WordTemplateService {
@@ -180,14 +191,13 @@ export class WordTemplateService {
   /**
    * セクションデータをテンプレート用に整形
    */
-  private formatSectionsForTemplate(sections: Section[]): any[] {
+  private formatSectionsForTemplate(sections: WordTemplateSection[]): any[] {
     return sections.map(section => ({
       sectionNumber: section.sectionNumber,
       timestamp: section.timestamp,
       endTimestamp: section.endTimestamp,
       speaker: section.speaker,
       content: section.content,
-      source: section.source,
       sectionDuration: section.sectionDuration,
       // Word文書用の書式設定
       isBold: true, // 話者名を太字に
