@@ -24,7 +24,7 @@ const secondsToTime = (seconds: number): string => {
 };
 
 // 話者名を4文字に調整する関数
-const formatSpeakerName = (speaker: string): string => {
+const formatSpeakerName = async (speaker: string): Promise<string> => {
   // 「話者1」などの形式を除外
   if (/^話者\d+$/.test(speaker)) {
     return speaker;
@@ -34,13 +34,27 @@ const formatSpeakerName = (speaker: string): string => {
   
   // 「議員」が含まれる場合の特別処理
   if (speaker.includes('議員')) {
-    // 「議員」を除いた部分を取得
-    const baseName = speaker.replace('議員', '');
-    
-    // 「議員」を付けたフルネームを作成
-    // 例：「伊藤議員」→「伊藤顕議員」（実際のフルネームはデータベースから取得する必要あり）
-    // ここでは仮に元の名前をそのまま使用
-    speakerName = `${baseName}議員`;
+    try {
+      // 話者マスターから該当する話者を検索
+      const speakerRecord = await prisma.speaker.findFirst({
+        where: {
+          OR: [
+            { fullName: { contains: speaker.replace('議員', '') } },
+            { displayName: { contains: speaker } },
+            { aliases: { contains: speaker } }
+          ],
+          speakerType: 'MEMBER' // 議員タイプのみ
+        }
+      });
+      
+      if (speakerRecord) {
+        // 話者マスターに登録されている場合はフルネーム+議員を使用
+        speakerName = `${speakerRecord.fullName}議員`;
+      }
+    } catch (error) {
+      console.error('Error finding speaker in database:', error);
+      // エラー時は元の名前をそのまま使用
+    }
   }
   
   // 文字数を取得
@@ -355,7 +369,7 @@ export class DownloadController {
                 spacing: { after: 400 }
               }),
               // Sections with proper timestamp format
-              ...manusData.sections.flatMap((section, index) => {
+              ...await Promise.all(manusData.sections.map(async (section, index) => {
                 // 現在のセクションまでの全体経過時間を計算
                 let totalElapsedSeconds = 0;
                 for (let i = 0; i < index; i++) {
@@ -380,8 +394,8 @@ export class DownloadController {
                 // このセクションの終了時の全体経過時間
                 const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
                 
-                // 話者名を4文字の均等割り付けに整形
-                const formattedSpeakerName = formatSpeakerName(section.speaker);
+                // 話者名を4文字の均等割り付けに整形（非同期関数に変更）
+                const formattedSpeakerName = await formatSpeakerName(section.speaker);
                 
                 return [
                   // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
@@ -429,7 +443,7 @@ export class DownloadController {
                     })
                   ] : [])
                 ];
-              })
+              })).then(sections => sections.flat())
             ]
           }]
         });
