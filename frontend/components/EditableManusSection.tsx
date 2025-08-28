@@ -231,28 +231,46 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
             )}]
           </p>
         </div>
-        <textarea
-          value={editedContent}
-          onChange={(e) => setEditedContent(e.target.value)}
-          className="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-          rows={6}
-          disabled={isSaving}
-        />
-        <div className="flex items-center justify-end space-x-2">
-          <button
-            onClick={handleSaveContent}
-            disabled={isSaving}
-            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-          >
-            {isSaving ? '保存中...' : '保存'}
-          </button>
-          <button
-            onClick={handleCancelContent}
-            disabled={isSaving}
-            className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
-          >
-            キャンセル
-          </button>
+        {/* 編集エリアを拡大 */}
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">本文編集</h3>
+              <button
+                onClick={handleCancelContent}
+                className="text-gray-500 hover:text-gray-700"
+                title="閉じる"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              className="w-full px-4 py-3 text-base border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+              rows={15}
+              disabled={isSaving}
+              autoFocus
+            />
+            <div className="flex items-center justify-end space-x-3 mt-4">
+              <button
+                onClick={handleCancelContent}
+                disabled={isSaving}
+                className="px-4 py-2 text-base bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleSaveContent}
+                disabled={isSaving}
+                className="px-4 py-2 text-base bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              >
+                {isSaving ? '保存中...' : '保存'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -316,4 +334,5 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
       <p className={`text-sm whitespace-pre-wrap ${!isIncluded ? 'line-through text-gray-400' : ''}`}>{section.content}</p>
     </div>
   );
-} // force reload
+}
+
