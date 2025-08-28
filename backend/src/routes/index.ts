@@ -9,7 +9,7 @@ const router = Router();
 // Mount routes
 router.use('/sessions', sessionRoutes);
 router.use('/sessions/:id/upload', uploadRoutes);
-router.use('/sessions', downloadRoutes);
+router.use('/download', downloadRoutes);
 router.use('/sections', sectionRoutes);
 
 // API info endpoint
@@ -33,10 +33,10 @@ router.get('/', (_req, res) => {
         text: 'POST /api/sessions/:id/upload/text/:source',
       },
       download: {
-        notta: 'GET /api/sessions/:id/download/notta',
-        manus: 'GET /api/sessions/:id/download/manus',
-        word: 'POST /api/sessions/:id/download/word',
-        wordMacro: 'POST /api/sessions/:id/download/word-macro',
+        notta: 'GET /api/download/:id/notta',
+        manus: 'GET /api/download/:id/manus',
+        word: 'POST /api/download/:id/word',
+        wordMacro: 'POST /api/download/:id/word-macro',
       },
     },
   });

@@ -426,7 +426,7 @@ export default function SessionDetail() {
     try {
       setIsDownloading(true);
       // 絶対URLを使用
-      const url = `${API_URL}/api/sessions/${sessionId}/upload/download/manus/word`;
+      const url = `${API_URL}/api/download/${sessionId}/word`;
       console.log('Sending Word download request to:', url);
       console.log('Request body:', { includedSections: includedSectionIds });
       
@@ -497,7 +497,7 @@ export default function SessionDetail() {
     try {
       setIsDownloading(true);
       // マクロ付きWord出力のエンドポイントを使用
-      const url = `${API_URL}/api/sessions/${sessionId}/download/word-macro`;
+      const url = `${API_URL}/api/download/${sessionId}/word-macro`;
       console.log('Sending macro Word download request to:', url);
       console.log('Request body:', { includedSections: includedSectionIds });
       
