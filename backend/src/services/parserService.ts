@@ -6,6 +6,7 @@ interface ParsedStatement {
   speaker: string;
   timestamp: string;
   content: string;
+  speakerId?: string | null;
 }
 
 export class ParserService {
@@ -207,7 +208,7 @@ export class ParserService {
       transcriptionDataId,
       sectionNumber: statement.sectionNumber,
       speaker: statement.speaker,
-      speakerId: null, // 話者IDは後で話者認識処理で設定
+      speakerId: statement.speakerId || null, // 話者IDを使用
       timestamp: statement.timestamp,
       endTimestamp: null,
       content: statement.content.trim(),

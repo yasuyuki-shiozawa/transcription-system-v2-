@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { SpeakerService } from '../services/speakerService';
 
 // 累積時間計算のためのヘルパー関数
 const timeToSeconds = (timeStr: string): number => {
@@ -23,70 +24,13 @@ const secondsToTime = (seconds: number): string => {
   return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
 };
 
-// 話者名を4文字に調整する関数
-const formatSpeakerName = async (speaker: string): Promise<string> => {
-  // 「話者1」などの形式を除外
-  if (/^話者\d+$/.test(speaker)) {
-    return speaker;
-  }
-  
-  let speakerName = speaker;
-  
-  // 「議員」が含まれる場合の特別処理
-  if (speaker.includes('議員')) {
-    try {
-      // 話者マスターから該当する話者を検索
-      const speakerRecord = await prisma.speaker.findFirst({
-        where: {
-          OR: [
-            { fullName: { contains: speaker.replace('議員', '') } },
-            { displayName: { contains: speaker } },
-            { aliases: { contains: speaker } }
-          ],
-          speakerType: 'MEMBER' // 議員タイプのみ
-        }
-      });
-      
-      if (speakerRecord) {
-        // 話者マスターに登録されている場合はフルネーム+議員を使用
-        speakerName = `${speakerRecord.fullName}議員`;
-      }
-    } catch (error) {
-      console.error('Error finding speaker in database:', error);
-      // エラー時は元の名前をそのまま使用
-    }
-  }
-  
-  // 文字数を取得
-  const nameLength = [...speakerName].length; // サロゲートペア対応
-  
-  if (nameLength === 4) {
-    // 既に4文字なら何もしない
-    return speakerName;
-  } else if (nameLength < 4) {
-    // 4文字未満なら空白で埋める
-    return speakerName.padEnd(4 + (speakerName.length - nameLength), '　');
-  } else {
-    // 4文字より多い場合は切り詰める（ただし「議員」は維持）
-    if (speakerName.endsWith('議員')) {
-      // 「議員」を除いた部分を調整
-      const baseName = speakerName.slice(0, -2);
-      const baseNameLength = [...baseName].length;
-      if (baseNameLength <= 2) {
-        // 「議員」を含めても4文字以下なら何もしない
-        return speakerName;
-      } else {
-        // 「議員」を含めて4文字になるように調整
-        return [...baseName].slice(0, 2).join('') + '議員';
-      }
-    } else {
-      // 「議員」がない場合は単純に4文字に切り詰める
-      return [...speakerName].slice(0, 4).join('');
-    }
-  }
-};
-
 export class DownloadController {
+  private speakerService: SpeakerService;
+  
+  constructor() {
+    this.speakerService = new SpeakerService();
+  }
+  
   downloadManusData = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { sessionId, transcriptionId } = req.params;
@@ -394,8 +338,8 @@ export class DownloadController {
                 // このセクションの終了時の全体経過時間
                 const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
                 
-                // 話者名を4文字の均等割り付けに整形（非同期関数に変更）
-                const formattedSpeakerName = await formatSpeakerName(section.speaker);
+                // 話者名を4文字の均等割り付けに整形
+                const formattedSpeakerName = await this.speakerService.formatSpeakerNameFixed(section.speaker, sessionId);
                 
                 return [
                   // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
