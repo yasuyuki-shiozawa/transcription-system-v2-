@@ -23,33 +23,44 @@ const secondsToTime = (seconds: number): string => {
   return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
 };
 
-// 話者別累積時間計算 - TODO: 話者管理システムとの統合後に実装
-// const calculateCumulativeTime = (sections: any[], currentSectionId: string, isEndTime = false): number => {
-//   let cumulativeSeconds = 0;
-//   
-//   for (const section of sections) {
-//     if (section.endTimestamp) {
-//       const duration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
-//       if (duration > 0) {
-//         cumulativeSeconds += duration;
-//       }
-//     }
-//     
-//     // 現在のセクションに到達したら停止
-//     if (section.id === currentSectionId) {
-//       if (isEndTime && section.endTimestamp) {
-//         // 終了時間の場合は現在のセクションの時間も含める
-//         const duration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
-//         if (duration > 0) {
-//           cumulativeSeconds += duration;
-//         }
-//       }
-//       break;
-//     }
-//   }
-//   
-//   return cumulativeSeconds;
-// };
+// 話者名を4文字に調整する関数
+const formatSpeakerName = (speaker: string): string => {
+  // 「話者1」などの形式を除外
+  if (/^話者\d+$/.test(speaker)) {
+    return speaker;
+  }
+  
+  // 「議員」を付ける処理は維持
+  let speakerName = speaker.includes('議員') ? speaker : `${speaker}議員`;
+  
+  // 文字数を取得
+  const nameLength = [...speakerName].length; // サロゲートペア対応
+  
+  if (nameLength === 4) {
+    // 既に4文字なら何もしない
+    return speakerName;
+  } else if (nameLength < 4) {
+    // 4文字未満なら空白で埋める
+    return speakerName.padEnd(4 + (speakerName.length - nameLength), '　');
+  } else {
+    // 4文字より多い場合は切り詰める（ただし「議員」は維持）
+    if (speakerName.endsWith('議員')) {
+      // 「議員」を除いた部分を調整
+      const baseName = speakerName.slice(0, -2);
+      const baseNameLength = [...baseName].length;
+      if (baseNameLength <= 2) {
+        // 「議員」を含めても4文字以下なら何もしない
+        return speakerName;
+      } else {
+        // 「議員」を含めて4文字になるように調整
+        return [...baseName].slice(0, 2).join('') + '議員';
+      }
+    } else {
+      // 「議員」がない場合は単純に4文字に切り詰める
+      return [...speakerName].slice(0, 4).join('');
+    }
+  }
+};
 
 export class DownloadController {
   downloadManusData = async (req: Request, res: Response, next: NextFunction) => {
@@ -359,8 +370,8 @@ export class DownloadController {
                 // このセクションの終了時の全体経過時間
                 const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
                 
-                // 話者名の整形（「議員」を付ける場合など）
-                const speakerName = section.speaker.includes('議員') ? section.speaker : `${section.speaker}議員`;
+                // 話者名を4文字の均等割り付けに整形
+                const formattedSpeakerName = formatSpeakerName(section.speaker);
                 
                 return [
                   // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
@@ -375,11 +386,11 @@ export class DownloadController {
                     spacing: { before: 200, after: 100 }
                   }),
                   
-                  // 話者名
+                  // 話者名（4文字均等割り付け）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `${speakerName}：`,
+                        text: `${formattedSpeakerName}：`,
                         bold: true,
                         size: 24
                       })
