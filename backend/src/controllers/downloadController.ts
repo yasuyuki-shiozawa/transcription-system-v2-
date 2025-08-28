@@ -4,8 +4,6 @@ import { ApiResponse } from '../types';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { SpeakerService } from '../services/speakerService';
 import { WordTemplateService } from '../services/wordTemplateService';
-import fs from 'fs';
-import path from 'path';
 
 // 累積時間計算のためのヘルパー関数
 const timeToSeconds = (timeStr: string): number => {
@@ -550,7 +548,6 @@ export class DownloadController {
             endTimestamp: totalEndTime,
             speaker: speakerName,
             content: section.content,
-            source: section.source,
             order: section.order,
             sectionDuration: secondsToTime(sectionDuration)
           };

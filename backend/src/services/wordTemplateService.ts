@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
-import { Section } from '../types/section';
+import { Section } from '../types';
 
 export interface WordTemplateData {
   sessionName: string;
@@ -172,7 +172,8 @@ export class WordTemplateService {
       return buffer;
     } catch (error) {
       console.error('Word文書生成エラー:', error);
-      throw new Error(`Word文書の生成に失敗しました: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Word文書の生成に失敗しました: ${errorMessage}`);
     }
   }
 
@@ -207,7 +208,8 @@ export class WordTemplateService {
       return Buffer.from(content, 'utf-8');
     } catch (error) {
       console.error('基本Word文書生成エラー:', error);
-      throw new Error(`基本Word文書の生成に失敗しました: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`基本Word文書の生成に失敗しました: ${errorMessage}`);
     }
   }
 
