@@ -48,8 +48,8 @@ export default function SpeakersSettings() {
     
     try {
       const url = editingSpeaker 
-        ? `/api/speakers/${editingSpeaker.id}`
-        : '/api/speakers';
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/speakers/${editingSpeaker.id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/speakers`;
         
       const method = editingSpeaker ? 'PUT' : 'POST';
       
@@ -72,7 +72,7 @@ export default function SpeakersSettings() {
     if (!confirm('この話者を削除しますか？')) return;
     
     try {
-      const response = await fetch(`/api/speakers/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/speakers/${id}`, {
         method: 'DELETE'
       });
       
@@ -318,3 +318,4 @@ export default function SpeakersSettings() {
     </div>
   );
 }
+
