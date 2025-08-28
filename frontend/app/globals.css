@@ -24,3 +24,76 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 本文編集モーダル用のスタイル */
+.content-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.content-edit-modal-content {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 800px;
+  padding: 1.5rem;
+}
+
+.content-edit-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.content-edit-textarea:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.content-edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.content-edit-button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.content-edit-save {
+  background-color: #10b981;
+  color: white;
+}
+
+.content-edit-save:hover {
+  background-color: #059669;
+}
+
+.content-edit-cancel {
+  background-color: #d1d5db;
+  color: #374151;
+}
+
+.content-edit-cancel:hover {
+  background-color: #9ca3af;
+}
+
