@@ -2,12 +2,14 @@ import { Router } from 'express';
 import sessionRoutes from './sessionRoutes';
 import uploadRoutes from './uploadRoutes';
 import sectionRoutes from './sectionRoutes';
+import downloadRoutes from './downloadRoutes';
 
 const router = Router();
 
 // Mount routes
 router.use('/sessions', sessionRoutes);
 router.use('/sessions/:id/upload', uploadRoutes);
+router.use('/sessions', downloadRoutes);
 router.use('/sections', sectionRoutes);
 
 // API info endpoint
@@ -29,6 +31,12 @@ router.get('/', (_req, res) => {
         manus: 'POST /api/sessions/:id/upload/manus',
         audio: 'POST /api/sessions/:id/upload/audio/:source',
         text: 'POST /api/sessions/:id/upload/text/:source',
+      },
+      download: {
+        notta: 'GET /api/sessions/:id/download/notta',
+        manus: 'GET /api/sessions/:id/download/manus',
+        word: 'POST /api/sessions/:id/download/word',
+        wordMacro: 'POST /api/sessions/:id/download/word-macro',
       },
     },
   });

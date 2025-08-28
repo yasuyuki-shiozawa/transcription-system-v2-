@@ -1,0 +1,19 @@
+# Word Template with Macro Placeholder
+
+This is a placeholder file for the Word template with macro.
+In a real implementation, this would be a .dotm file created in Microsoft Word with the VBA macro embedded.
+
+For now, we'll create a basic Word document structure and add the macro functionality through the WordTemplateService.
+
+## Template Structure:
+- Session Name: {{sessionName}}
+- Session Date: {{sessionDate}}
+- Sections: {{#sections}}
+  - Timestamp: {{timestamp}}
+  - Speaker: {{speaker}}
+  - Content: {{content}}
+{{/sections}}
+
+## VBA Macro:
+The VBA macro code is stored in word_macro.vba and should be embedded in the actual .dotm template file.
+
