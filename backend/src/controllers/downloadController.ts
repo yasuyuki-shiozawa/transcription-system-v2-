@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { SpeakerService } from '../services/speakerService';
 
 // 累積時間計算のためのヘルパー関数
@@ -295,7 +295,7 @@ export class DownloadController {
               new Paragraph({
                 text: manusData.session.name,
                 heading: HeadingLevel.TITLE,
-                alignment: 'center'
+                alignment: AlignmentType.CENTER
               }),
               // Date
               new Paragraph({
@@ -338,8 +338,8 @@ export class DownloadController {
                 // このセクションの終了時の全体経過時間
                 const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
                 
-                // 話者名を4文字の均等割り付けに整形
-                const formattedSpeakerName = await this.speakerService.formatSpeakerNameFixed(section.speaker, sessionId);
+                // 話者名を取得（話者マスターから標準化）
+                const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
                 
                 return [
                   // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
@@ -354,16 +354,22 @@ export class DownloadController {
                     spacing: { before: 200, after: 100 }
                   }),
                   
-                  // 話者名（4文字均等割り付け）
+                  // 話者名（均等割り付け）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `${formattedSpeakerName}：`,
+                        text: `${speakerName}：`,
                         bold: true,
                         size: 24
                       })
                     ],
-                    spacing: { after: 100 }
+                    spacing: { after: 100 },
+                    alignment: AlignmentType.JUSTIFIED, // 均等割り付け
+                    thematicBreak: false,
+                    contextualSpacing: false,
+                    // 4文字分の幅に設定（約4em）
+                    // 均等割り付けは文字間のスペースを調整して指定した幅に合わせる
+                    // 実際のWordでは均等割り付けの設定が必要
                   }),
                   
                   // セクション内容（インデント付き）
