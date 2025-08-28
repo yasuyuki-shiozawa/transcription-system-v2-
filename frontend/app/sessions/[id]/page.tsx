@@ -83,14 +83,18 @@ export default function SessionDetail() {
     if (!isInitialized && transcriptions.length > 0) {
       const manusData = transcriptions.find(t => t.source === 'MANUS');
       if (manusData && manusData.sections.length > 0) {
-        // オプトイン方式: デフォルトですべて未選択
-        const included = new Set<string>();
-        console.log('🔴 INITIALIZING OPT-IN MODE:', {
+        // データベースのisExcludedフィールドを読み取って初期化
+        const included = new Set<string>(
+          manusData.sections
+            .filter(section => !section.isExcluded)  // 除外されていないセクション
+            .map(section => section.id)
+        );
+        console.log('✅ INITIALIZING FROM DATABASE:', {
           total: manusData.sections.length,
           included: included.size,
           includedIds: Array.from(included),
-          note: 'All sections start unchecked in opt-in mode',
-          sections: manusData.sections.map(s => ({ id: s.id, isExcluded: s.isExcluded }))
+          note: 'Sections initialized from database isExcluded field',
+          sections: manusData.sections.map(s => ({ id: s.id, isExcluded: s.isExcluded, included: !s.isExcluded }))
         });
         setIncludedSections(included);
         setIsInitialized(true);
