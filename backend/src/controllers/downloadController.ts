@@ -30,8 +30,18 @@ const formatSpeakerName = (speaker: string): string => {
     return speaker;
   }
   
-  // 「議員」を付ける処理は維持
-  let speakerName = speaker.includes('議員') ? speaker : `${speaker}議員`;
+  let speakerName = speaker;
+  
+  // 「議員」が含まれる場合の特別処理
+  if (speaker.includes('議員')) {
+    // 「議員」を除いた部分を取得
+    const baseName = speaker.replace('議員', '');
+    
+    // 「議員」を付けたフルネームを作成
+    // 例：「伊藤議員」→「伊藤顕議員」（実際のフルネームはデータベースから取得する必要あり）
+    // ここでは仮に元の名前をそのまま使用
+    speakerName = `${baseName}議員`;
+  }
   
   // 文字数を取得
   const nameLength = [...speakerName].length; // サロゲートペア対応
