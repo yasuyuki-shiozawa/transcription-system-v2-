@@ -24,6 +24,22 @@ const secondsToTime = (seconds: number): string => {
   return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
 };
 
+// 話者名を4文字分の幅に調整する関数
+const padSpeakerNameTo4Chars = (name: string): string => {
+  const nameChars = [...name]; // サロゲートペア対応
+  const nameLength = nameChars.length;
+  
+  if (nameLength === 4) {
+    return name; // 既に4文字なら何もしない
+  } else if (nameLength < 4) {
+    // 4文字未満なら全角スペースで埋める
+    return name + '　'.repeat(4 - nameLength);
+  } else {
+    // 4文字より多い場合はそのまま返す（切り詰めない）
+    return name;
+  }
+};
+
 export class DownloadController {
   private speakerService: SpeakerService;
   
@@ -341,6 +357,9 @@ export class DownloadController {
                 // 話者名を取得（話者マスターから標準化）
                 const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
                 
+                // 話者名を4文字分の幅に調整（全角スペースでパディング）
+                const paddedSpeakerName = padSpeakerNameTo4Chars(speakerName);
+                
                 return [
                   // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
                   new Paragraph({
@@ -354,22 +373,17 @@ export class DownloadController {
                     spacing: { before: 200, after: 100 }
                   }),
                   
-                  // 話者名（均等割り付け）
+                  // 話者名（4文字分の幅に調整）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `${speakerName}：`,
+                        text: `${paddedSpeakerName}：`,
                         bold: true,
-                        size: 24
+                        size: 24,
+                        font: "MS Gothic" // 固定幅フォントを使用
                       })
                     ],
-                    spacing: { after: 100 },
-                    alignment: AlignmentType.JUSTIFIED, // 均等割り付け
-                    thematicBreak: false,
-                    contextualSpacing: false,
-                    // 4文字分の幅に設定（約4em）
-                    // 均等割り付けは文字間のスペースを調整して指定した幅に合わせる
-                    // 実際のWordでは均等割り付けの設定が必要
+                    spacing: { after: 100 }
                   }),
                   
                   // セクション内容（インデント付き）
