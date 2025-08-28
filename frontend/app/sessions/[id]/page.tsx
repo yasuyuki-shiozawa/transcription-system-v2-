@@ -8,7 +8,7 @@ import EditableManusSection from '@/components/EditableManusSection';
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
 
 // API URL configuration
-const API_URL = 'https://transcription-system-obfr.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
 
 interface Session {
   id: string;
@@ -59,6 +59,7 @@ export default function SessionDetail() {
   const [includedSections, setIncludedSections] = useState<Set<string>>(new Set());
   const [showTimeCalculation, setShowTimeCalculation] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   console.log('📊 COMPONENT STATE:', {
     includedSectionsSize: includedSections.size,
@@ -419,7 +420,9 @@ export default function SessionDetail() {
     }
 
     try {
-      const url = `/api/sessions/${sessionId}/upload/download/manus/word`;
+      setIsDownloading(true);
+      // 絶対URLを使用
+      const url = `${API_URL}/api/sessions/${sessionId}/upload/download/manus/word`;
       console.log('Sending Word download request to:', url);
       console.log('Request body:', { includedSections: includedSectionIds });
       
@@ -444,6 +447,8 @@ export default function SessionDetail() {
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        console.log('Word document downloaded successfully');
       } else {
         // Try to parse as JSON for error message, but handle binary responses
         let errorMessage = 'Unknown error';
@@ -463,6 +468,8 @@ export default function SessionDetail() {
     } catch (error) {
       console.error('Download error:', error);
       alert('ダウンロード中にエラーが発生しました');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -716,17 +723,17 @@ export default function SessionDetail() {
                         <div className="flex space-x-2">
                           <button
                             onClick={downloadFilteredManusData}
-                            disabled={includedSections.size === 0}
+                            disabled={includedSections.size === 0 || isDownloading}
                             className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             テキスト形式でダウンロード
                           </button>
                           <button
                             onClick={downloadFilteredManusAsWord}
-                            disabled={includedSections.size === 0}
+                            disabled={includedSections.size === 0 || isDownloading}
                             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Word形式でダウンロード
+                            {isDownloading ? 'ダウンロード中...' : 'Word形式でダウンロード'}
                           </button>
                         </div>
                       </div>

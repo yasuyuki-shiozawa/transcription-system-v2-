@@ -306,121 +306,137 @@ export class DownloadController {
         return;
       }
 
-      // Create Word document
-      const doc = new Document({
-        sections: [{
-          properties: {},
-          children: [
-            // Title
-            new Paragraph({
-              text: manusData.session.name,
-              heading: HeadingLevel.TITLE,
-              alignment: 'center'
-            }),
-            // Date
-            new Paragraph({
-              text: `開催日: ${new Date(manusData.session.date).toLocaleDateString('ja-JP')}`,
-              spacing: { after: 200 }
-            }),
-            // Section count
-            new Paragraph({
-              text: `出力セクション数: ${manusData.sections.length}`,
-              spacing: { after: 400 }
-            }),
-            // Separator
-            new Paragraph({
-              text: '─'.repeat(50),
-              spacing: { after: 400 }
-            }),
-            // Sections with proper timestamp format
-            ...manusData.sections.flatMap((section, index) => {
-              // 現在のセクションまでの全体経過時間を計算
-              let totalElapsedSeconds = 0;
-              for (let i = 0; i < index; i++) {
-                const prevSection = manusData.sections[i];
-                if (prevSection.endTimestamp) {
-                  const duration = timeToSeconds(prevSection.endTimestamp) - timeToSeconds(prevSection.timestamp);
-                  if (duration > 0) {
-                    totalElapsedSeconds += duration;
+      try {
+        // Create Word document
+        const doc = new Document({
+          sections: [{
+            properties: {},
+            children: [
+              // Title
+              new Paragraph({
+                text: manusData.session.name,
+                heading: HeadingLevel.TITLE,
+                alignment: 'center'
+              }),
+              // Date
+              new Paragraph({
+                text: `開催日: ${new Date(manusData.session.date).toLocaleDateString('ja-JP')}`,
+                spacing: { after: 200 }
+              }),
+              // Section count
+              new Paragraph({
+                text: `出力セクション数: ${manusData.sections.length}`,
+                spacing: { after: 400 }
+              }),
+              // Separator
+              new Paragraph({
+                text: '─'.repeat(50),
+                spacing: { after: 400 }
+              }),
+              // Sections with proper timestamp format
+              ...manusData.sections.flatMap((section, index) => {
+                // 現在のセクションまでの全体経過時間を計算
+                let totalElapsedSeconds = 0;
+                for (let i = 0; i < index; i++) {
+                  const prevSection = manusData.sections[i];
+                  if (prevSection.endTimestamp) {
+                    const duration = timeToSeconds(prevSection.endTimestamp) - timeToSeconds(prevSection.timestamp);
+                    if (duration > 0) {
+                      totalElapsedSeconds += duration;
+                    }
                   }
                 }
-              }
-              
-              // このセクションの開始時の全体経過時間
-              const totalStartTime = secondsToTime(totalElapsedSeconds);
-              
-              // このセクションの長さ
-              let sectionDuration = 0;
-              if (section.endTimestamp) {
-                sectionDuration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
-              }
-              
-              // このセクションの終了時の全体経過時間
-              const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
-              
-              // 話者名の整形（「議員」を付ける場合など）
-              const speakerName = section.speaker.includes('議員') ? section.speaker : `${section.speaker}議員`;
-              
-              return [
-                // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `（${totalStartTime}）（00：00：00）`,
-                      color: '000000',
-                      size: 22
-                    })
-                  ],
-                  spacing: { before: 200, after: 100 }
-                }),
                 
-                // 話者名
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `${speakerName}：`,
-                      bold: true,
-                      size: 24
-                    })
-                  ],
-                  spacing: { after: 100 }
-                }),
+                // このセクションの開始時の全体経過時間
+                const totalStartTime = secondsToTime(totalElapsedSeconds);
                 
-                // セクション内容（インデント付き）
-                new Paragraph({
-                  text: section.content,
-                  indent: { left: 360 }, // 全角スペース2つ分のインデント
-                  spacing: { after: 100 }
-                }),
+                // このセクションの長さ
+                let sectionDuration = 0;
+                if (section.endTimestamp) {
+                  sectionDuration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
+                }
                 
-                // 終了タイムスタンプ（全体経過時間）（このセクションの長さ）
-                ...(section.endTimestamp ? [
+                // このセクションの終了時の全体経過時間
+                const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
+                
+                // 話者名の整形（「議員」を付ける場合など）
+                const speakerName = section.speaker.includes('議員') ? section.speaker : `${section.speaker}議員`;
+                
+                return [
+                  // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `（${totalEndTime}）（${secondsToTime(sectionDuration)}）`,
+                        text: `（${totalStartTime}）（00：00：00）`,
                         color: '000000',
                         size: 22
                       })
                     ],
-                    spacing: { after: 400 }
-                  })
-                ] : [])
-              ];
-            })
-          ]
-        }]
-      });
+                    spacing: { before: 200, after: 100 }
+                  }),
+                  
+                  // 話者名
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `${speakerName}：`,
+                        bold: true,
+                        size: 24
+                      })
+                    ],
+                    spacing: { after: 100 }
+                  }),
+                  
+                  // セクション内容（インデント付き）
+                  new Paragraph({
+                    text: section.content,
+                    indent: { left: 360 }, // 全角スペース2つ分のインデント
+                    spacing: { after: 100 }
+                  }),
+                  
+                  // 終了タイムスタンプ（全体経過時間）（このセクションの長さ）
+                  ...(section.endTimestamp ? [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `（${totalEndTime}）（${secondsToTime(sectionDuration)}）`,
+                          color: '000000',
+                          size: 22
+                        })
+                      ],
+                      spacing: { after: 400 }
+                    })
+                  ] : [])
+                ];
+              })
+            ]
+          }]
+        });
 
-      // Generate buffer
-      const buffer = await Packer.toBuffer(doc);
+        console.log('Word document created successfully');
 
-      // Set headers for Word file download
-      const filename = `manus_filtered_${new Date().toISOString().split('T')[0]}.docx`;
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      
-      res.send(buffer);
+        // Generate buffer
+        const buffer = await Packer.toBuffer(doc);
+        console.log('Word document packed to buffer, size:', buffer.length);
+
+        // Set headers for Word file download
+        const filename = `manus_filtered_${new Date().toISOString().split('T')[0]}.docx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
+        // Send the buffer
+        res.send(buffer);
+        console.log('Word document sent to client');
+      } catch (docError) {
+        console.error('Error creating Word document:', docError);
+        const response: ApiResponse = {
+          success: false,
+          error: docError instanceof Error ? `Word文書の生成中にエラーが発生しました: ${docError.message}` : 'Word文書の生成中にエラーが発生しました'
+        };
+        res.status(500).json(response);
+      }
     } catch (error) {
       console.error('Error in downloadFilteredManusAsWord:', error);
       const response: ApiResponse = {
@@ -431,3 +447,4 @@ export class DownloadController {
     }
   };
 }
+
