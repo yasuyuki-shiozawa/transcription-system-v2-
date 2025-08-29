@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DataSource } from '../../../backend/src/types';
+
+// ローカル型定義
+type DataSource = 'NOTTA' | 'MANUS';
 
 interface SectionInsertButtonProps {
   sessionId: string;
