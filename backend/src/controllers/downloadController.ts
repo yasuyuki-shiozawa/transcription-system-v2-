@@ -3,7 +3,6 @@ import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { SpeakerService } from '../services/speakerService';
-import { WordTemplateService } from '../services/wordTemplateService';
 
 // 累積時間計算のためのヘルパー関数
 const timeToSeconds = (timeStr: string): number => {
@@ -43,11 +42,9 @@ const padSpeakerNameTo4Chars = (name: string): string => {
 
 export class DownloadController {
   private speakerService: SpeakerService;
-  private wordTemplateService: WordTemplateService;
   
   constructor() {
     this.speakerService = new SpeakerService();
-    this.wordTemplateService = new WordTemplateService();
   }
   
   downloadManusData = async (req: Request, res: Response, next: NextFunction) => {
@@ -449,143 +446,5 @@ export class DownloadController {
     }
   };
 
-  downloadFilteredManusAsWordWithMacro = async (req: Request, res: Response, _next: NextFunction) => {
-    try {
-      // sessionIdはURLパスから取得（親ルーターから継承）
-      const sessionId = req.params.id || req.params.sessionId;
-      const { includedSections = [] } = req.body;
-      
-      console.log('downloadFilteredManusAsWordWithMacro called:', {
-        sessionId,
-        includedSections,
-        includedSectionsLength: includedSections.length
-      });
-
-      // Get MANUS data with included sections only
-      const manusData = await prisma.transcriptionData.findFirst({
-        where: {
-          sessionId: sessionId,
-          source: 'MANUS'
-        },
-        include: {
-          sections: {
-            where: {
-              id: {
-                in: includedSections as string[]
-              }
-            },
-            orderBy: { order: 'asc' }
-          },
-          session: true
-        }
-      });
-
-      if (!manusData) {
-        console.log('No MANUS transcription data found for session:', sessionId);
-        const response: ApiResponse = {
-          success: false,
-          error: 'No MANUS data found for this session'
-        };
-        res.status(404).json(response);
-        return;
-      }
-      
-      if (manusData.sections.length === 0) {
-        console.log('MANUS data found but no sections matched included IDs:', {
-          sessionId,
-          includedSectionsCount: includedSections.length,
-          includedSections: includedSections.slice(0, 5) // 最初の5個のIDを表示
-        });
-        const response: ApiResponse = {
-          success: false,
-          error: 'No sections found with the specified IDs'
-        };
-        res.status(404).json(response);
-        return;
-      }
-
-      try {
-        // マクロ付きWordテンプレートが利用可能かチェック
-        if (!this.wordTemplateService.isTemplateAvailable()) {
-          console.log('Macro template not available, falling back to basic Word generation');
-          // マクロなしの基本的なWord文書を生成
-          return this.downloadFilteredManusAsWord(req, res, _next);
-        }
-
-        // セクションデータを整形
-        const formattedSections = await Promise.all(manusData.sections.map(async (section, index) => {
-          // 現在のセクションまでの全体経過時間を計算
-          let totalElapsedSeconds = 0;
-          for (let i = 0; i < index; i++) {
-            const prevSection = manusData.sections[i];
-            if (prevSection.endTimestamp) {
-              const duration = timeToSeconds(prevSection.endTimestamp) - timeToSeconds(prevSection.timestamp);
-              if (duration > 0) {
-                totalElapsedSeconds += duration;
-              }
-            }
-          }
-          
-          // このセクションの開始時の全体経過時間
-          const totalStartTime = secondsToTime(totalElapsedSeconds);
-          
-          // このセクションの長さ
-          let sectionDuration = 0;
-          if (section.endTimestamp) {
-            sectionDuration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
-          }
-          
-          // このセクションの終了時の全体経過時間
-          const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
-          
-          // 話者名を取得（話者マスターから標準化）
-          const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
-          
-          return {
-            id: section.id,
-            sectionNumber: section.sectionNumber,
-            timestamp: totalStartTime,
-            endTimestamp: totalEndTime,
-            speaker: speakerName,
-            content: section.content,
-            order: section.order,
-            sectionDuration: secondsToTime(sectionDuration)
-          };
-        }));
-
-        // マクロ付きWord文書を生成
-        const buffer = await this.wordTemplateService.generateWordDocumentWithMacro({
-          sessionName: manusData.session.name,
-          sessionDate: new Date(manusData.session.date).toLocaleDateString('ja-JP'),
-          sections: formattedSections
-        });
-
-        console.log('Macro-enabled Word document created successfully');
-
-        // Set headers for Word file download (.docx for compatibility)
-        const filename = `${manusData.session.name}_macro_guide_${new Date().toISOString().split('T')[0]}.docx`;
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
-        // Send the buffer
-        res.send(buffer);
-        console.log('Macro-enabled Word document sent to client');
-      } catch (docError) {
-        console.error('Error creating macro-enabled Word document:', docError);
-        console.log('Falling back to basic Word generation');
-        // エラーが発生した場合は基本的なWord文書にフォールバック
-        return this.downloadFilteredManusAsWord(req, res, _next);
-      }
-    } catch (error) {
-      console.error('Error in downloadFilteredManusAsWordWithMacro:', error);
-      const response: ApiResponse = {
-        success: false,
-        error: error instanceof Error ? error.message : 'マクロ付きWord形式のダウンロード中にエラーが発生しました'
-      };
-      res.status(500).json(response);
-    }
-  };
 }
 

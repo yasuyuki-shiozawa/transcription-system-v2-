@@ -477,77 +477,6 @@ export default function SessionDetail() {
     }
   };
 
-  const downloadFilteredManusAsWordWithMacro = async () => {
-    console.log('downloadFilteredManusAsWordWithMacro called');
-    const manusData = transcriptions.find(t => t.source === 'MANUS');
-    if (!manusData) {
-      console.log('No MANUS data found');
-      return;
-    }
-
-    // 含まれるセクションIDのリストを作成
-    const includedSectionIds = Array.from(includedSections);
-    console.log('Included sections:', includedSectionIds);
-    
-    if (includedSectionIds.length === 0) {
-      alert('ダウンロードするセクションを選択してください');
-      return;
-    }
-
-    try {
-      setIsDownloading(true);
-      // マクロ付きWord出力のエンドポイントを使用
-      const url = `${API_URL}/api/download/${sessionId}/word-macro`;
-      console.log('Sending macro Word download request to:', url);
-      console.log('Request body:', { includedSections: includedSectionIds });
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ includedSections: includedSectionIds }),
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${session?.name || 'manus'}_macro_${new Date().toISOString().split('T')[0]}.docm`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        console.log('Macro Word document downloaded successfully');
-      } else {
-        // Try to parse as JSON for error message, but handle binary responses
-        let errorMessage = 'Unknown error';
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          try {
-            const error = await response.json();
-            errorMessage = error.error || errorMessage;
-          } catch {
-            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-          }
-        } else {
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
-        alert('マクロ付きWord形式のダウンロードに失敗しました: ' + errorMessage);
-      }
-    } catch (error) {
-      console.error('Macro Word download error:', error);
-      alert('マクロ付きWordダウンロード中にエラーが発生しました');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -809,14 +738,6 @@ export default function SessionDetail() {
                             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isDownloading ? 'ダウンロード中...' : 'Word形式でダウンロード'}
-                          </button>
-                          <button
-                            onClick={downloadFilteredManusAsWordWithMacro}
-                            disabled={includedSections.size === 0 || isDownloading}
-                            className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="話者名均等割り付けマクロ付きWord文書をダウンロード"
-                          >
-                            {isDownloading ? 'ダウンロード中...' : 'マクロ付きWord'}
                           </button>
                         </div>
                       </div>

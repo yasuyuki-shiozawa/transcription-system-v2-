@@ -12,7 +12,6 @@ router.get('/:transcriptionId/manus/:sessionId', downloadController.downloadManu
 
 // Word download routes
 router.post('/:id/word', downloadController.downloadFilteredManusAsWord);
-router.post('/:id/word-macro', downloadController.downloadFilteredManusAsWordWithMacro);
 
 export default router;
 

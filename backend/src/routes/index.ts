@@ -36,7 +36,6 @@ router.get('/', (_req, res) => {
         notta: 'GET /api/download/:id/notta',
         manus: 'GET /api/download/:id/manus',
         word: 'POST /api/download/:id/word',
-        wordMacro: 'POST /api/download/:id/word-macro',
       },
     },
   });
