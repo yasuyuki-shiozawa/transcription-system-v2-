@@ -43,7 +43,10 @@ export default function SectionInsertButton({
     if (numbers.length === 0) return '';
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) {
-      return `${numbers.slice(0, 2)}:${numbers.slice(2)}`;
+      // 4桁の場合: HHMM -> HH:MM:00 (秒を00で補完)
+      const hours = numbers.slice(0, 2);
+      const minutes = numbers.slice(2).padEnd(2, '0');
+      return `${hours}:${minutes}:00`;
     }
     
     // 6桁の場合: HHMMSS -> HH:MM:SS
@@ -151,7 +154,7 @@ export default function SectionInsertButton({
                   type="text"
                   value={formData.timestamp}
                   onChange={(e) => handleTimeChange('timestamp', e.target.value)}
-                  placeholder="0518"
+                  placeholder="1030 (4桁) または 103000 (6桁)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -164,7 +167,7 @@ export default function SectionInsertButton({
                   type="text"
                   value={formData.endTimestamp}
                   onChange={(e) => handleTimeChange('endTimestamp', e.target.value)}
-                  placeholder="0545"
+                  placeholder="1045 (4桁) または 104500 (6桁)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
