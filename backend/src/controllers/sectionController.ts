@@ -108,7 +108,7 @@ export class SectionController {
       next(error);
     }
   };
-}
+
   // Add new section to session
   addSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
