@@ -39,6 +39,7 @@ export interface CreateSectionDto {
   timestamp: string;
   endTimestamp?: string | null;
   content?: string;
+  insertPosition?: number; // 挿入位置（0ベース）
 }
 
 export interface UpdateSectionDto {

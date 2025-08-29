@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '@/components/EditableManusSection';
 import SectionAddButton from '@/components/SectionAddButton';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
+import SectionInsertButton from '@/components/SectionInsertButton';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
@@ -798,74 +799,108 @@ export default function SessionDetail() {
                 </div>
 
                 <div className="space-y-4">
-                  {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }) => (
-                  <div key={sectionNumber} className="bg-white rounded-lg shadow overflow-hidden">
-                    {/* Section Header */}
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">セクション {sectionNumber}</span>
-                        <div className="flex items-center space-x-2">
-                          {mapping && (
-                            <span className="text-sm text-gray-600">
-                              マッチング確信度: {Math.round(mapping.confidence * 100)}%
-                            </span>
-                          )}
-                          {/* Delete buttons for existing sections */}
-                          {notta && (
-                            <SectionDeleteButton
-                              sectionId={notta.id}
-                              sectionNumber={notta.sectionNumber}
-                              speaker={notta.speaker}
-                              onSectionDeleted={fetchSessionData}
-                            />
-                          )}
-                          {manus && (
-                            <SectionDeleteButton
-                              sectionId={manus.id}
-                              sectionNumber={manus.sectionNumber}
-                              speaker={manus.speaker}
-                              onSectionDeleted={fetchSessionData}
-                            />
-                          )}
+                  {/* 最初の挿入ボタン */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <SectionInsertButton
+                      sessionId={sessionId}
+                      source="NOTTA"
+                      insertPosition={0}
+                      onSectionAdded={fetchSessionData}
+                    />
+                    <SectionInsertButton
+                      sessionId={sessionId}
+                      source="MANUS"
+                      insertPosition={0}
+                      onSectionAdded={fetchSessionData}
+                    />
+                  </div>
+
+                  {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }, index) => (
+                    <div key={sectionNumber}>
+                      <div className="bg-white rounded-lg shadow overflow-hidden">
+                        {/* Section Header */}
+                        <div className="bg-gray-50 px-4 py-2 border-b">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">セクション {sectionNumber}</span>
+                            <div className="flex items-center space-x-2">
+                              {mapping && (
+                                <span className="text-sm text-gray-600">
+                                  マッチング確信度: {Math.round(mapping.confidence * 100)}%
+                                </span>
+                              )}
+                              {/* Delete buttons for existing sections */}
+                              {notta && (
+                                <SectionDeleteButton
+                                  sectionId={notta.id}
+                                  sectionNumber={notta.sectionNumber}
+                                  speaker={notta.speaker}
+                                  onSectionDeleted={fetchSessionData}
+                                />
+                              )}
+                              {manus && (
+                                <SectionDeleteButton
+                                  sectionId={manus.id}
+                                  sectionNumber={manus.sectionNumber}
+                                  speaker={manus.speaker}
+                                  onSectionDeleted={fetchSessionData}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section Content */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 divide-x">
+                          {/* NOTTA Column */}
+                          <div className="p-4">
+                            <h3 className="font-semibold text-blue-600 mb-2">NOTTA</h3>
+                            {notta ? (
+                              <div>
+                                <p className="text-sm text-gray-600 mb-1">
+                                  {notta.speaker} [{notta.timestamp}]
+                                </p>
+                                <p className="text-sm whitespace-pre-wrap">{notta.content}</p>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400">データなし</p>
+                            )}
+                          </div>
+
+                          {/* Manus Column */}
+                          <div className="p-4">
+                            <h3 className="font-semibold text-green-600 mb-2">Manus</h3>
+                            {manus ? (
+                              <EditableManusSection 
+                                section={manus} 
+                                onUpdate={updateManusSection}
+                                isIncluded={includedSections.has(manus.id)}
+                                onToggleInclude={toggleIncludeSection}
+                                showWarning={showTimeCalculation}
+                              />
+                            ) : (
+                              <p className="text-sm text-gray-400">データなし</p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Section Content */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 divide-x">
-                      {/* NOTTA Column */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-blue-600 mb-2">NOTTA</h3>
-                        {notta ? (
-                          <div>
-                            <p className="text-sm text-gray-600 mb-1">
-                              {notta.speaker} [{notta.timestamp}]
-                            </p>
-                            <p className="text-sm whitespace-pre-wrap">{notta.content}</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-400">データなし</p>
-                        )}
-                      </div>
-
-                      {/* Manus Column */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-green-600 mb-2">Manus</h3>
-                        {manus ? (
-                          <EditableManusSection 
-                            section={manus} 
-                            onUpdate={updateManusSection}
-                            isIncluded={includedSections.has(manus.id)}
-                            onToggleInclude={toggleIncludeSection}
-                            showWarning={showTimeCalculation}
-                          />
-                        ) : (
-                          <p className="text-sm text-gray-400">データなし</p>
-                        )}
+                      {/* セクション間の挿入ボタン */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <SectionInsertButton
+                          sessionId={sessionId}
+                          source="NOTTA"
+                          insertPosition={index + 1}
+                          onSectionAdded={fetchSessionData}
+                        />
+                        <SectionInsertButton
+                          sessionId={sessionId}
+                          source="MANUS"
+                          insertPosition={index + 1}
+                          onSectionAdded={fetchSessionData}
+                        />
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
                 </div>
               </div>
             )}

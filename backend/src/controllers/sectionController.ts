@@ -113,7 +113,7 @@ export class SectionController {
   addSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { sessionId } = req.params;
-      const { source, speaker, timestamp, endTimestamp, content }: CreateSectionDto = req.body;
+      const { source, speaker, timestamp, endTimestamp, content, insertPosition }: CreateSectionDto = req.body;
       
       console.log('POST /sections/session/:sessionId received:', {
         sessionId,
@@ -124,7 +124,7 @@ export class SectionController {
       if (!source || !speaker || !timestamp) {
         const response: ApiResponse = {
           success: false,
-          error: 'Missing required fields: source, speaker, timestamp'
+          error: 'Source, speaker, and timestamp are required'
         };
         res.status(400).json(response);
         return;
@@ -144,7 +144,7 @@ export class SectionController {
         return;
       }
 
-      // Find the transcription data for this session and source
+      // Find or create transcription data for this session and source
       let transcriptionData = await prisma.transcriptionData.findFirst({
         where: {
           sessionId: sessionId,
@@ -164,38 +164,55 @@ export class SectionController {
         });
       }
 
-      // Get the next section number
+      // Get all existing sections for this transcription data
       const existingSections = await prisma.section.findMany({
         where: { transcriptionDataId: transcriptionData.id },
-        orderBy: { sectionNumber: 'desc' },
-        take: 1
+        orderBy: { sectionNumber: 'asc' }
       });
 
-      const nextSectionNumber = existingSections.length > 0 
-        ? (parseInt(existingSections[0].sectionNumber) + 1).toString()
-        : '1';
-
-      // Create new section
-      const newSection = await prisma.section.create({
-        data: {
-          transcriptionDataId: transcriptionData.id,
-          sectionNumber: nextSectionNumber,
-          speaker: speaker,
-          timestamp: timestamp,
-          endTimestamp: endTimestamp || null,
-          content: content || '',
-          isExcluded: false
+      // Calculate insert position
+      const targetPosition = insertPosition !== undefined ? insertPosition : existingSections.length;
+      
+      // Use transaction to handle section number updates
+      const result = await prisma.$transaction(async (tx) => {
+        // If inserting in the middle, update section numbers of existing sections
+        if (targetPosition < existingSections.length) {
+          // Update section numbers for sections that come after the insert position
+          const sectionsToUpdate = existingSections.slice(targetPosition);
+          for (let i = 0; i < sectionsToUpdate.length; i++) {
+            await tx.section.update({
+              where: { id: sectionsToUpdate[i].id },
+              data: { sectionNumber: (targetPosition + i + 2).toString() }
+            });
+          }
         }
+
+        // Create new section at the target position
+        const newSectionNumber = (targetPosition + 1).toString();
+        const newSection = await tx.section.create({
+          data: {
+            transcriptionDataId: transcriptionData.id,
+            sectionNumber: newSectionNumber,
+            speaker: speaker,
+            timestamp: timestamp,
+            endTimestamp: endTimestamp || null,
+            content: content || '',
+            isExcluded: false
+          }
+        });
+
+        return newSection;
       });
 
       console.log('Section created successfully:', {
-        id: newSection.id,
-        sectionNumber: newSection.sectionNumber
+        id: result.id,
+        sectionNumber: result.sectionNumber,
+        insertPosition: targetPosition
       });
 
       const response: ApiResponse = {
         success: true,
-        data: newSection,
+        data: result,
         message: 'Section added successfully'
       };
 
