@@ -562,9 +562,9 @@ export class DownloadController {
 
         console.log('Macro-enabled Word document created successfully');
 
-        // Set headers for Word file download (.docm for macro-enabled)
-        const filename = `${manusData.session.name}_macro_${new Date().toISOString().split('T')[0]}.docm`;
-        res.setHeader('Content-Type', 'application/vnd.ms-word.document.macroEnabled.12');
+        // Set headers for Word file download (.docx for compatibility)
+        const filename = `${manusData.session.name}_macro_guide_${new Date().toISOString().split('T')[0]}.docx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');

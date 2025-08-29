@@ -29,11 +29,10 @@ export class WordTemplateService {
   }
 
   /**
-   * マクロ付きWord文書を生成
-   * 注意: 現在の実装では、docxライブラリを使用してWord文書を生成し、
-   * マクロの説明をコメントとして追加しています。
-   * 実際のVBAマクロの埋め込みには、より高度なライブラリまたは
-   * Microsoft Wordの自動化が必要です。
+   * マクロガイド付きWord文書を生成
+   * 注意: 現在の実装では、docxライブラリを使用して通常のWord文書(.docx)を生成し、
+   * VBAマクロの使用方法とコードを説明として文書内に含めています。
+   * 実際のVBAマクロを実行するには、ユーザーが手動でマクロを追加する必要があります。
    */
   async generateWordDocumentWithMacro(data: WordTemplateData): Promise<Buffer> {
     try {
@@ -53,35 +52,35 @@ export class WordTemplateService {
           children: [
             // マクロ使用説明
             new Paragraph({
-              text: "【マクロ付き議事録】",
+              text: "【マクロガイド付き議事録】",
               heading: HeadingLevel.TITLE,
               alignment: AlignmentType.CENTER
             }),
             new Paragraph({
-              text: "この文書にはVBAマクロが含まれています。",
+              text: "この文書にはVBAマクロの使用方法が含まれています。",
               spacing: { after: 200 }
             }),
             new Paragraph({
-              text: "使用方法：",
+              text: "マクロ設定手順：",
               spacing: { after: 100 }
             }),
             new Paragraph({
-              text: "1. マクロを有効にしてください",
+              text: "1. 「開発」タブ→「Visual Basic」を開く",
               indent: { left: 360 },
               spacing: { after: 100 }
             }),
             new Paragraph({
-              text: "2. 「均等割り付け実行」ボタンをクリックして話者名を4文字幅に調整",
+              text: "2. 文書末尾のVBAコードをコピーして標準モジュールに貼り付け",
               indent: { left: 360 },
               spacing: { after: 100 }
             }),
             new Paragraph({
-              text: "3. 編集作業を完了",
+              text: "3. 「均等割り付け実行」ボタンをクリックして話者名を4文字幅に調整",
               indent: { left: 360 },
               spacing: { after: 100 }
             }),
             new Paragraph({
-              text: "4. 納品前に「納品用に変換」マクロを実行してボタンを削除",
+              text: "4. 編集作業を完了後、「納品用に変換」マクロを実行してボタンを削除",
               indent: { left: 360 },
               spacing: { after: 400 }
             }),
