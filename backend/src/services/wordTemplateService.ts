@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
-import { Section } from '../types';
 
 export interface WordTemplateSection {
   id: string;
