@@ -106,7 +106,6 @@ export default function SectionInsertButton({
     }
   };
 
-  const sourceColor = source === 'NOTTA' ? 'blue' : 'green';
   const bgColor = source === 'NOTTA' ? 'bg-blue-50 hover:bg-blue-100' : 'bg-green-50 hover:bg-green-100';
   const borderColor = source === 'NOTTA' ? 'border-blue-200' : 'border-green-200';
   const textColor = source === 'NOTTA' ? 'text-blue-700' : 'text-green-700';
