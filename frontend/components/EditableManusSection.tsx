@@ -190,7 +190,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500">
-              時刻は数字のみで入力できます（例: 0518 → 05:18、013005 → 01:30:05）
+              時刻は数字のみで入力できます（例: 1030 → 10:30、推奨4桁）
             </p>
             <div className="flex items-center space-x-2">
               <button
