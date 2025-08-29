@@ -116,21 +116,28 @@ export default function SessionDetail() {
       const sessionData = await sessionRes.json();
       if (sessionData.success) {
         setSession(sessionData.data);
+        console.log('✅ Session data updated');
       }
 
       // Fetch transcriptions
+      console.log('📡 Fetching transcriptions...');
       const transcriptionsRes = await fetch(`${API_URL}/api/sessions/${sessionId}/upload/transcriptions`);
       const transcriptionsData = await transcriptionsRes.json();
       if (transcriptionsData.success) {
         setTranscriptions(transcriptionsData.data);
+        console.log('✅ Transcriptions updated, count:', transcriptionsData.data.length);
       }
 
       // Fetch mappings
+      console.log('📡 Fetching mappings...');
       const mappingsRes = await fetch(`${API_URL}/api/sessions/${sessionId}/upload/mappings`);
       const mappingsData = await mappingsRes.json();
       if (mappingsData.success) {
         setMappings(mappingsData.data);
+        console.log('✅ Mappings updated');
       }
+      
+      console.log('🎉 All data fetched successfully');
     } catch (error) {
       console.error('Error fetching session data:', error);
     } finally {
@@ -800,24 +807,24 @@ export default function SessionDetail() {
                 </div>
 
                 <div className="space-y-4">
-                  {/* 最初の挿入ボタン */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <SectionInsertButton
-                      sessionId={sessionId}
-                      source="NOTTA"
-                      insertPosition={0}
-                      onSectionAdded={fetchSessionData}
-                    />
-                    <SectionInsertButton
-                      sessionId={sessionId}
-                      source="MANUS"
-                      insertPosition={0}
-                      onSectionAdded={fetchSessionData}
-                    />
-                  </div>
-
                   {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }, index) => (
                     <div key={sectionNumber}>
+                      {/* セクション前の挿入ボタン */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <SectionInsertButton
+                          sessionId={sessionId}
+                          source="NOTTA"
+                          insertPosition={index}
+                          onSectionAdded={fetchSessionData}
+                        />
+                        <SectionInsertButton
+                          sessionId={sessionId}
+                          source="MANUS"
+                          insertPosition={index}
+                          onSectionAdded={fetchSessionData}
+                        />
+                      </div>
+
                       <div className="bg-white rounded-lg shadow overflow-hidden">
                         {/* Section Header */}
                         <div className="bg-gray-50 px-4 py-2 border-b">

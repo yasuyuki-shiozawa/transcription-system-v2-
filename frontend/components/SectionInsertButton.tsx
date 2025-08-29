@@ -99,7 +99,10 @@ export default function SectionInsertButton({
           content: ''
         });
         setShowForm(false);
-        onSectionAdded();
+        // データ更新を強制実行
+        console.log('🔄 Calling onSectionAdded to refresh data...');
+        await onSectionAdded();
+        console.log('✅ Data refresh completed');
       } else {
         throw new Error(data.error || 'Failed to add section');
       }
