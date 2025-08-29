@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
-import { ApiResponse, CreateSectionDto, UpdateSectionDto, ReorderSectionsDto } from '../types';
+import { ApiResponse, CreateSectionDto, ReorderSectionsDto } from '../types';
 
 export class SectionController {
   updateSection = async (req: Request, res: Response, next: NextFunction) => {
@@ -197,6 +197,7 @@ export class SectionController {
             timestamp: timestamp,
             endTimestamp: endTimestamp || null,
             content: content || '',
+            order: targetPosition + 1,
             isExcluded: false
           }
         });
