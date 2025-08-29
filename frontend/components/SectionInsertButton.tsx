@@ -49,8 +49,10 @@ export default function SectionInsertButton({
       return `${hours}:${minutes}`;
     }
     
-    // 6桁の場合: HHMMSS -> HH:MM:SS
-    return `${numbers.slice(0, 2)}:${numbers.slice(2, 4)}:${numbers.slice(4, 6)}`;
+    // 6桁の場合も4桁表示に統一: HHMMSS -> HH:MM
+    const hours = numbers.slice(0, 2);
+    const minutes = numbers.slice(2, 4);
+    return `${hours}:${minutes}`;
   };
 
   const handleTimeChange = (field: 'timestamp' | 'endTimestamp', value: string) => {

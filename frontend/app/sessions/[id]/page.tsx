@@ -786,25 +786,7 @@ export default function SessionDetail() {
                   );
                 })()}
                 
-                {/* Section Add Buttons */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                  {/* NOTTA Add Button */}
-                  <div>
-                    <SectionAddButton
-                      source="NOTTA"
-                      sessionId={sessionId}
-                      onSectionAdded={fetchSessionData}
-                    />
-                  </div>
-                  {/* Manus Add Button */}
-                  <div>
-                    <SectionAddButton
-                      source="MANUS"
-                      sessionId={sessionId}
-                      onSectionAdded={fetchSessionData}
-                    />
-                  </div>
-                </div>
+
 
                 <div className="space-y-4">
                   {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }, index) => (
