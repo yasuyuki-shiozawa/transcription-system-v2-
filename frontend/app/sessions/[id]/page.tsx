@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '@/components/EditableManusSection';
+import SectionAddButton from '@/components/SectionAddButton';
+import SectionDeleteButton from '@/components/SectionDeleteButton';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
@@ -774,6 +776,27 @@ export default function SessionDetail() {
                     </div>
                   );
                 })()}
+                
+                {/* Section Add Buttons */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                  {/* NOTTA Add Button */}
+                  <div>
+                    <SectionAddButton
+                      source="NOTTA"
+                      sessionId={sessionId}
+                      onSectionAdded={fetchSessionData}
+                    />
+                  </div>
+                  {/* Manus Add Button */}
+                  <div>
+                    <SectionAddButton
+                      source="MANUS"
+                      sessionId={sessionId}
+                      onSectionAdded={fetchSessionData}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }) => (
                   <div key={sectionNumber} className="bg-white rounded-lg shadow overflow-hidden">
@@ -781,11 +804,30 @@ export default function SessionDetail() {
                     <div className="bg-gray-50 px-4 py-2 border-b">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">セクション {sectionNumber}</span>
-                        {mapping && (
-                          <span className="text-sm text-gray-600">
-                            マッチング確信度: {Math.round(mapping.confidence * 100)}%
-                          </span>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {mapping && (
+                            <span className="text-sm text-gray-600">
+                              マッチング確信度: {Math.round(mapping.confidence * 100)}%
+                            </span>
+                          )}
+                          {/* Delete buttons for existing sections */}
+                          {notta && (
+                            <SectionDeleteButton
+                              sectionId={notta.id}
+                              sectionNumber={notta.sectionNumber}
+                              speaker={notta.speaker}
+                              onSectionDeleted={fetchSessionData}
+                            />
+                          )}
+                          {manus && (
+                            <SectionDeleteButton
+                              sectionId={manus.id}
+                              sectionNumber={manus.sectionNumber}
+                              speaker={manus.speaker}
+                              onSectionDeleted={fetchSessionData}
+                            />
+                          )}
+                        </div>
                       </div>
                     </div>
 

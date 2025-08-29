@@ -32,3 +32,24 @@ export type {
 export type SessionStatus = 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
 export type DataSource = 'NOTTA' | 'MANUS';
 export type ProcessingStatus = 'UPLOADED' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
+// Section related types
+export interface CreateSectionDto {
+  source: DataSource;
+  speaker: string;
+  timestamp: string;
+  endTimestamp?: string | null;
+  content?: string;
+}
+
+export interface UpdateSectionDto {
+  speaker?: string;
+  timestamp?: string;
+  endTimestamp?: string | null;
+  content?: string;
+  isExcluded?: boolean;
+}
+
+export interface ReorderSectionsDto {
+  source: DataSource;
+}
+

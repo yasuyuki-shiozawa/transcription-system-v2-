@@ -11,3 +11,12 @@ router.patch('/:sectionId', sectionController.updateSection);
 router.patch('/', sectionController.updateSections);
 
 export default router;
+// Add new section to session
+router.post('/session/:sessionId', sectionController.addSection);
+
+// Delete section
+router.delete('/:sectionId', sectionController.deleteSection);
+
+// Reorder sections in session
+router.patch('/session/:sessionId/reorder', sectionController.reorderSections);
+

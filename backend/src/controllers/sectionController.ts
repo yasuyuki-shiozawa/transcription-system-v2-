@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
-import { ApiResponse } from '../types';
+import { ApiResponse, CreateSectionDto, UpdateSectionDto, ReorderSectionsDto } from '../types';
 
 export class SectionController {
   updateSection = async (req: Request, res: Response, next: NextFunction) => {
@@ -109,3 +109,223 @@ export class SectionController {
     }
   };
 }
+  // Add new section to session
+  addSection = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { sessionId } = req.params;
+      const { source, speaker, timestamp, endTimestamp, content }: CreateSectionDto = req.body;
+      
+      console.log('POST /sections/session/:sessionId received:', {
+        sessionId,
+        body: req.body
+      });
+
+      // Validate required fields
+      if (!source || !speaker || !timestamp) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Missing required fields: source, speaker, timestamp'
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // Check if session exists
+      const session = await prisma.session.findUnique({
+        where: { id: sessionId }
+      });
+
+      if (!session) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Session not found'
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Find the transcription data for this session and source
+      let transcriptionData = await prisma.transcriptionData.findFirst({
+        where: {
+          sessionId: sessionId,
+          source: source
+        }
+      });
+
+      // If no transcription data exists for this source, create it
+      if (!transcriptionData) {
+        transcriptionData = await prisma.transcriptionData.create({
+          data: {
+            sessionId: sessionId,
+            source: source,
+            originalFileName: `${source.toLowerCase()}_manual_entry`,
+            status: 'COMPLETED'
+          }
+        });
+      }
+
+      // Get the next section number
+      const existingSections = await prisma.section.findMany({
+        where: { transcriptionDataId: transcriptionData.id },
+        orderBy: { sectionNumber: 'desc' },
+        take: 1
+      });
+
+      const nextSectionNumber = existingSections.length > 0 
+        ? (parseInt(existingSections[0].sectionNumber) + 1).toString()
+        : '1';
+
+      // Create new section
+      const newSection = await prisma.section.create({
+        data: {
+          transcriptionDataId: transcriptionData.id,
+          sectionNumber: nextSectionNumber,
+          speaker: speaker,
+          timestamp: timestamp,
+          endTimestamp: endTimestamp || null,
+          content: content || '',
+          isExcluded: false
+        }
+      });
+
+      console.log('Section created successfully:', {
+        id: newSection.id,
+        sectionNumber: newSection.sectionNumber
+      });
+
+      const response: ApiResponse = {
+        success: true,
+        data: newSection,
+        message: 'Section added successfully'
+      };
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // Delete section
+  deleteSection = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { sectionId } = req.params;
+      
+      console.log('DELETE /sections/:sectionId received:', { sectionId });
+
+      // Check if section exists
+      const existingSection = await prisma.section.findUnique({
+        where: { id: sectionId },
+        include: { transcriptionData: true }
+      });
+
+      if (!existingSection) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Section not found'
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Delete the section
+      await prisma.section.delete({
+        where: { id: sectionId }
+      });
+
+      // Reorder remaining sections
+      const remainingSections = await prisma.section.findMany({
+        where: { transcriptionDataId: existingSection.transcriptionDataId },
+        orderBy: { sectionNumber: 'asc' }
+      });
+
+      // Update section numbers to be sequential
+      await prisma.$transaction(
+        remainingSections.map((section, index) =>
+          prisma.section.update({
+            where: { id: section.id },
+            data: { sectionNumber: (index + 1).toString() }
+          })
+        )
+      );
+
+      console.log('Section deleted and remaining sections reordered');
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Section deleted successfully'
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // Reorder sections in session
+  reorderSections = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { sessionId } = req.params;
+      const { source }: ReorderSectionsDto = req.body;
+      
+      console.log('PATCH /sections/session/:sessionId/reorder received:', {
+        sessionId,
+        source
+      });
+
+      // Validate required fields
+      if (!source) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Missing required field: source'
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // Find the transcription data
+      const transcriptionData = await prisma.transcriptionData.findFirst({
+        where: {
+          sessionId: sessionId,
+          source: source
+        }
+      });
+
+      if (!transcriptionData) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Transcription data not found'
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Get all sections and reorder them
+      const sections = await prisma.section.findMany({
+        where: { transcriptionDataId: transcriptionData.id },
+        orderBy: { sectionNumber: 'asc' }
+      });
+
+      // Update section numbers to be sequential
+      await prisma.$transaction(
+        sections.map((section, index) =>
+          prisma.section.update({
+            where: { id: section.id },
+            data: { sectionNumber: (index + 1).toString() }
+          })
+        )
+      );
+
+      console.log('Sections reordered successfully');
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Sections reordered successfully'
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
