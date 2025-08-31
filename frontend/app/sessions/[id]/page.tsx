@@ -876,7 +876,44 @@ export default function SessionDetail() {
                                 onSectionDeleted={fetchSessionData}
                               />
                             ) : (
-                              <p className="text-sm text-gray-400">データなし</p>
+                              <div>
+                                <p className="text-sm text-gray-400 mb-3">データなし</p>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={async () => {
+                                      // 空のNOTTAセクションを作成
+                                      try {
+                                        const response = await fetch(`${API_URL}/api/sections`, {
+                                          method: 'POST',
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                          },
+                                          body: JSON.stringify({
+                                            sessionId: sessionId,
+                                            source: 'NOTTA',
+                                            sectionNumber: sectionNumber,
+                                            speaker: '新しい話者',
+                                            timestamp: '00:00',
+                                            content: '新しい内容'
+                                          }),
+                                        });
+
+                                        if (response.ok) {
+                                          const data = await response.json();
+                                          if (data.success) {
+                                            await fetchSessionData();
+                                          }
+                                        }
+                                      } catch (error) {
+                                        console.error('Failed to create NOTTA section:', error);
+                                      }
+                                    }}
+                                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                                  >
+                                    データを追加
+                                  </button>
+                                </div>
+                              </div>
                             )}
                           </div>
 
