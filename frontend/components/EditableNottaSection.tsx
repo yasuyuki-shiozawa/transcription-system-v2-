@@ -1,7 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SectionDeleteButton from './SectionDeleteButton';
+import HighlightEditor from './HighlightEditor';
+
+interface Highlight {
+  id: string;
+  startOffset: number;
+  endOffset: number;
+  color: 'yellow' | 'blue' | 'green' | 'pink' | 'orange';
+  text: string;
+}
 
 interface Section {
   id: string;
@@ -26,6 +35,81 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   const [editingTimestamp, setEditingTimestamp] = useState(section.timestamp);
   const [editingEndTimestamp, setEditingEndTimestamp] = useState(section.endTimestamp || '');
   const [editingContent, setEditingContent] = useState(section.content);
+  
+  // ハイライト関連の状態
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [isLoadingHighlights, setIsLoadingHighlights] = useState(false);
+
+  // API URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-1.onrender.com';
+
+  // ハイライト一覧を取得
+  const fetchHighlights = async () => {
+    setIsLoadingHighlights(true);
+    try {
+      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`);
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+    } finally {
+      setIsLoadingHighlights(false);
+    }
+  };
+
+  // ハイライト作成
+  const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startOffset,
+          endOffset,
+          color,
+          text
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(prev => [...prev, data.data]);
+      } else {
+        alert('ハイライトの作成に失敗しました: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error creating highlight:', error);
+      alert('ハイライトの作成中にエラーが発生しました');
+    }
+  };
+
+  // ハイライト削除
+  const handleHighlightDelete = async (highlightId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/highlights/${highlightId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(prev => prev.filter(h => h.id !== highlightId));
+      } else {
+        alert('ハイライトの削除に失敗しました: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error deleting highlight:', error);
+      alert('ハイライトの削除中にエラーが発生しました');
+    }
+  };
+
+  // コンポーネントマウント時にハイライトを取得
+  useEffect(() => {
+    fetchHighlights();
+  }, [section.id]);
 
   // タイムスタンプを分:秒形式にフォーマット
   const formatTimestamp = (timestamp: string) => {
@@ -142,14 +226,33 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
       )}
 
       {isEditingContent ? (
-        <textarea
-          value={editingContent}
-          onChange={(e) => setEditingContent(e.target.value)}
-          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px]"
-          placeholder="内容を入力してください"
-        />
+        <div className="space-y-2">
+          <div className="mb-4">
+            <HighlightEditor
+              text={editingContent}
+              highlights={highlights}
+              onHighlightCreate={handleHighlightCreate}
+              onHighlightDelete={handleHighlightDelete}
+              isEditing={true}
+            />
+          </div>
+          <textarea
+            value={editingContent}
+            onChange={(e) => setEditingContent(e.target.value)}
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px]"
+            placeholder="内容を入力してください"
+          />
+        </div>
       ) : (
-        <p className="text-sm whitespace-pre-wrap mb-3">{section.content}</p>
+        <div className="mb-3">
+          <HighlightEditor
+            text={section.content}
+            highlights={highlights}
+            onHighlightCreate={handleHighlightCreate}
+            onHighlightDelete={handleHighlightDelete}
+            isEditing={false}
+          />
+        </div>
       )}
 
       <div className="flex items-center space-x-2">

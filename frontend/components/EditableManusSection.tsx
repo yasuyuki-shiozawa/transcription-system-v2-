@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SectionDeleteButton from './SectionDeleteButton';
+import HighlightEditor from './HighlightEditor';
 
 // DEBUG: Console log at component load
 console.log('=== EDITABLE MANUS SECTION COMPONENT LOADED ===', new Date().toISOString());
+
+interface Highlight {
+  id: string;
+  startOffset: number;
+  endOffset: number;
+  color: 'yellow' | 'blue' | 'green' | 'pink' | 'orange';
+  text: string;
+}
 
 interface Section {
   id: string;
@@ -32,6 +41,81 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   const [editedEndTimestamp, setEditedEndTimestamp] = useState(section.endTimestamp || '');
   const [editedContent, setEditedContent] = useState(section.content);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // ハイライト関連の状態
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [isLoadingHighlights, setIsLoadingHighlights] = useState(false);
+
+  // API URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-1.onrender.com';
+
+  // ハイライト一覧を取得
+  const fetchHighlights = async () => {
+    setIsLoadingHighlights(true);
+    try {
+      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`);
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+    } finally {
+      setIsLoadingHighlights(false);
+    }
+  };
+
+  // ハイライト作成
+  const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startOffset,
+          endOffset,
+          color,
+          text
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(prev => [...prev, data.data]);
+      } else {
+        alert('ハイライトの作成に失敗しました: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error creating highlight:', error);
+      alert('ハイライトの作成中にエラーが発生しました');
+    }
+  };
+
+  // ハイライト削除
+  const handleHighlightDelete = async (highlightId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/highlights/${highlightId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setHighlights(prev => prev.filter(h => h.id !== highlightId));
+      } else {
+        alert('ハイライトの削除に失敗しました: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error deleting highlight:', error);
+      alert('ハイライトの削除中にエラーが発生しました');
+    }
+  };
+
+  // コンポーネントマウント時にハイライトを取得
+  useEffect(() => {
+    fetchHighlights();
+  }, [section.id]);
 
   // 時刻入力のハンドラー（シンプルなアプローチ）
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
@@ -212,7 +296,13 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
             </div>
           </div>
         </div>
-        <p className="text-sm whitespace-pre-wrap">{section.content}</p>
+        <HighlightEditor
+          text={section.content}
+          highlights={highlights}
+          onHighlightCreate={handleHighlightCreate}
+          onHighlightDelete={handleHighlightDelete}
+          isEditing={false}
+        />
       </div>
     );
   }
@@ -250,12 +340,22 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
               </button>
             </div>
             
+            <div className="mb-4">
+              <HighlightEditor
+                text={editedContent}
+                highlights={highlights}
+                onHighlightCreate={handleHighlightCreate}
+                onHighlightDelete={handleHighlightDelete}
+                isEditing={true}
+              />
+            </div>
+            
             <textarea
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
               className="content-edit-textarea"
               disabled={isSaving}
-              autoFocus
+              placeholder="本文を編集してください..."
             />
             
             <div className="content-edit-buttons">
