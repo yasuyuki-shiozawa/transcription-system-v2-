@@ -55,7 +55,7 @@ export const createHighlight = async (req: Request, res: Response) => {
       }
     });
 
-    res.json({
+    return res.json({
       success: true,
       data: highlight
     });
@@ -78,7 +78,7 @@ export const getHighlightsBySection = async (req: Request, res: Response) => {
       orderBy: { startOffset: 'asc' }
     });
 
-    res.json({
+    return res.json({
       success: true,
       data: highlights
     });
@@ -149,7 +149,7 @@ export const updateHighlight = async (req: Request, res: Response) => {
       data: updateData
     });
 
-    res.json({
+    return res.json({
       success: true,
       data: highlight
     });
@@ -184,7 +184,7 @@ export const deleteHighlight = async (req: Request, res: Response) => {
       where: { id: highlightId }
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Highlight deleted successfully'
     });
