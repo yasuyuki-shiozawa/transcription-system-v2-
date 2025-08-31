@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import HighlightedText from './HighlightedText';
+import HighlightToolbar from './HighlightToolbar';
+import HighlightPopup from './HighlightPopup';
 
 interface Highlight {
   id: string;
@@ -34,54 +36,77 @@ export default function HighlightEditor({
   onHighlightDelete,
   isEditing
 }: HighlightEditorProps) {
-  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number; text: string } | null>(null);
-  const [palettePosition, setPalettePosition] = useState({ x: 0, y: 0 });
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const textRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTextSelection = useCallback(() => {
     if (!isEditing) return;
 
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    if (!selection || selection.rangeCount === 0) {
+      setShowPopup(false);
+      setSelectedRange(null);
+      return;
+    }
 
     const range = selection.getRangeAt(0);
     const selectedText = selection.toString().trim();
 
     if (selectedText.length === 0) {
-      setShowColorPalette(false);
+      setShowPopup(false);
+      setSelectedRange(null);
       return;
     }
 
-    // テキストコンテナ内での選択かチェック
-    if (!textRef.current?.contains(range.commonAncestorContainer)) {
+    // テキストエリア内での選択の場合
+    if (textareaRef.current && document.activeElement === textareaRef.current) {
+      const startOffset = textareaRef.current.selectionStart || 0;
+      const endOffset = textareaRef.current.selectionEnd || 0;
+      
+      setSelectedRange({
+        start: startOffset,
+        end: endOffset,
+        text: selectedText
+      });
+
+      // ポップアップの位置を計算
+      const rect = textareaRef.current.getBoundingClientRect();
+      setPopupPosition({
+        x: rect.left + (rect.width / 2) - 100, // ポップアップを中央寄せ
+        y: rect.top - 60 // テキストエリアの上に表示
+      });
+      
+      setShowPopup(true);
       return;
     }
 
-    // テキスト内での位置を計算
-    const beforeRange = range.cloneRange();
-    beforeRange.selectNodeContents(textRef.current);
-    beforeRange.setEnd(range.startContainer, range.startOffset);
-    const startOffset = beforeRange.toString().length;
-    const endOffset = startOffset + selectedText.length;
+    // 表示モードでの選択の場合
+    if (textRef.current?.contains(range.commonAncestorContainer)) {
+      const beforeRange = range.cloneRange();
+      beforeRange.selectNodeContents(textRef.current);
+      beforeRange.setEnd(range.startContainer, range.startOffset);
+      const startOffset = beforeRange.toString().length;
+      const endOffset = startOffset + selectedText.length;
 
-    // 選択範囲を保存
-    setSelectedRange({
-      start: startOffset,
-      end: endOffset,
-      text: selectedText
-    });
+      setSelectedRange({
+        start: startOffset,
+        end: endOffset,
+        text: selectedText
+      });
 
-    // カラーパレットの位置を計算
-    const rect = range.getBoundingClientRect();
-    const containerRect = textRef.current.getBoundingClientRect();
+      // ポップアップの位置を計算
+      const rect = range.getBoundingClientRect();
     
-    setPalettePosition({
-      x: rect.left - containerRect.left + rect.width / 2,
-      y: rect.bottom - containerRect.top + 5
-    });
+      setPopupPosition({
+        x: rect.left + rect.width / 2 - 100,
+        y: rect.bottom + 5
+      });
 
-    setShowColorPalette(true);
+      setShowPopup(true);
+    }
   }, [isEditing]);
 
   const handleColorSelect = useCallback((color: string) => {
@@ -94,12 +119,22 @@ export default function HighlightEditor({
       selectedRange.text
     );
 
-    setShowColorPalette(false);
+    setShowPopup(false);
     setSelectedRange(null);
     
     // 選択を解除
     window.getSelection()?.removeAllRanges();
   }, [selectedRange, onHighlightCreate]);
+
+  const handleDeleteAll = useCallback(() => {
+    if (highlights.length === 0) return;
+    
+    if (window.confirm('全てのハイライトを削除しますか？')) {
+      highlights.forEach(highlight => {
+        onHighlightDelete(highlight.id);
+      });
+    }
+  }, [highlights, onHighlightDelete]);
 
   const handleHighlightClick = useCallback((highlight: Highlight) => {
     if (!isEditing) return;
@@ -109,18 +144,53 @@ export default function HighlightEditor({
     }
   }, [isEditing, onHighlightDelete]);
 
-  const handleClickOutside = useCallback(() => {
-    setShowColorPalette(false);
+  const handlePopupClose = useCallback(() => {
+    setShowPopup(false);
     setSelectedRange(null);
+    window.getSelection()?.removeAllRanges();
   }, []);
 
+  // 編集モードの場合はテキストエリアとツールバーを表示
+  if (isEditing) {
+    return (
+      <div className="relative">
+        <HighlightToolbar
+          onColorSelect={handleColorSelect}
+          onDeleteAll={handleDeleteAll}
+          selectedText={selectedRange?.text || ''}
+          isVisible={true}
+        />
+        
+        <textarea
+          ref={textareaRef}
+          className="w-full h-64 p-3 border border-gray-300 rounded-lg resize-vertical"
+          value={text}
+          onMouseUp={handleTextSelection}
+          onKeyUp={handleTextSelection}
+          readOnly
+        />
+        
+        <HighlightPopup
+          isVisible={showPopup}
+          position={popupPosition}
+          onColorSelect={handleColorSelect}
+          onClose={handlePopupClose}
+        />
+        
+        <div className="mt-2 text-xs text-gray-500">
+          💡 テキストを選択してハイライトを追加できます。既存のハイライトをクリックすると削除できます。
+        </div>
+      </div>
+    );
+  }
+
+  // 表示モードの場合はハイライト付きテキストを表示
   return (
     <div className="relative">
       <div
         ref={textRef}
-        className={`whitespace-pre-wrap ${isEditing ? 'select-text cursor-text' : 'select-none'}`}
+        className="whitespace-pre-wrap select-text"
         onMouseUp={handleTextSelection}
-        onClick={handleClickOutside}
       >
         <HighlightedText
           text={text}
@@ -129,43 +199,12 @@ export default function HighlightEditor({
         />
       </div>
 
-      {/* カラーパレット */}
-      {showColorPalette && selectedRange && (
-        <div
-          className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-2 flex gap-1"
-          style={{
-            left: `${palettePosition.x}px`,
-            top: `${palettePosition.y}px`,
-            transform: 'translateX(-50%)'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {colorOptions.map((option) => (
-            <button
-              key={option.value}
-              className={`${option.bgClass} hover:opacity-80 border border-gray-300 rounded px-2 py-1 text-xs font-medium transition-opacity`}
-              onClick={() => handleColorSelect(option.value)}
-              title={option.label}
-            >
-              {option.label.split(' ')[0]}
-            </button>
-          ))}
-          <button
-            className="bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded px-2 py-1 text-xs font-medium transition-colors"
-            onClick={() => setShowColorPalette(false)}
-            title="キャンセル"
-          >
-            ❌
-          </button>
-        </div>
-      )}
-
-      {/* 編集モード時のヘルプテキスト */}
-      {isEditing && (
-        <div className="mt-2 text-xs text-gray-500">
-          💡 テキストを選択してハイライトを追加できます。既存のハイライトをクリックすると削除できます。
-        </div>
-      )}
+      <HighlightPopup
+        isVisible={showPopup}
+        position={popupPosition}
+        onColorSelect={handleColorSelect}
+        onClose={handlePopupClose}
+      />
     </div>
   );
 }
