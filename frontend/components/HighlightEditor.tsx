@@ -59,7 +59,6 @@ export default function HighlightEditor({
     }
 
     // テキスト内での位置を計算
-    const textContent = textRef.current.textContent || '';
     const beforeRange = range.cloneRange();
     beforeRange.selectNodeContents(textRef.current);
     beforeRange.setEnd(range.startContainer, range.startOffset);

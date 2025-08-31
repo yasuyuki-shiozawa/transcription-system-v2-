@@ -40,8 +40,6 @@ export default function HighlightedText({ text, highlights, onHighlightClick }: 
     end: number;
   }> = [];
 
-  let currentPosition = 0;
-
   // 全ての位置を収集してソート
   const positions = new Set<number>();
   positions.add(0);

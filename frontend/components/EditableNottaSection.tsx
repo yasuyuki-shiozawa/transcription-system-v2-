@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import SectionDeleteButton from './SectionDeleteButton';
 import HighlightEditor from './HighlightEditor';
 
@@ -38,14 +38,12 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   
   // ハイライト関連の状態
   const [highlights, setHighlights] = useState<Highlight[]>([]);
-  const [isLoadingHighlights, setIsLoadingHighlights] = useState(false);
 
   // API URL
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-1.onrender.com';
 
   // ハイライト一覧を取得
-  const fetchHighlights = async () => {
-    setIsLoadingHighlights(true);
+  const fetchHighlights = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`);
       const data = await response.json();
@@ -54,10 +52,8 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
       }
     } catch (error) {
       console.error('Error fetching highlights:', error);
-    } finally {
-      setIsLoadingHighlights(false);
     }
-  };
+  }, [API_URL, section.id]);
 
   // ハイライト作成
   const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
