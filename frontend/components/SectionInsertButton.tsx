@@ -36,54 +36,41 @@ export default function SectionInsertButton({
     content: ''
   });
 
-  const formatTimeInput = (value: string) => {
-    // デバッグログ追加
-    console.log('formatTimeInput called with:', value);
+  // 既存の時間編集機能と同じ実装を適用
+  const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'timestamp' | 'endTimestamp') => {
+    const value = e.target.value;
     
-    // 完全に新しいロジック: 数字のみを抽出
-    const cleanValue = value.replace(/[^0-9]/g, '');
-    console.log('cleanValue:', cleanValue);
+    // 数字とコロンのみ許可（既存機能と同じ）
+    const filtered = value.replace(/[^0-9:]/g, '');
     
-    if (!cleanValue) return '';
-    
-    // 4桁未満の場合はそのまま返す
-    if (cleanValue.length < 3) return cleanValue;
-    
-    // 4桁の場合: MMSS -> MM:SS (分:秒) - 完全新規実装
-    if (cleanValue.length <= 4) {
-      // 4桁に0埋め
-      const fourDigits = cleanValue.padStart(4, '0');
-      console.log('fourDigits:', fourDigits);
-      
-      // 分と秒を抽出
-      const mm = fourDigits.substring(0, 2);
-      const ss = fourDigits.substring(2, 4);
-      console.log('mm:', mm, 'ss:', ss);
-      
-      const result = `${mm}:${ss}`;
-      console.log('result:', result);
-      return result;
-    }
-    
-    // 6桁の場合: HHMMSS -> MM:SS (時間は無視、分:秒のみ)
-    const mm = cleanValue.substring(2, 4);
-    const ss = cleanValue.substring(4, 6);
-    const result = `${mm}:${ss}`;
-    console.log('6-digit result:', result);
-    return result;
+    setFormData(prev => ({
+      ...prev,
+      [field]: filtered
+    }));
   };
 
-  const handleTimeChange = (field: 'timestamp' | 'endTimestamp', value: string) => {
-    // デバッグログ追加
-    console.log('handleTimeChange called with field:', field, 'value:', value);
+  // フォーカスが外れた時に時刻をフォーマット（既存機能と同じ）
+  const handleTimeBlur = (value: string, field: 'timestamp' | 'endTimestamp') => {
+    // 数字のみ抽出
+    const numbers = value.replace(/[^\d]/g, '');
     
-    // 既存のフォーマット済み値を削除して生の数字のみを抽出
-    const rawNumbers = value.replace(/[^0-9]/g, '');
-    console.log('rawNumbers extracted:', rawNumbers);
+    if (numbers.length === 0) {
+      return;
+    }
     
-    // 生の数字のみをformatTimeInputに渡す
-    const formatted = formatTimeInput(rawNumbers);
-    console.log('formatted result:', formatted);
+    let formatted = '';
+    if (numbers.length <= 4) {
+      // MMSS -> MM:SS
+      const mm = numbers.slice(0, 2).padStart(2, '0');
+      const ss = numbers.slice(2, 4).padStart(2, '0');
+      formatted = ss ? `${mm}:${ss}` : mm;
+    } else {
+      // HHMMSS -> HH:MM:SS
+      const hh = numbers.slice(0, 2).padStart(2, '0');
+      const mm = numbers.slice(2, 4).padStart(2, '0');
+      const ss = numbers.slice(4, 6).padStart(2, '0');
+      formatted = ss ? `${hh}:${mm}:${ss}` : `${hh}:${mm}`;
+    }
     
     setFormData(prev => ({
       ...prev,
@@ -186,8 +173,10 @@ export default function SectionInsertButton({
                 <input
                   type="text"
                   value={formData.timestamp}
-                  onChange={(e) => handleTimeChange('timestamp', e.target.value)}
+                  onChange={(e) => handleTimeInputChange(e, 'timestamp')}
+                  onBlur={(e) => handleTimeBlur(e.target.value, 'timestamp')}
                   placeholder="1030 (10分30秒)"
+                  title="数字のみ入力（例: 1030 → 10:30）"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -199,8 +188,10 @@ export default function SectionInsertButton({
                 <input
                   type="text"
                   value={formData.endTimestamp}
-                  onChange={(e) => handleTimeChange('endTimestamp', e.target.value)}
+                  onChange={(e) => handleTimeInputChange(e, 'endTimestamp')}
+                  onBlur={(e) => handleTimeBlur(e.target.value, 'endTimestamp')}
                   placeholder="1045 (10分45秒)"
+                  title="数字のみ入力（例: 1045 → 10:45）"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
