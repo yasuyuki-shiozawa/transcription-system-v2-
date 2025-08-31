@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '@/components/EditableManusSection';
-import SectionAddButton from '@/components/SectionAddButton';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
 import SectionInsertButton from '@/components/SectionInsertButton';
 
