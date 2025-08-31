@@ -78,8 +78,23 @@ model Section {
   transcriptionData   TranscriptionData @relation(fields: [transcriptionDataId], references: [id], onDelete: Cascade)
   manusMappings       SectionMapping[]  @relation("ManusSection")
   nottaMappings       SectionMapping[]  @relation("NottaSection")
+  highlights          Highlight[]       // ハイライト機能
 
   @@index([transcriptionDataId])
+}
+
+model Highlight {
+  id          String   @id @default(cuid())
+  sectionId   String
+  startOffset Int      // テキスト内の開始位置
+  endOffset   Int      // テキスト内の終了位置
+  color       String   // ハイライト色 (yellow, blue, green, pink, orange)
+  text        String   // ハイライトされたテキスト（検証用）
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  section     Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId])
 }
 
 model SectionMapping {

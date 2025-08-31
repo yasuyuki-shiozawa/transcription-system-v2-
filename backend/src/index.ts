@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import routes from './routes';
 import sectionSelectionRoutes from './routes/sectionSelectionRoutes';
 import speakersRoutes from './routes/speakers';
+import highlightRoutes from './routes/highlights';
 import { ApiResponse } from './types';
 import { initDatabase } from './utils/initDatabase';
 
@@ -106,6 +107,7 @@ app.get('/health/live', (_req: Request, res: Response) => {
 app.use('/api', routes);
 app.use('/api', sectionSelectionRoutes);
 app.use('/api/speakers', speakersRoutes);
+app.use('/api', highlightRoutes);
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
