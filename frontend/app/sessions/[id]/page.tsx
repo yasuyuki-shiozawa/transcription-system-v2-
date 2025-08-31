@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import TranscriptionProgress from '@/components/TranscriptionProgress';
+import SectionSelectionManager from '@/components/SectionSelectionManager';
+import SectionInsertButton from '@/components/SectionInsertButton';
+import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton';
 import EditableManusSection from '@/components/EditableManusSection';
 import EditableNottaSection from '@/components/EditableNottaSection';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
-import SectionInsertButton from '@/components/SectionInsertButton';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
@@ -816,21 +819,12 @@ export default function SessionDetail() {
                 <div className="space-y-4">
                   {getSyncedSections().map(({ sectionNumber, notta, manus, mapping }, index) => (
                     <div key={sectionNumber}>
-                      {/* セクション前の挿入ボタン */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                        <SectionInsertButton
-                          sessionId={sessionId}
-                          source="NOTTA"
-                          insertPosition={index}
-                          onSectionAdded={fetchSessionData}
-                        />
-                        <SectionInsertButton
-                          sessionId={sessionId}
-                          source="MANUS"
-                          insertPosition={index}
-                          onSectionAdded={fetchSessionData}
-                        />
-                      </div>
+                      {/* セクション間の統合挿入ボタン */}
+                      <UnifiedSectionInsertButton
+                        sessionId={sessionId}
+                        insertPosition={index}
+                        onSectionAdded={fetchSessionData}
+                      />
 
                       <div className="bg-white rounded-lg shadow overflow-hidden">
                         {/* Section Header */}
@@ -933,24 +927,15 @@ export default function SessionDetail() {
                           </div>
                         </div>
                       </div>
-
-                      {/* セクション間の挿入ボタン */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <SectionInsertButton
-                          sessionId={sessionId}
-                          source="NOTTA"
-                          insertPosition={index + 1}
-                          onSectionAdded={fetchSessionData}
-                        />
-                        <SectionInsertButton
-                          sessionId={sessionId}
-                          source="MANUS"
-                          insertPosition={index + 1}
-                          onSectionAdded={fetchSessionData}
-                        />
-                      </div>
                     </div>
                   ))}
+
+                  {/* 最後のセクション後の統合挿入ボタン */}
+                  <UnifiedSectionInsertButton
+                    sessionId={sessionId}
+                    insertPosition={getSyncedSections().length}
+                    onSectionAdded={fetchSessionData}
+                  />
                 </div>
               </div>
             )}
