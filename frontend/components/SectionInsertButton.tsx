@@ -44,8 +44,9 @@ export default function SectionInsertButton({
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) {
       // 4桁の場合: MMSS -> MM:SS (分:秒)
-      const minutes = numbers.slice(0, 2);
-      const seconds = numbers.slice(2).padEnd(2, '0');
+      const paddedNumbers = numbers.padStart(4, '0'); // 4桁に0埋め
+      const minutes = paddedNumbers.slice(0, 2);
+      const seconds = paddedNumbers.slice(2, 4);
       return `${minutes}:${seconds}`;
     }
     
