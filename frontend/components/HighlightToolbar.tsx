@@ -40,7 +40,7 @@ export default function HighlightToolbar({
       
       {selectedText && (
         <div className="mb-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-          選択中: "{selectedText.length > 30 ? selectedText.substring(0, 30) + '...' : selectedText}"
+          選択中: &quot;{selectedText.length > 30 ? selectedText.substring(0, 30) + '...' : selectedText}&quot;
         </div>
       )}
       

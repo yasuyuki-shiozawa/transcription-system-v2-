@@ -21,14 +21,6 @@ interface HighlightEditorProps {
   isEditing: boolean;
 }
 
-const colorOptions = [
-  { value: 'yellow', label: '🟡 黄色', bgClass: 'bg-yellow-200' },
-  { value: 'blue', label: '🔵 青色', bgClass: 'bg-blue-200' },
-  { value: 'green', label: '🟢 緑色', bgClass: 'bg-green-200' },
-  { value: 'pink', label: '🩷 ピンク', bgClass: 'bg-pink-200' },
-  { value: 'orange', label: '🟠 オレンジ', bgClass: 'bg-orange-200' }
-];
-
 export default function HighlightEditor({
   text,
   highlights,
