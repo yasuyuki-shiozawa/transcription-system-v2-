@@ -883,15 +883,13 @@ export default function SessionDetail() {
                                     onClick={async () => {
                                       // 空のNOTTAセクションを作成
                                       try {
-                                        const response = await fetch(`${API_URL}/api/sections`, {
+                                        const response = await fetch(`${API_URL}/api/sections/session/${sessionId}`, {
                                           method: 'POST',
                                           headers: {
                                             'Content-Type': 'application/json',
                                           },
                                           body: JSON.stringify({
-                                            sessionId: sessionId,
                                             source: 'NOTTA',
-                                            sectionNumber: sectionNumber,
                                             speaker: '新しい話者',
                                             timestamp: '00:00',
                                             content: '新しい内容'
