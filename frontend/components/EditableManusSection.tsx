@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SectionDeleteButton from './SectionDeleteButton';
 
 // DEBUG: Console log at component load
 console.log('=== EDITABLE MANUS SECTION COMPONENT LOADED ===', new Date().toISOString());
@@ -19,9 +20,10 @@ interface EditableManusSectonProps {
   isIncluded?: boolean;
   onToggleInclude?: (sectionId: string) => void;
   showWarning?: boolean;
+  onSectionDeleted?: () => void;
 }
 
-export default function EditableManusSection({ section, onUpdate, isIncluded = false, onToggleInclude, showWarning = false }: EditableManusSectonProps) {
+export default function EditableManusSection({ section, onUpdate, isIncluded = false, onToggleInclude, showWarning = false, onSectionDeleted }: EditableManusSectonProps) {
   console.log(`📝 EditableManusSection for ${section.id}:`, { isIncluded, sectionNumber: section.sectionNumber });
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
@@ -331,6 +333,14 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
           >
             本文編集
           </button>
+          {onSectionDeleted && (
+            <SectionDeleteButton
+              sectionId={section.id}
+              sectionNumber={section.sectionNumber}
+              speaker={section.speaker}
+              onSectionDeleted={onSectionDeleted}
+            />
+          )}
         </div>
       </div>
       <p className={`text-sm whitespace-pre-wrap ${!isIncluded ? 'line-through text-gray-400' : ''}`}>{section.content}</p>

@@ -865,6 +865,7 @@ export default function SessionDetail() {
                                 isIncluded={includedSections.has(manus.id)}
                                 onToggleInclude={toggleIncludeSection}
                                 showWarning={showTimeCalculation}
+                                onSectionDeleted={fetchSessionData}
                               />
                             ) : (
                               <p className="text-sm text-gray-400">データなし</p>
