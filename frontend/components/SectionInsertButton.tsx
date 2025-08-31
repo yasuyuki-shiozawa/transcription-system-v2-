@@ -36,14 +36,14 @@ export default function SectionInsertButton({
     content: ''
   });
 
-  const formatTime = (value: string) => {
+  const formatTimeInput = (value: string) => {
     // 数字のみを抽出
     const numbers = value.replace(/\D/g, '');
     
     if (numbers.length === 0) return '';
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) {
-      // 4桁の場合: MMSS -> MM:SS (分:秒) - 強制再デプロイ用修正
+      // 4桁の場合: MMSS -> MM:SS (分:秒) - 関数名変更で確実に新しい実装を使用
       const paddedNumbers = numbers.padStart(4, '0'); // 4桁に0埋め
       const minutes = paddedNumbers.slice(0, 2);
       const seconds = paddedNumbers.slice(2, 4);
@@ -57,7 +57,7 @@ export default function SectionInsertButton({
   };
 
   const handleTimeChange = (field: 'timestamp' | 'endTimestamp', value: string) => {
-    const formatted = formatTime(value);
+    const formatted = formatTimeInput(value);
     setFormData(prev => ({
       ...prev,
       [field]: formatted
