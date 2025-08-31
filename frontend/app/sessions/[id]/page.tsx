@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import SectionInsertButton from '@/components/SectionInsertButton';
 import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton';
 import EditableManusSection from '@/components/EditableManusSection';
