@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import TranscriptionProgress from '@/components/TranscriptionProgress';
-import SectionSelectionManager from '@/components/SectionSelectionManager';
 import SectionInsertButton from '@/components/SectionInsertButton';
 import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton';
 import EditableManusSection from '@/components/EditableManusSection';
@@ -77,7 +75,7 @@ export default function SessionDetail() {
   useEffect(() => {
     console.log('🔄 SESSION DETAIL useEffect - Fetching session data for ID:', sessionId);
     fetchSessionData();
-  }, [sessionId]);
+  }, [sessionId, fetchSessionData]);
 
   // ページ読み込み時に含めるセクションの状態を復元
   useEffect(() => {
@@ -109,7 +107,7 @@ export default function SessionDetail() {
     }
   }, [transcriptions, isInitialized]);
 
-  const fetchSessionData = async () => {
+  const fetchSessionData = useCallback(async () => {
     console.log('🔍 FETCHING SESSION DATA...');
     try {
       // Fetch session details
@@ -146,7 +144,7 @@ export default function SessionDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
 
   const handleFileUpload = async (file: File, source: 'notta' | 'manus') => {
     const formData = new FormData();
