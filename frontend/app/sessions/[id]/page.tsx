@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '@/components/EditableManusSection';
+import EditableNottaSection from '@/components/EditableNottaSection';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
 import SectionInsertButton from '@/components/SectionInsertButton';
 
@@ -228,6 +229,31 @@ export default function SessionDetail() {
   };
 
   const updateManusSection = async (sectionId: string, updates: { speaker?: string; timestamp?: string; endTimestamp?: string | null; content?: string }) => {
+    try {
+      const response = await fetch(`${API_URL}/api/sections/${sectionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update section');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // Refresh data to show updates
+        await fetchSessionData();
+      }
+    } catch (error) {
+      console.error('Error updating section:', error);
+      throw error;
+    }
+  };
+
+  const updateNottaSection = async (sectionId: string, updates: { speaker?: string; timestamp?: string; endTimestamp?: string | null; content?: string }) => {
     try {
       const response = await fetch(`${API_URL}/api/sections/${sectionId}`, {
         method: 'PATCH',
@@ -844,12 +870,11 @@ export default function SessionDetail() {
                           <div className="p-4">
                             <h3 className="font-semibold text-blue-600 mb-2">NOTTA</h3>
                             {notta ? (
-                              <div>
-                                <p className="text-sm text-gray-600 mb-1">
-                                  {notta.speaker} [{notta.timestamp}]
-                                </p>
-                                <p className="text-sm whitespace-pre-wrap">{notta.content}</p>
-                              </div>
+                              <EditableNottaSection 
+                                section={notta} 
+                                onUpdate={updateNottaSection}
+                                onSectionDeleted={fetchSessionData}
+                              />
                             ) : (
                               <p className="text-sm text-gray-400">データなし</p>
                             )}
