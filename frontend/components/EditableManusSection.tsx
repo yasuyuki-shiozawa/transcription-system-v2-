@@ -53,7 +53,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   // ハイライト一覧を取得
   const fetchHighlights = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`);
+      const response = await fetch(`${API_URL}/api/highlights/section/${section.id}`);
       const data = await response.json();
       if (data.success) {
         setHighlights(data.data);
@@ -66,7 +66,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   // ハイライト作成
   const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`, {
+      const response = await fetch(`${API_URL}/api/highlights/section/${section.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -441,7 +441,15 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
           )}
         </div>
       </div>
-      <p className={`text-sm whitespace-pre-wrap ${!isIncluded ? 'line-through text-gray-400' : ''}`}>{section.content}</p>
+      <div className={`text-sm whitespace-pre-wrap ${!isIncluded ? 'line-through text-gray-400' : ''}`}>
+        <HighlightEditor
+          text={section.content}
+          highlights={highlights}
+          onHighlightCreate={handleHighlightCreate}
+          onHighlightDelete={handleHighlightDelete}
+          isEditing={false}
+        />
+      </div>
     </div>
   );
 }

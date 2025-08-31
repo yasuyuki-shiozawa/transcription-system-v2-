@@ -45,7 +45,7 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   // ハイライト一覧を取得
   const fetchHighlights = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`);
+      const response = await fetch(`${API_URL}/api/highlights/section/${section.id}`);
       const data = await response.json();
       if (data.success) {
         setHighlights(data.data);
@@ -58,7 +58,7 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   // ハイライト作成
   const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${section.id}/highlights`, {
+      const response = await fetch(`${API_URL}/api/highlights/section/${section.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
