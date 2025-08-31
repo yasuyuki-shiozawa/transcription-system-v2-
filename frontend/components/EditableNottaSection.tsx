@@ -105,7 +105,7 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   // コンポーネントマウント時にハイライトを取得
   useEffect(() => {
     fetchHighlights();
-  }, [section.id]);
+  }, [fetchHighlights]);
 
   // タイムスタンプを分:秒形式にフォーマット
   const formatTimestamp = (timestamp: string) => {

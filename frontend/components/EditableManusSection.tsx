@@ -113,7 +113,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   // コンポーネントマウント時にハイライトを取得
   useEffect(() => {
     fetchHighlights();
-  }, [section.id]);
+  }, [fetchHighlights]);
 
   // 時刻入力のハンドラー（シンプルなアプローチ）
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
