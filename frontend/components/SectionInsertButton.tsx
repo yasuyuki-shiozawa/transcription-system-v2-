@@ -43,16 +43,16 @@ export default function SectionInsertButton({
     if (numbers.length === 0) return '';
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) {
-      // 4桁の場合: HHMM -> HH:MM (秒なし)
-      const hours = numbers.slice(0, 2);
-      const minutes = numbers.slice(2).padEnd(2, '0');
-      return `${hours}:${minutes}`;
+      // 4桁の場合: MMSS -> MM:SS (分:秒)
+      const minutes = numbers.slice(0, 2);
+      const seconds = numbers.slice(2).padEnd(2, '0');
+      return `${minutes}:${seconds}`;
     }
     
-    // 6桁の場合も4桁表示に統一: HHMMSS -> HH:MM
-    const hours = numbers.slice(0, 2);
+    // 6桁の場合: HHMMSS -> MM:SS (時間は無視、分:秒のみ)
     const minutes = numbers.slice(2, 4);
-    return `${hours}:${minutes}`;
+    const seconds = numbers.slice(4, 6);
+    return `${minutes}:${seconds}`;
   };
 
   const handleTimeChange = (field: 'timestamp' | 'endTimestamp', value: string) => {
@@ -159,7 +159,7 @@ export default function SectionInsertButton({
                   type="text"
                   value={formData.timestamp}
                   onChange={(e) => handleTimeChange('timestamp', e.target.value)}
-                  placeholder="1030 (推奨4桁)"
+                  placeholder="1030 (10分30秒)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -172,7 +172,7 @@ export default function SectionInsertButton({
                   type="text"
                   value={formData.endTimestamp}
                   onChange={(e) => handleTimeChange('endTimestamp', e.target.value)}
-                  placeholder="1045 (推奨4桁)"
+                  placeholder="1045 (10分45秒)"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
