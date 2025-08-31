@@ -72,41 +72,6 @@ export default function SessionDetail() {
     transcriptionsLength: transcriptions.length
   });
 
-  useEffect(() => {
-    console.log('🔄 SESSION DETAIL useEffect - Fetching session data for ID:', sessionId);
-    fetchSessionData();
-  }, [sessionId, fetchSessionData]);
-
-  // ページ読み込み時に含めるセクションの状態を復元
-  useEffect(() => {
-    console.log('🔄 Checking initialization:', {
-      isInitialized,
-      transcriptionsLength: transcriptions.length,
-      hasManusData: transcriptions.some(t => t.source === 'MANUS')
-    });
-    
-    if (!isInitialized && transcriptions.length > 0) {
-      const manusData = transcriptions.find(t => t.source === 'MANUS');
-      if (manusData && manusData.sections.length > 0) {
-        // データベースのisExcludedフィールドを読み取って初期化
-        const included = new Set<string>(
-          manusData.sections
-            .filter(section => !section.isExcluded)  // 除外されていないセクション
-            .map(section => section.id)
-        );
-        console.log('✅ INITIALIZING FROM DATABASE:', {
-          total: manusData.sections.length,
-          included: included.size,
-          includedIds: Array.from(included),
-          note: 'Sections initialized from database isExcluded field',
-          sections: manusData.sections.map(s => ({ id: s.id, isExcluded: s.isExcluded, included: !s.isExcluded }))
-        });
-        setIncludedSections(included);
-        setIsInitialized(true);
-      }
-    }
-  }, [transcriptions, isInitialized]);
-
   const fetchSessionData = useCallback(async () => {
     console.log('🔍 FETCHING SESSION DATA...');
     try {
@@ -145,6 +110,41 @@ export default function SessionDetail() {
       setLoading(false);
     }
   }, [sessionId]);
+
+  useEffect(() => {
+    console.log('🔄 SESSION DETAIL useEffect - Fetching session data for ID:', sessionId);
+    fetchSessionData();
+  }, [sessionId, fetchSessionData]);
+
+  // ページ読み込み時に含めるセクションの状態を復元
+  useEffect(() => {
+    console.log('🔄 Checking initialization:', {
+      isInitialized,
+      transcriptionsLength: transcriptions.length,
+      hasManusData: transcriptions.some(t => t.source === 'MANUS')
+    });
+    
+    if (!isInitialized && transcriptions.length > 0) {
+      const manusData = transcriptions.find(t => t.source === 'MANUS');
+      if (manusData && manusData.sections.length > 0) {
+        // データベースのisExcludedフィールドを読み取って初期化
+        const included = new Set<string>(
+          manusData.sections
+            .filter(section => !section.isExcluded)  // 除外されていないセクション
+            .map(section => section.id)
+        );
+        console.log('✅ INITIALIZING FROM DATABASE:', {
+          total: manusData.sections.length,
+          included: included.size,
+          includedIds: Array.from(included),
+          note: 'Sections initialized from database isExcluded field',
+          sections: manusData.sections.map(s => ({ id: s.id, isExcluded: s.isExcluded, included: !s.isExcluded }))
+        });
+        setIncludedSections(included);
+        setIsInitialized(true);
+      }
+    }
+  }, [transcriptions, isInitialized]);
 
   const handleFileUpload = async (file: File, source: 'notta' | 'manus') => {
     const formData = new FormData();
