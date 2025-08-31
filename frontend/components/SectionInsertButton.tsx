@@ -74,7 +74,17 @@ export default function SectionInsertButton({
   };
 
   const handleTimeChange = (field: 'timestamp' | 'endTimestamp', value: string) => {
-    const formatted = formatTimeInput(value);
+    // デバッグログ追加
+    console.log('handleTimeChange called with field:', field, 'value:', value);
+    
+    // 既存のフォーマット済み値を削除して生の数字のみを抽出
+    const rawNumbers = value.replace(/[^0-9]/g, '');
+    console.log('rawNumbers extracted:', rawNumbers);
+    
+    // 生の数字のみをformatTimeInputに渡す
+    const formatted = formatTimeInput(rawNumbers);
+    console.log('formatted result:', formatted);
+    
     setFormData(prev => ({
       ...prev,
       [field]: formatted
