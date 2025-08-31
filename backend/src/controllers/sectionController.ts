@@ -182,13 +182,13 @@ export class SectionController {
           for (let i = 0; i < sectionsToUpdate.length; i++) {
             await tx.section.update({
               where: { id: sectionsToUpdate[i].id },
-              data: { sectionNumber: (targetPosition + i + 2).toString() }
+              data: { sectionNumber: (targetPosition + i + 2).toString().padStart(4, '0') }
             });
           }
         }
 
         // Create new section at the target position
-        const newSectionNumber = (targetPosition + 1).toString();
+        const newSectionNumber = (targetPosition + 1).toString().padStart(4, '0');
         const newSection = await tx.section.create({
           data: {
             transcriptionDataId: transcriptionData.id,
@@ -261,7 +261,7 @@ export class SectionController {
         remainingSections.map((section, index) =>
           prisma.section.update({
             where: { id: section.id },
-            data: { sectionNumber: (index + 1).toString() }
+            data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
           })
         )
       );
@@ -328,7 +328,7 @@ export class SectionController {
         sections.map((section, index) =>
           prisma.section.update({
             where: { id: section.id },
-            data: { sectionNumber: (index + 1).toString() }
+            data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
           })
         )
       );
