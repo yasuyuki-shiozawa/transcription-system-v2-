@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // ハイライト作成
-export const createHighlight = async (req: Request, res: Response): Promise<void> => {
+export const createHighlight = async (req: Request, res: Response) => {
   try {
     const { sectionId } = req.params;
     const { startOffset, endOffset, color, text } = req.body;
@@ -69,7 +69,7 @@ export const createHighlight = async (req: Request, res: Response): Promise<void
 };
 
 // セクションのハイライト一覧取得
-export const getHighlightsBySection = async (req: Request, res: Response): Promise<void> => {
+export const getHighlightsBySection = async (req: Request, res: Response) => {
   try {
     const { sectionId } = req.params;
 
@@ -92,7 +92,7 @@ export const getHighlightsBySection = async (req: Request, res: Response): Promi
 };
 
 // ハイライト更新
-export const updateHighlight = async (req: Request, res: Response): Promise<void> => {
+export const updateHighlight = async (req: Request, res: Response) => {
   try {
     const { highlightId } = req.params;
     const { startOffset, endOffset, color, text } = req.body;
@@ -163,7 +163,7 @@ export const updateHighlight = async (req: Request, res: Response): Promise<void
 };
 
 // ハイライト削除
-export const deleteHighlight = async (req: Request, res: Response): Promise<void> => {
+export const deleteHighlight = async (req: Request, res: Response) => {
   try {
     const { highlightId } = req.params;
 
