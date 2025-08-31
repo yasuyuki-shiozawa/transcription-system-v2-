@@ -61,7 +61,7 @@ export const createHighlight = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error creating highlight:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
@@ -84,7 +84,7 @@ export const getHighlightsBySection = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching highlights:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
@@ -155,7 +155,7 @@ export const updateHighlight = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error updating highlight:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
@@ -190,7 +190,7 @@ export const deleteHighlight = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error deleting highlight:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
