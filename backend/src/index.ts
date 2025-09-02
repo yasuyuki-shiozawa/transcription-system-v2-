@@ -109,6 +109,10 @@ app.use('/api', sectionSelectionRoutes);
 app.use('/api/speakers', speakersRoutes);
 app.use('/api', highlightRoutes);
 
+// セッション関連のルートを追加
+import sessionRoutes from './routes/sessions';
+app.use('/api/sessions', sessionRoutes);
+
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
   console.error(err.stack);

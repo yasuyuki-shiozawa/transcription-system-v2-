@@ -17,11 +17,11 @@ interface HighlightedTextProps {
 }
 
 const colorMap = {
-  yellow: 'rgb(254, 240, 138)',
-  blue: 'rgb(147, 197, 253)',
-  green: 'rgb(134, 239, 172)',
-  pink: 'rgb(249, 168, 212)',
-  orange: 'rgb(253, 186, 116)'
+  yellow: 'rgb(255, 235, 59)',    // より濃い黄色
+  blue: 'rgb(33, 150, 243)',      // より濃い青色
+  green: 'rgb(76, 175, 80)',      // より濃い緑色
+  pink: 'rgb(233, 30, 99)',       // より濃いピンク色
+  orange: 'rgb(255, 152, 0)'      // より濃いオレンジ色
 };
 
 export default function HighlightedText({ text, highlights, onHighlightClick }: HighlightedTextProps) {

@@ -48,8 +48,8 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   // ハイライト関連の状態
   const [highlights, setHighlights] = useState<Highlight[]>([]);
 
-  // API URL - 確実にバックエンドURLを使用（環境変数が読み込まれない場合のフォールバック）
-  const API_URL = 'https://transcription-system-obfr.onrender.com';
+  // API URL - 環境変数を使用
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   
   console.log('🔗 EditableManusSection API_URL:', API_URL);
 
@@ -330,61 +330,50 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
           </p>
         </div>
         
-        {/* 新しいCSSクラスを使用した本文編集モーダル */}
-        <div className="content-edit-modal">
-          <div className="content-edit-modal-content">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">本文編集</h3>
-              <button
-                onClick={handleCancelContent}
-                className="text-gray-500 hover:text-gray-700"
-                title="閉じる"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="mb-4">
-              <HighlightEditor
-                text={editedContent}
-                highlights={highlights}
-                onHighlightCreate={handleHighlightCreate}
-                onHighlightDelete={(highlightId: string) => {
-                  const highlight = highlights.find(h => h.id === highlightId);
-                  if (highlight) {
-                    handleHighlightDelete(highlight);
-                  }
-                }}
-                isEditing={true}
-              />
-            </div>
-            
-            <textarea
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              className="content-edit-textarea"
+        {/* 改善されたハイライトエディター */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">本文編集</h3>
+            <button
+              onClick={handleCancelContent}
+              className="text-gray-500 hover:text-gray-700"
+              title="閉じる"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <HighlightEditor
+            text={editedContent}
+            highlights={highlights}
+            onHighlightCreate={handleHighlightCreate}
+            onHighlightDelete={(highlightId: string) => {
+              const highlight = highlights.find(h => h.id === highlightId);
+              if (highlight) {
+                handleHighlightDelete(highlight);
+              }
+            }}
+            onTextChange={setEditedContent}
+            isEditing={true}
+          />
+          
+          <div className="flex justify-end space-x-2 mt-4 pt-4 border-t border-gray-200">
+            <button
+              onClick={handleCancelContent}
               disabled={isSaving}
-              placeholder="本文を編集してください..."
-            />
-            
-            <div className="content-edit-buttons">
-              <button
-                onClick={handleCancelContent}
-                disabled={isSaving}
-                className="content-edit-button content-edit-cancel"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleSaveContent}
-                disabled={isSaving}
-                className="content-edit-button content-edit-save"
-              >
-                {isSaving ? '保存中...' : '保存'}
-              </button>
-            </div>
+              className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handleSaveContent}
+              disabled={isSaving}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isSaving ? '保存中...' : '保存'}
+            </button>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ interface HighlightEditorProps {
   onHighlightCreate: (startOffset: number, endOffset: number, color: string, text: string) => void;
   onHighlightDelete: (highlightId: string) => void;
   isEditing: boolean;
+  onTextChange?: (text: string) => void; // テキスト変更時のコールバック
 }
 
 export default function HighlightEditor({
@@ -26,11 +27,13 @@ export default function HighlightEditor({
   highlights,
   onHighlightCreate,
   onHighlightDelete,
-  isEditing
+  isEditing,
+  onTextChange
 }: HighlightEditorProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number; text: string } | null>(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [editorMode, setEditorMode] = useState<'edit' | 'preview'>('edit'); // 新しい状態
   const textRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -142,25 +145,78 @@ export default function HighlightEditor({
     window.getSelection()?.removeAllRanges();
   }, []);
 
-  // 編集モードの場合はテキストエリアとツールバーを表示
+  // 編集モードの場合は切り替え式エディターを表示
   if (isEditing) {
     return (
       <div className="relative">
-        <HighlightToolbar
-          onColorSelect={handleColorSelect}
-          onDeleteAll={handleDeleteAll}
-          selectedText={selectedRange?.text || ''}
-          isVisible={true}
-        />
-        
-        <textarea
-          ref={textareaRef}
-          className="w-full h-64 p-3 border border-gray-300 rounded-lg resize-vertical"
-          value={text}
-          onMouseUp={handleTextSelection}
-          onKeyUp={handleTextSelection}
-          readOnly
-        />
+        {/* モード切り替えタブ */}
+        <div className="flex border-b border-gray-200 mb-4">
+          <button
+            onClick={() => setEditorMode('edit')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              editorMode === 'edit'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            📝 編集モード
+          </button>
+          <button
+            onClick={() => setEditorMode('preview')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              editorMode === 'preview'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            👁️ プレビューモード
+          </button>
+        </div>
+
+        {/* 編集モード */}
+        {editorMode === 'edit' && (
+          <div>
+            <HighlightToolbar
+              onColorSelect={handleColorSelect}
+              onDeleteAll={handleDeleteAll}
+              selectedText={selectedRange?.text || ''}
+              isVisible={true}
+            />
+            
+            <textarea
+              ref={textareaRef}
+              className="w-full h-64 p-3 border border-gray-300 rounded-lg resize-vertical focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={text}
+              onChange={(e) => onTextChange?.(e.target.value)}
+              onMouseUp={handleTextSelection}
+              onKeyUp={handleTextSelection}
+              placeholder="本文を編集してください..."
+            />
+            
+            <div className="mt-2 text-xs text-gray-500">
+              💡 テキストを選択してからハイライト色を選んでください
+            </div>
+          </div>
+        )}
+
+        {/* プレビューモード */}
+        {editorMode === 'preview' && (
+          <div>
+            <div className="mb-2 text-sm text-gray-600">
+              ハイライトをクリックすると削除できます
+            </div>
+            <div
+              ref={textRef}
+              className="min-h-64 p-3 border border-gray-200 rounded-lg bg-gray-50 whitespace-pre-wrap"
+            >
+              <HighlightedText
+                text={text}
+                highlights={highlights}
+                onHighlightClick={handleHighlightClick}
+              />
+            </div>
+          </div>
+        )}
         
         <HighlightPopup
           isVisible={showPopup}
@@ -168,10 +224,6 @@ export default function HighlightEditor({
           onColorSelect={handleColorSelect}
           onClose={handlePopupClose}
         />
-        
-        <div className="mt-2 text-xs text-gray-500">
-          💡 テキストを選択してハイライトを追加できます。既存のハイライトをクリックすると削除できます。
-        </div>
       </div>
     );
   }
