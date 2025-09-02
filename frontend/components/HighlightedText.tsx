@@ -16,12 +16,12 @@ interface HighlightedTextProps {
   onHighlightClick?: (highlight: Highlight) => void;
 }
 
-const colorClasses = {
-  yellow: 'bg-yellow-200 hover:bg-yellow-300',
-  blue: 'bg-blue-200 hover:bg-blue-300',
-  green: 'bg-green-200 hover:bg-green-300',
-  pink: 'bg-pink-200 hover:bg-pink-300',
-  orange: 'bg-orange-200 hover:bg-orange-300'
+const colorMap = {
+  yellow: 'rgb(254, 240, 138)',
+  blue: 'rgb(147, 197, 253)',
+  green: 'rgb(134, 239, 172)',
+  pink: 'rgb(249, 168, 212)',
+  orange: 'rgb(253, 186, 116)'
 };
 
 export default function HighlightedText({ text, highlights, onHighlightClick }: HighlightedTextProps) {
@@ -81,17 +81,22 @@ export default function HighlightedText({ text, highlights, onHighlightClick }: 
 
         // 最初のハイライト色を使用（複数ある場合）
         const primaryHighlight = segment.highlights[0];
-        const colorClass = colorClasses[primaryHighlight.color];
+        const backgroundColor = colorMap[primaryHighlight.color];
 
         return (
-          <mark
+          <span
             key={index}
-            className={`${colorClass} cursor-pointer transition-colors duration-200 rounded px-0.5`}
+            style={{ 
+              backgroundColor,
+              cursor: 'pointer',
+              borderRadius: '2px',
+              padding: '0 2px'
+            }}
             onClick={() => onHighlightClick?.(primaryHighlight)}
             title={`ハイライト: ${primaryHighlight.color} (クリックで削除)`}
           >
             {segment.text}
-          </mark>
+          </span>
         );
       })}
     </span>
