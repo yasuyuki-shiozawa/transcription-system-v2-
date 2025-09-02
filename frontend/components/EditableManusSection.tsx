@@ -47,8 +47,10 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   // ハイライト関連の状態
   const [highlights, setHighlights] = useState<Highlight[]>([]);
 
-  // API URL
+  // API URL - 確実にバックエンドURLを使用
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
+  
+  console.log('🔗 EditableManusSection API_URL:', API_URL);
 
   // ハイライト一覧を取得
   const fetchHighlights = useCallback(async () => {
