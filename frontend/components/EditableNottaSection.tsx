@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import SectionDeleteButton from './SectionDeleteButton';
 import HighlightEditor from './HighlightEditor';
+import HighlightedText from './HighlightedText';
 
 interface Highlight {
   id: string;
@@ -86,15 +87,15 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
   };
 
   // ハイライト削除
-  const handleHighlightDelete = async (highlightId: string) => {
+  const handleHighlightDelete = async (highlight: Highlight) => {
     try {
-      const response = await fetch(`${API_URL}/api/highlights/${highlightId}`, {
+      const response = await fetch(`${API_URL}/api/highlights/${highlight.id}`, {
         method: 'DELETE',
       });
       
       const data = await response.json();
       if (data.success) {
-        setHighlights(prev => prev.filter(h => h.id !== highlightId));
+        setHighlights(prev => prev.filter(h => h.id !== highlight.id));
       } else {
         alert('ハイライトの削除に失敗しました: ' + data.message);
       }
@@ -230,7 +231,12 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
               text={editingContent}
               highlights={highlights}
               onHighlightCreate={handleHighlightCreate}
-              onHighlightDelete={handleHighlightDelete}
+              onHighlightDelete={(highlightId: string) => {
+                const highlight = highlights.find(h => h.id === highlightId);
+                if (highlight) {
+                  handleHighlightDelete(highlight);
+                }
+              }}
               isEditing={true}
             />
           </div>
@@ -243,12 +249,10 @@ export default function EditableNottaSection({ section, onUpdate, onSectionDelet
         </div>
       ) : (
         <div className="mb-3">
-          <HighlightEditor
+          <HighlightedText
             text={section.content}
             highlights={highlights}
-            onHighlightCreate={handleHighlightCreate}
-            onHighlightDelete={handleHighlightDelete}
-            isEditing={false}
+            onHighlightClick={handleHighlightDelete}
           />
         </div>
       )}
