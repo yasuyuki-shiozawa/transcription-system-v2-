@@ -22,7 +22,6 @@ export default function TestRealSessionPage() {
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [sectionData, setSectionData] = useState<SectionData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // テスト用のセッションとセクションデータを作成
@@ -55,14 +54,6 @@ export default function TestRealSessionPage() {
     return (
       <div className="container mx-auto p-8">
         <div className="text-center">読み込み中...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="text-red-500">エラー: {error}</div>
       </div>
     );
   }

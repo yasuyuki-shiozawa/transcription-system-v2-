@@ -101,7 +101,7 @@ export default function TestHighlightPage() {
           {highlights.map(h => (
             <div key={h.id} className="mb-2">
               <span className="font-mono text-sm">
-                ID: {h.id}, 位置: {h.startOffset}-{h.endOffset}, 色: {h.color}, テキスト: "{h.text}"
+                ID: {h.id}, 位置: {h.startOffset}-{h.endOffset}, 色: {h.color}, テキスト: &quot;{h.text}&quot;
               </span>
             </div>
           ))}

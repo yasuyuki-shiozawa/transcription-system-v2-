@@ -96,8 +96,8 @@ export default function ComparePage() {
                   <EditableNottaSection
                     key={section.id}
                     section={section}
-                    onUpdate={() => {}}
-                    readOnly={true}
+                    onUpdate={async () => {}}
+                    onSectionDeleted={async () => {}}
                   />
                 ))}
               </div>
@@ -117,8 +117,7 @@ export default function ComparePage() {
                   <EditableManusSection
                     key={section.id}
                     section={section}
-                    onUpdate={() => {}}
-                    readOnly={false}
+                    onUpdate={async () => {}}
                   />
                 ))}
               </div>
