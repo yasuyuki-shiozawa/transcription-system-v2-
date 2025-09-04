@@ -657,7 +657,7 @@ export default function SessionDetail() {
                   <button
                     onClick={async () => {
                       try {
-                        const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/manus`);
+                        const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/manus/word`);
                         if (response.ok) {
                           const blob = await response.blob();
                           const url = window.URL.createObjectURL(blob);

@@ -27,6 +27,6 @@ router.get('/download/notta', downloadController.downloadAllSections);
 router.get('/download/notta/:transcriptionId', downloadController.downloadNottaData);
 router.get('/download/manus', downloadController.downloadAllManusData);
 router.get('/download/manus/:transcriptionId', downloadController.downloadManusData);
-router.post('/download/manus/word', downloadController.downloadFilteredManusAsWord);
+router.get('/download/manus/word', downloadController.downloadFilteredManusAsWord);
 
 export default router;

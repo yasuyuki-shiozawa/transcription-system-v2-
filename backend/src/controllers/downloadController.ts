@@ -24,7 +24,9 @@ const mapHighlightColor = (color: string) => {
 
 // 累積時間計算のためのヘルパー関数
 const timeToSeconds = (timeStr: string): number => {
-  const parts = timeStr.split(':').map(Number);
+  // 半角・全角コロン両方に対応し、角括弧も除去
+  const normalizedTimeStr = timeStr.replace(/[\[\]]/g, '').replace(/：/g, ':');
+  const parts = normalizedTimeStr.split(':').map(Number);
   if (parts.length === 2) {
     return parts[0] * 60 + parts[1];
   } else if (parts.length === 3) {
@@ -38,8 +40,8 @@ const secondsToTime = (seconds: number): string => {
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
   
-  // 常にHH:MM:SS形式で返す
-  return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
+  // 常にHH:MM:SS形式で返す（半角コロンに統一）
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
 // テキストにハイライトを適用するヘルパー関数
@@ -428,11 +430,11 @@ export class DownloadController {
                 const paddedSpeakerName = padSpeakerNameTo4Chars(speakerName);
                 
                 return [
-                  // 開始タイムスタンプ（全体経過時間）（話者の開始時間 00:00:00）
+                  // 開始タイムスタンプ（全体経過時間）（このセクションの開始時間）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `（${totalStartTime}）（00：00：00）`,
+                        text: `（${totalStartTime}）（${section.timestamp}）`,
                         color: '000000',
                         size: 22
                       })
