@@ -15,6 +15,159 @@ export class UploadController {
     this.prisma = new PrismaClient();
   }
 
+  // 既存データを削除して新しいファイルを再アップロードする
+  private async cleanupExistingData(sessionId: string, source: 'NOTTA' | 'MANUS') {
+    try {
+      // トランザクション内で関連データを削除
+      await this.prisma.$transaction(async (tx) => {
+        // 1. 既存の転写データを取得
+        const existingTranscription = await tx.transcriptionData.findFirst({
+          where: {
+            sessionId,
+            source,
+          },
+          include: {
+            sections: {
+              include: {
+                highlights: true,
+                nottaMappings: true,
+                manusMappings: true,
+              },
+            },
+          },
+        });
+
+        if (existingTranscription) {
+          // 2. ハイライトデータを削除
+          for (const section of existingTranscription.sections) {
+            if (section.highlights.length > 0) {
+              await tx.highlight.deleteMany({
+                where: {
+                  sectionId: section.id,
+                },
+              });
+            }
+          }
+
+          // 3. セクションマッピングを削除
+          await tx.sectionMapping.deleteMany({
+            where: {
+              OR: [
+                { nottaSectionId: { in: existingTranscription.sections.map(s => s.id) } },
+                { manusSectionId: { in: existingTranscription.sections.map(s => s.id) } },
+              ],
+            },
+          });
+
+          // 4. セクションデータを削除
+          await tx.section.deleteMany({
+            where: {
+              transcriptionDataId: existingTranscription.id,
+            },
+          });
+
+          // 5. 転写データを削除
+          await tx.transcriptionData.delete({
+            where: {
+              id: existingTranscription.id,
+            },
+          });
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error cleaning up existing data:', error);
+      throw new Error('Failed to cleanup existing data');
+    }
+  }
+
+  replaceNottaFile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id: sessionId } = req.params;
+      const file = req.file;
+
+      if (!file) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'No file uploaded',
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // 既存データをクリーンアップ
+      await this.cleanupExistingData(sessionId, 'NOTTA');
+
+      // Fix encoding for Japanese filenames
+      const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      
+      // 新しいファイルを処理
+      const result = await this.uploadService.processUploadedFile(
+        sessionId,
+        'NOTTA',
+        file.path,
+        originalName
+      );
+
+      // 自動マッチングを実行
+      await this.matchingService.performAutoMatching(sessionId);
+
+      const response: ApiResponse = {
+        success: true,
+        data: result,
+        message: 'NOTTA file replaced successfully',
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  replaceManusFile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id: sessionId } = req.params;
+      const file = req.file;
+
+      if (!file) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'No file uploaded',
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // 既存データをクリーンアップ
+      await this.cleanupExistingData(sessionId, 'MANUS');
+
+      // Fix encoding for Japanese filenames
+      const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      
+      // 新しいファイルを処理
+      const result = await this.uploadService.processUploadedFile(
+        sessionId,
+        'MANUS',
+        file.path,
+        originalName
+      );
+
+      // 自動マッチングを実行
+      await this.matchingService.performAutoMatching(sessionId);
+
+      const response: ApiResponse = {
+        success: true,
+        data: result,
+        message: 'Manus file replaced successfully',
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   uploadNotta = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id: sessionId } = req.params;

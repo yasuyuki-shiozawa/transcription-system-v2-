@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import SectionInsertButton from '@/components/SectionInsertButton';
+import HighlightEditor from '../../../components/HighlightEditor';
+import TextFileUpload from '../../../components/TextFileUpload';
 import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton';
 import EditableManusSection from '@/components/EditableManusSection';
 import EditableNottaSection from '@/components/EditableNottaSection';
@@ -176,6 +177,44 @@ export default function SessionDetail() {
     } catch (error) {
       console.error('Upload error:', error);
       alert('アップロード中にエラーが発生しました');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileReplace = async (file: File, source: 'notta' | 'manus') => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const setUploading = source === 'notta' ? setUploadingNotta : setUploadingManus;
+    setUploading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}/upload/${source}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`${source === 'notta' ? 'NOTTA' : 'Manus'}ファイルの置き換えが完了しました`);
+        fetchSessionData();
+        
+        // Reset included sections when file is replaced
+        setIncludedSections(new Set());
+        
+        // Switch to compare view if both files are uploaded
+        const hasNotta = transcriptions.some(t => t.source === 'NOTTA') || source === 'notta';
+        const hasManus = transcriptions.some(t => t.source === 'MANUS') || source === 'manus';
+        if (hasNotta && hasManus) {
+          setViewMode('compare');
+        }
+      } else {
+        alert('ファイル置き換えエラー: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Replace error:', error);
+      alert('ファイル置き換え中にエラーが発生しました');
     } finally {
       setUploading(false);
     }

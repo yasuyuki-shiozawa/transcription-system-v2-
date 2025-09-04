@@ -12,6 +12,10 @@ router.post('/notta', upload.single('file'), uploadController.uploadNotta);
 router.post('/manus', upload.single('file'), uploadController.uploadManus);
 router.post('/audio/:source', upload.single('file'), uploadController.uploadAudio);
 
+// Replace/Re-upload routes
+router.put('/notta', upload.single('file'), uploadController.replaceNottaFile);
+router.put('/manus', upload.single('file'), uploadController.replaceManusFile);
+
 // Text upload route (手動入力)
 router.post('/text/:source', uploadController.uploadText);
 

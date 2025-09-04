@@ -2,9 +2,11 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import UserFriendlyErrorMessage from './UserFriendlyErrorMessage';
+import ConfirmationDialog from './ConfirmationDialog';
 
 interface TextFileUploadProps {
   onFileSelect: (file: File) => void;
+  onFileReplace?: (file: File) => void;
   uploading: boolean;
   uploadedFile?: {
     originalFileName: string;
@@ -17,6 +19,7 @@ interface TextFileUploadProps {
 
 const TextFileUpload: React.FC<TextFileUploadProps> = ({
   onFileSelect,
+  onFileReplace,
   uploading,
   uploadedFile,
   onDownload,
@@ -25,6 +28,8 @@ const TextFileUpload: React.FC<TextFileUploadProps> = ({
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = useCallback((file: File): boolean => {
@@ -55,9 +60,36 @@ const TextFileUpload: React.FC<TextFileUploadProps> = ({
 
   const handleFileChange = useCallback((file: File) => {
     if (validateFile(file)) {
-      onFileSelect(file);
+      // 既にファイルがアップロード済みの場合は確認ダイアログを表示
+      if (uploadedFile && onFileReplace) {
+        setPendingFile(file);
+        setShowConfirmDialog(true);
+      } else {
+        onFileSelect(file);
+      }
     }
-  }, [validateFile, onFileSelect]);
+  }, [validateFile, onFileSelect, onFileReplace, uploadedFile]);
+
+  const handleConfirmReplace = useCallback(() => {
+    if (pendingFile && onFileReplace) {
+      onFileReplace(pendingFile);
+      setPendingFile(null);
+      setShowConfirmDialog(false);
+    }
+  }, [pendingFile, onFileReplace]);
+
+  const handleCancelReplace = useCallback(() => {
+    setPendingFile(null);
+    setShowConfirmDialog(false);
+    // ファイル入力をリセット
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, []);
+
+  const handleReplaceClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -119,20 +151,66 @@ const TextFileUpload: React.FC<TextFileUploadProps> = ({
             </div>
           </div>
           
-          {onDownload && (
-            <button
-              onClick={onDownload}
-              className="mt-3 w-full px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>セクション番号付きデータをダウンロード</span>
-              </div>
-            </button>
-          )}
+          <div className="mt-3 flex space-x-2">
+            {/* ファイル変更ボタン */}
+            {onFileReplace && (
+              <button
+                onClick={handleReplaceClick}
+                disabled={uploading}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>ファイルを変更</span>
+                </div>
+              </button>
+            )}
+            
+            {/* ダウンロードボタン */}
+            {onDownload && (
+              <button
+                onClick={onDownload}
+                className="flex-1 px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>セクション番号付きデータをダウンロード</span>
+                </div>
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* 隠しファイル入力（再アップロード用） */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={acceptedFormats.join(',')}
+          onChange={handleInputChange}
+          className="hidden"
+          disabled={uploading}
+        />
+
+        {/* 確認ダイアログ */}
+        <ConfirmationDialog
+          isOpen={showConfirmDialog}
+          title="ファイル変更の確認"
+          message="新しいファイルをアップロードすると、既存のデータが削除されます。"
+          details={[
+            `セクションデータ (${uploadedFile.sectionsCount}件)`,
+            'ハイライト情報',
+            'マッピングデータ'
+          ]}
+          confirmText="変更を続行"
+          cancelText="キャンセル"
+          onConfirm={handleConfirmReplace}
+          onCancel={handleCancelReplace}
+          isDestructive={true}
+        />
       </div>
     );
   }
