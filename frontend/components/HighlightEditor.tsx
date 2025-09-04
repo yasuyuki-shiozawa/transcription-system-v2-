@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import HighlightedText from './HighlightedText';
-import HighlightToolbar from './HighlightToolbar';
 import HighlightPopup from './HighlightPopup';
 import OverlayHighlightEditor from './OverlayHighlightEditor';
 
@@ -121,16 +120,6 @@ export default function HighlightEditor({
     // 選択を解除
     window.getSelection()?.removeAllRanges();
   }, [selectedRange, onHighlightCreate]);
-
-  const handleDeleteAll = useCallback(() => {
-    if (highlights.length === 0) return;
-    
-    if (window.confirm('全てのハイライトを削除しますか？')) {
-      highlights.forEach(highlight => {
-        onHighlightDelete(highlight.id);
-      });
-    }
-  }, [highlights, onHighlightDelete]);
 
   const handleHighlightClick = useCallback((highlight: Highlight) => {
     if (!isEditing) return;

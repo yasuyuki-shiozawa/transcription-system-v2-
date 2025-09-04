@@ -107,7 +107,6 @@ export default function OverlayHighlightEditor({
 
     // テキストを文字ごとに分割してハイライトを適用
     const textContent = text;
-    let currentIndex = 0;
     const elements: string[] = [];
 
     // ハイライトを開始位置でソート
@@ -285,7 +284,7 @@ export default function OverlayHighlightEditor({
             ))}
           </div>
           <div className="text-xs text-gray-600 text-center">
-            選択: "{selectedRange?.text.substring(0, 20)}{(selectedRange?.text.length || 0) > 20 ? '...' : ''}"
+            選択: &quot;{selectedRange?.text.substring(0, 20)}{(selectedRange?.text.length || 0) > 20 ? '...' : ''}&quot;
           </div>
           <button
             className="mt-2 w-full text-xs text-gray-500 hover:text-gray-700"
