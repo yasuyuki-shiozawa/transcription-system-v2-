@@ -9,7 +9,6 @@ import SectionDeleteButton from '@/components/SectionDeleteButton';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
-console.log('=== SECTION INSERT BUTTON IMPORTED ===', typeof SectionInsertButton);
 
 // API URL configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
