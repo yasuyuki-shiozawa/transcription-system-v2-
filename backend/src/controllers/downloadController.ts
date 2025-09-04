@@ -1,8 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, HighlightColor } from 'docx';
 import { SpeakerService } from '../services/speakerService';
+
+// ハイライト色をdocxライブラリの色にマッピングする関数
+const mapHighlightColor = (color: string) => {
+  switch (color) {
+    case 'yellow':
+      return HighlightColor.YELLOW;
+    case 'blue':
+      return HighlightColor.CYAN;
+    case 'green':
+      return HighlightColor.GREEN;
+    case 'pink':
+      return HighlightColor.MAGENTA;
+    case 'orange':
+      return HighlightColor.YELLOW; // オレンジはYELLOWで代用
+    default:
+      return HighlightColor.YELLOW;
+  }
+};
 
 // 累積時間計算のためのヘルパー関数
 const timeToSeconds = (timeStr: string): number => {
@@ -22,6 +40,50 @@ const secondsToTime = (seconds: number): string => {
   
   // 常にHH:MM:SS形式で返す
   return `${hours.toString().padStart(2, '0')}：${minutes.toString().padStart(2, '0')}：${secs.toString().padStart(2, '0')}`;
+};
+
+// テキストにハイライトを適用するヘルパー関数
+const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
+  if (!highlights || highlights.length === 0) {
+    return [new TextRun({ text })];
+  }
+
+  // ハイライトを開始位置でソート
+  const sortedHighlights = highlights.sort((a, b) => a.startOffset - b.startOffset);
+  
+  const textRuns: TextRun[] = [];
+  let currentPosition = 0;
+
+  for (const highlight of sortedHighlights) {
+    // ハイライト前のテキスト
+    if (currentPosition < highlight.startOffset) {
+      const beforeText = text.substring(currentPosition, highlight.startOffset);
+      if (beforeText) {
+        textRuns.push(new TextRun({ text: beforeText }));
+      }
+    }
+
+    // ハイライト部分のテキスト
+    const highlightedText = text.substring(highlight.startOffset, highlight.endOffset);
+    if (highlightedText) {
+      textRuns.push(new TextRun({
+        text: highlightedText,
+        highlight: mapHighlightColor(highlight.color)
+      }));
+    }
+
+    currentPosition = Math.max(currentPosition, highlight.endOffset);
+  }
+
+  // 残りのテキスト
+  if (currentPosition < text.length) {
+    const remainingText = text.substring(currentPosition);
+    if (remainingText) {
+      textRuns.push(new TextRun({ text: remainingText }));
+    }
+  }
+
+  return textRuns;
 };
 
 // 話者名を4文字分の幅に調整する関数
@@ -271,6 +333,11 @@ export class DownloadController {
                 in: includedSections as string[]
               }
             },
+            include: {
+              highlights: {
+                orderBy: { startOffset: 'asc' }
+              }
+            },
             orderBy: { order: 'asc' }
           },
           session: true
@@ -386,9 +453,9 @@ export class DownloadController {
                     spacing: { after: 100 }
                   }),
                   
-                  // セクション内容（インデント付き）
+                  // セクション内容（インデント付き、ハイライト適用）
                   new Paragraph({
-                    text: section.content,
+                    children: applyHighlightsToText(section.content, section.highlights),
                     indent: { left: 360 }, // 全角スペース2つ分のインデント
                     spacing: { after: 100 }
                   }),
