@@ -44,6 +44,31 @@ const secondsToTime = (seconds: number): string => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+// 新しいタイムスタンプ形式のための計算関数
+const calculateTimestamps = (section: any) => {
+  // ①セクションの開始時間
+  const sectionStartTime = section.timestamp;
+  
+  // ②そのセクションにおけるその話者の会話開始秒数（すべて0スタート）
+  const speakerStartTime = '00:00';
+  
+  // ③セクションの終わり時間
+  const sectionEndTime = section.endTimestamp || section.timestamp;
+  
+  // ④そのセクションにおいて経過した時間（発言時間）
+  const sectionDuration = section.endTimestamp 
+    ? timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp)
+    : 0;
+  const sectionDurationFormatted = secondsToTime(sectionDuration);
+  
+  return {
+    sectionStartTime,
+    speakerStartTime,
+    sectionEndTime,
+    sectionDurationFormatted
+  };
+};
+
 // テキストにハイライトを適用するヘルパー関数
 const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (!highlights || highlights.length === 0) {
@@ -411,17 +436,8 @@ export class DownloadController {
                   }
                 }
                 
-                // このセクションの開始時の全体経過時間
-                const totalStartTime = secondsToTime(totalElapsedSeconds);
-                
-                // このセクションの長さ
-                let sectionDuration = 0;
-                if (section.endTimestamp) {
-                  sectionDuration = timeToSeconds(section.endTimestamp) - timeToSeconds(section.timestamp);
-                }
-                
-                // このセクションの終了時の全体経過時間
-                const totalEndTime = secondsToTime(totalElapsedSeconds + sectionDuration);
+                // 新しいタイムスタンプ形式を計算
+                const timestamps = calculateTimestamps(section);
                 
                 // 話者名を取得（話者マスターから標準化）
                 const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
@@ -430,11 +446,11 @@ export class DownloadController {
                 const paddedSpeakerName = padSpeakerNameTo4Chars(speakerName);
                 
                 return [
-                  // 開始タイムスタンプ（全体経過時間）（このセクションの開始時間）
+                  // 開始タイムスタンプ ①（セクション開始時間）②（話者開始秒数）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `（${totalStartTime}）（${section.timestamp}）`,
+                        text: `①（${timestamps.sectionStartTime}）②（${timestamps.speakerStartTime}）`,
                         color: '000000',
                         size: 22
                       })
@@ -462,12 +478,12 @@ export class DownloadController {
                     spacing: { after: 100 }
                   }),
                   
-                  // 終了タイムスタンプ（全体経過時間）（このセクションの長さ）
+                  // 終了タイムスタンプ ③（セクション終了時間）④（セクション経過時間）
                   ...(section.endTimestamp ? [
                     new Paragraph({
                       children: [
                         new TextRun({
-                          text: `（${totalEndTime}）（${secondsToTime(sectionDuration)}）`,
+                          text: `③（${timestamps.sectionEndTime}）④（${timestamps.sectionDurationFormatted}）`,
                           color: '000000',
                           size: 22
                         })
