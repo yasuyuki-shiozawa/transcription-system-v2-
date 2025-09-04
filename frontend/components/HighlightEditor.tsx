@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import HighlightedText from './HighlightedText';
 import HighlightToolbar from './HighlightToolbar';
 import HighlightPopup from './HighlightPopup';
+import OverlayHighlightEditor from './OverlayHighlightEditor';
 
 interface Highlight {
   id: string;
@@ -176,25 +177,14 @@ export default function HighlightEditor({
         {/* 編集モード */}
         {editorMode === 'edit' && (
           <div>
-            <HighlightToolbar
-              onColorSelect={handleColorSelect}
-              onDeleteAll={handleDeleteAll}
-              selectedText={selectedRange?.text || ''}
-              isVisible={true}
-            />
-            
-            <textarea
-              ref={textareaRef}
-              className="w-full h-64 p-3 border border-gray-300 rounded-lg resize-vertical focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={text}
-              onChange={(e) => onTextChange?.(e.target.value)}
-              onMouseUp={handleTextSelection}
-              onKeyUp={handleTextSelection}
-              placeholder="本文を編集してください..."
-            />
-            
-            <div className="mt-2 text-xs text-gray-500">
-              💡 テキストを選択してからハイライト色を選んでください
+            <div className="mb-4">
+              <OverlayHighlightEditor
+                text={text}
+                highlights={highlights}
+                onTextChange={onTextChange || (() => {})}
+                onHighlightCreate={onHighlightCreate}
+                onHighlightDelete={onHighlightDelete}
+              />
             </div>
           </div>
         )}
