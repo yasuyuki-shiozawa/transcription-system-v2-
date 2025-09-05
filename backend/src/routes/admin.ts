@@ -6,7 +6,7 @@ const router = Router();
 const execAsync = promisify(exec);
 
 // データベース初期化エンドポイント
-router.post('/init-database', async (req: Request, res: Response) => {
+router.post('/init-database', async (_req: Request, res: Response) => {
   try {
     console.log('🔧 Manual database initialization requested');
     
@@ -35,7 +35,7 @@ router.post('/init-database', async (req: Request, res: Response) => {
 });
 
 // 環境情報確認エンドポイント
-router.get('/env-info', (req: Request, res: Response) => {
+router.get('/env-info', (_req: Request, res: Response) => {
   res.json({
     success: true,
     environment: {
