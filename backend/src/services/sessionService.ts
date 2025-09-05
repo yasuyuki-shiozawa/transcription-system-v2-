@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../utils/prisma';
 import { CreateSessionDto, UpdateSessionDto } from '../types';
 import { Session } from '@prisma/client';
-
-const prisma = new PrismaClient();
 
 export class SessionService {
   async createSession(data: CreateSessionDto): Promise<Session> {
