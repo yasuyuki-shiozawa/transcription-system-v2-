@@ -14,6 +14,10 @@ echo "📊 Environment variables:"
 echo "DATABASE_URL=$DATABASE_URL"
 echo "NODE_ENV=$NODE_ENV"
 
+# 強制的にビルドを実行
+echo "🔨 Building application..."
+npm run build
+
 # Prismaデータベースを初期化
 echo "🗄️ Initializing database..."
 npx prisma db push
