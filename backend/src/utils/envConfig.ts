@@ -4,7 +4,6 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 
 export const setupEnvironment = () => {
   // 本番環境の判定
