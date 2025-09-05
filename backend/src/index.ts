@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import { setupEnvironment } from './utils/envConfig';
 import routes from './routes';
 import sectionSelectionRoutes from './routes/sectionSelectionRoutes';
 import speakersRoutes from './routes/speakers';
@@ -11,7 +12,9 @@ import highlightRoutes from './routes/highlights';
 import { ApiResponse } from './types';
 import { initDatabase } from './utils/initDatabase';
 
+// 環境変数を最初に設定
 dotenv.config();
+setupEnvironment();
 
 const app: Express = express();
 const PORT = process.env.PORT || 3001;

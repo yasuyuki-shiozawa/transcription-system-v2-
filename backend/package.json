@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "dev:vpn": "VPN_OPTIMIZATION=true nodemon --watch src --ext ts --exec ts-node src/index.ts",
-    "build": "DATABASE_URL=file:/app/data/production.db prisma generate && tsc",
+    "build": "prisma generate && tsc",
     "postinstall": "prisma generate",
-    "start": "./scripts/start-production.sh",
+    "start": "node dist/index.js",
     "start:vpn": "VPN_OPTIMIZATION=true node dist/index.js",
     "deploy": "prisma migrate deploy && npm run start",
     "test": "jest",
