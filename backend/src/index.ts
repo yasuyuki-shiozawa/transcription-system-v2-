@@ -118,13 +118,13 @@ app.use('/api/sessions', sessionRoutes);
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
+  console.error('❌ Global error handler:', err);
   console.error(err.stack);
   
   const response: ApiResponse = {
     success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message,
+    error: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
   };
   
   res.status(500).json(response);
