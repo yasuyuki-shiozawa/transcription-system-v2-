@@ -4,12 +4,21 @@ import { Session } from '@prisma/client';
 
 export class SessionService {
   async createSession(data: CreateSessionDto): Promise<Session> {
-    return await prisma.session.create({
-      data: {
-        name: data.name,
-        date: new Date(data.date),
-      },
-    });
+    console.log('🔍 SessionService.createSession called with:', data);
+    try {
+      console.log('🔍 Attempting to create session in database...');
+      const result = await prisma.session.create({
+        data: {
+          name: data.name,
+          date: new Date(data.date),
+        },
+      });
+      console.log('✅ Session created in database:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Database error in SessionService.createSession:', error);
+      throw error;
+    }
   }
 
   async getAllSessions(): Promise<Session[]> {

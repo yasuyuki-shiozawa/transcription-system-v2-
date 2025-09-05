@@ -11,10 +11,12 @@ export class SessionController {
 
   createSession = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('🔍 Session creation started:', req.body);
       const data: CreateSessionDto = req.body;
       
       // Validation
       if (!data.name || !data.date) {
+        console.log('❌ Validation failed:', { name: data.name, date: data.date });
         const response: ApiResponse = {
           success: false,
           error: 'Missing required fields: name and date',
@@ -23,7 +25,9 @@ export class SessionController {
         return;
       }
 
+      console.log('✅ Validation passed, calling sessionService.createSession');
       const session = await this.sessionService.createSession(data);
+      console.log('✅ Session created successfully:', session);
       
       const response: ApiResponse = {
         success: true,
@@ -33,6 +37,7 @@ export class SessionController {
       
       res.status(201).json(response);
     } catch (error) {
+      console.error('❌ Session creation error:', error);
       next(error);
     }
   };
