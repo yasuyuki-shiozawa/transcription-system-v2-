@@ -4,7 +4,7 @@ import uploadRoutes from './uploadRoutes';
 import sectionRoutes from './sectionRoutes';
 import downloadRoutes from './downloadRoutes';
 import adminRoutes from './admin';
-import recoveryRoutes from './recovery';
+// import recoveryRoutes from './recovery'; // 一時的に無効化
 
 const router = Router();
 
@@ -14,7 +14,7 @@ router.use('/sessions/:id/upload', uploadRoutes);
 router.use('/download', downloadRoutes);
 router.use('/sections', sectionRoutes);
 router.use('/admin', adminRoutes);
-router.use('/recovery', recoveryRoutes);
+// router.use('/recovery', recoveryRoutes); // 一時的に無効化
 
 // API info endpoint
 router.get('/', (_req, res) => {
