@@ -4,6 +4,7 @@ import uploadRoutes from './uploadRoutes';
 import sectionRoutes from './sectionRoutes';
 import downloadRoutes from './downloadRoutes';
 import adminRoutes from './admin';
+import recoveryRoutes from './recovery';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/sessions/:id/upload', uploadRoutes);
 router.use('/download', downloadRoutes);
 router.use('/sections', sectionRoutes);
 router.use('/admin', adminRoutes);
+router.use('/recovery', recoveryRoutes);
 
 // API info endpoint
 router.get('/', (_req, res) => {
