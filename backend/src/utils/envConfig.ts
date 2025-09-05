@@ -3,6 +3,9 @@
  * 本番環境で適切なDATABASE_URLを自動設定
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 export const setupEnvironment = () => {
   // 本番環境の判定
   const isProduction = process.env.NODE_ENV === 'production' || 
@@ -10,6 +13,13 @@ export const setupEnvironment = () => {
                       process.env.RENDER_SERVICE_ID;
 
   if (isProduction) {
+    // 本番環境用のデータディレクトリを作成
+    const dataDir = '/app/data';
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+      console.log('📁 Created data directory:', dataDir);
+    }
+
     // 本番環境用のDATABASE_URLを設定
     process.env.DATABASE_URL = 'file:/app/data/production.db';
     console.log('🔧 Production environment detected, DATABASE_URL set to:', process.env.DATABASE_URL);
