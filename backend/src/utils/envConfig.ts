@@ -12,16 +12,21 @@ export const setupEnvironment = () => {
                       process.env.RENDER_SERVICE_ID;
 
   if (isProduction) {
-    // 本番環境用のデータディレクトリを作成
-    const dataDir = '/app/data';
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-      console.log('📁 Created data directory:', dataDir);
-    }
+    // DATABASE_URLが既に設定されている場合（PostgreSQLなど）はそれを使用
+    if (!process.env.DATABASE_URL) {
+      // 本番環境用のデータディレクトリを作成
+      const dataDir = '/app/data';
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+        console.log('📁 Created data directory:', dataDir);
+      }
 
-    // 本番環境用のDATABASE_URLを設定
-    process.env.DATABASE_URL = 'file:/app/data/production.db';
-    console.log('🔧 Production environment detected, DATABASE_URL set to:', process.env.DATABASE_URL);
+      // DATABASE_URLが設定されていない場合のみSQLiteにフォールバック
+      process.env.DATABASE_URL = 'file:/app/data/production.db';
+      console.log('🔧 Production environment detected, using fallback DATABASE_URL:', process.env.DATABASE_URL);
+    } else {
+      console.log('🔧 Production environment detected, using existing DATABASE_URL:', process.env.DATABASE_URL);
+    }
   } else {
     // 開発環境では既存の設定を使用
     if (!process.env.DATABASE_URL) {
