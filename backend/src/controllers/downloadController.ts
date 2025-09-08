@@ -446,11 +446,11 @@ export class DownloadController {
                 const paddedSpeakerName = padSpeakerNameTo4Chars(speakerName);
                 
                 return [
-                  // 開始タイムスタンプ ①（セクション開始時間）②（話者開始秒数）
+                  // 開始タイムスタンプ（セクション開始時間）（話者開始秒数）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `①（${timestamps.sectionStartTime}）②（${timestamps.speakerStartTime}）`,
+                        text: `（${timestamps.sectionStartTime}）（${timestamps.speakerStartTime}）`,
                         color: '000000',
                         size: 22
                       })
@@ -478,12 +478,12 @@ export class DownloadController {
                     spacing: { after: 100 }
                   }),
                   
-                  // 終了タイムスタンプ ③（セクション終了時間）④（セクション経過時間）
+                  // 終了タイムスタンプ（セクション終了時間）（セクション経過時間）
                   ...(section.endTimestamp ? [
                     new Paragraph({
                       children: [
                         new TextRun({
-                          text: `③（${timestamps.sectionEndTime}）④（${timestamps.sectionDurationFormatted}）`,
+                          text: `（${timestamps.sectionEndTime}）（${timestamps.sectionDurationFormatted}）`,
                           color: '000000',
                           size: 22
                         })
