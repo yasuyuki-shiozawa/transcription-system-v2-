@@ -3,6 +3,7 @@ import sessionRoutes from './sessionRoutes';
 import uploadRoutes from './uploadRoutes';
 import sectionRoutes from './sectionRoutes';
 import downloadRoutes from './downloadRoutes';
+import highlightRoutes from './highlights';
 import adminRoutes from './admin';
 // import recoveryRoutes from './recovery'; // 一時的に無効化
 
@@ -13,6 +14,7 @@ router.use('/sessions', sessionRoutes);
 router.use('/sessions/:id/upload', uploadRoutes);
 router.use('/download', downloadRoutes);
 router.use('/sections', sectionRoutes);
+router.use('/highlights', highlightRoutes);
 router.use('/admin', adminRoutes);
 // router.use('/recovery', recoveryRoutes); // 一時的に無効化
 
@@ -40,6 +42,11 @@ router.get('/', (_req, res) => {
         notta: 'GET /api/download/:id/notta',
         manus: 'GET /api/download/:id/manus',
         word: 'POST /api/download/:id/word',
+      },
+      highlights: {
+        list: 'GET /api/highlights/section/:sectionId',
+        create: 'POST /api/highlights/section/:sectionId',
+        delete: 'DELETE /api/highlights/:id',
       },
     },
   });
