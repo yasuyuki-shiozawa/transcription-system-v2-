@@ -9,22 +9,24 @@ import {
 const router = express.Router();
 
 // セクションのハイライト作成
-router.post('/sections/:sectionId/highlights', createHighlight);
-
-// フロントエンド互換性のための追加ルート
-router.post('/highlights/section/:sectionId', createHighlight);
+// /api/highlights/section/:sectionId (POST)
+router.post('/section/:sectionId', createHighlight);
 
 // セクションのハイライト一覧取得
-router.get('/sections/:sectionId/highlights', getHighlightsBySection);
-
-// フロントエンド互換性のための追加ルート
-router.get('/highlights/section/:sectionId', getHighlightsBySection);
+// /api/highlights/section/:sectionId (GET)
+router.get('/section/:sectionId', getHighlightsBySection);
 
 // ハイライト更新
-router.put('/highlights/:highlightId', updateHighlight);
+// /api/highlights/:highlightId (PUT)
+router.put('/:highlightId', updateHighlight);
 
 // ハイライト削除
-router.delete('/highlights/:highlightId', deleteHighlight);
+// /api/highlights/:highlightId (DELETE)
+router.delete('/:highlightId', deleteHighlight);
+
+// 後方互換性のための追加ルート（既存のフロントエンドコード用）
+router.post('/sections/:sectionId/highlights', createHighlight);
+router.get('/sections/:sectionId/highlights', getHighlightsBySection);
 
 export default router;
 
