@@ -10,7 +10,9 @@ export const createHighlight = async (req: Request, res: Response) => {
     const { startOffset, endOffset, color, text } = req.body;
 
     // バリデーション
-    if (!startOffset || !endOffset || !color || !text) {
+    if (startOffset === undefined || startOffset === null || 
+        endOffset === undefined || endOffset === null || 
+        !color || !text) {
       return res.status(400).json({
         success: false,
         message: 'startOffset, endOffset, color, text are required'
