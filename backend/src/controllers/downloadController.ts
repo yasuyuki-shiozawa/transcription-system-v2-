@@ -113,22 +113,6 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   return textRuns;
 };
 
-// 話者名を4文字分の幅に調整する関数
-const padSpeakerNameTo4Chars = (name: string): string => {
-  const nameChars = [...name]; // サロゲートペア対応
-  const nameLength = nameChars.length;
-  
-  if (nameLength === 4) {
-    return name; // 既に4文字なら何もしない
-  } else if (nameLength < 4) {
-    // 4文字未満なら全角スペースで埋める
-    return name + '　'.repeat(4 - nameLength);
-  } else {
-    // 4文字より多い場合はそのまま返す（切り詰めない）
-    return name;
-  }
-};
-
 export class DownloadController {
   private speakerService: SpeakerService;
   
@@ -439,11 +423,8 @@ export class DownloadController {
                 // 新しいタイムスタンプ形式を計算
                 const timestamps = calculateTimestamps(section);
                 
-                // 話者名を取得（話者マスターから標準化）
-                const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
-                
-                // 話者名を4文字分の幅に調整（全角スペースでパディング）
-                const paddedSpeakerName = padSpeakerNameTo4Chars(speakerName);
+                // 話者名を4文字の均等割り付けに整形（話者マスターから標準化）
+                const paddedSpeakerName = await this.speakerService.formatSpeakerNameFixed(section.speaker, sessionId);
                 
                 return [
                   // 開始タイムスタンプ（セクション開始時間）（話者開始秒数）
