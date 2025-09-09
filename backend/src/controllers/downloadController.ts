@@ -427,8 +427,7 @@ export class DownloadController {
             default: {
               document: {
                 run: {
-                  size: 21, // 10.5pt
-                  font: "MS Gothic"
+                  size: 21 // 10.5pt
                 }
               }
             }
