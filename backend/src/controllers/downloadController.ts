@@ -406,14 +406,20 @@ export class DownloadController {
       }
 
       try {
+        // 話者名のリストを取得（重複除去）
+        const uniqueSpeakers = [...new Set(manusData.sections.map(section => section.speaker))];
+        const speakerNames = await Promise.all(
+          uniqueSpeakers.map(speaker => this.speakerService.formatSpeakerForWord(speaker, sessionId))
+        );
+
         // Create Word document
         const doc = new Document({
           sections: [{
             properties: {},
             children: [
-              // Title
+              // Speaker names (instead of title)
               new Paragraph({
-                text: manusData.session.name,
+                text: speakerNames.join('　'),
                 heading: HeadingLevel.TITLE,
                 alignment: AlignmentType.CENTER
               }),
