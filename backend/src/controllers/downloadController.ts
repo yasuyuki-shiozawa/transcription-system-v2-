@@ -69,6 +69,30 @@ const calculateTimestamps = (section: any) => {
   };
 };
 
+// 話者名を4文字分の幅で均等割り付けする関数
+const formatSpeakerNameWithEqualSpacing = (name: string): string => {
+  // 文字を配列に分割（サロゲートペア対応）
+  const chars = [...name];
+  const charCount = chars.length;
+  
+  if (charCount === 1) {
+    // 1文字の場合：「田」→「田　　　」
+    return name + '　'.repeat(3);
+  } else if (charCount === 2) {
+    // 2文字の場合：「田中」→「田　　中」
+    return chars[0] + '　'.repeat(2) + chars[1];
+  } else if (charCount === 3) {
+    // 3文字の場合：「田中太」→「田　中　太」
+    return chars[0] + '　' + chars[1] + '　' + chars[2];
+  } else if (charCount === 4) {
+    // 4文字の場合：「田中太郎」→「田中太郎」（そのまま）
+    return name;
+  } else {
+    // 5文字以上の場合：文字間に半角スペースを挿入
+    return chars.join(' ');
+  }
+};
+
 // テキストにハイライトを適用するヘルパー関数
 const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (!highlights || highlights.length === 0) {
@@ -423,8 +447,11 @@ export class DownloadController {
                 // 新しいタイムスタンプ形式を計算
                 const timestamps = calculateTimestamps(section);
                 
-                // 話者名を4文字の均等割り付けに整形（話者マスターから標準化）
-                const paddedSpeakerName = await this.speakerService.formatSpeakerNameFixed(section.speaker, sessionId);
+                // 話者名を取得（話者マスターから標準化）
+                const speakerName = await this.speakerService.formatSpeakerForWord(section.speaker, sessionId);
+                
+                // 話者名を4文字分の幅で均等割り付け
+                const equalSpacedSpeakerName = formatSpeakerNameWithEqualSpacing(speakerName);
                 
                 return [
                   // 開始タイムスタンプ（セクション開始時間）（話者開始秒数）
@@ -439,11 +466,11 @@ export class DownloadController {
                     spacing: { before: 200, after: 100 }
                   }),
                   
-                  // 話者名（4文字分の幅に調整）
+                  // 話者名（4文字分の幅で均等割り付け）
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: `${paddedSpeakerName}：`,
+                        text: `${equalSpacedSpeakerName}：`,
                         bold: true,
                         size: 24,
                         font: "MS Gothic" // 固定幅フォントを使用
