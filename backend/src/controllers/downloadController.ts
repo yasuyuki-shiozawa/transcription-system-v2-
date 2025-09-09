@@ -69,6 +69,32 @@ const calculateTimestamps = (section: any) => {
   };
 };
 
+// 日付を令和年号形式に変換する関数
+const formatToReiwaDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  // 令和元年は2019年5月1日から
+  if (year < 2019 || (year === 2019 && month < 5)) {
+    // 平成年号（令和以前）
+    const heisei = year - 1988;
+    return `平成${heisei}年${month}月${day}日`;
+  } else {
+    // 令和年号
+    let reiwa = year - 2018;
+    if (year === 2019 && month < 5) {
+      // 2019年1-4月は平成31年
+      return `平成31年${month}月${day}日`;
+    }
+    if (reiwa === 1) {
+      return `令和元年${month}月${day}日`;
+    } else {
+      return `令和${reiwa}年${month}月${day}日`;
+    }
+  }
+};
+
 // テキストにハイライトを適用するヘルパー関数
 const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (!highlights || highlights.length === 0) {
@@ -393,7 +419,7 @@ export class DownloadController {
               }),
               // Date
               new Paragraph({
-                text: `開催日: ${new Date(manusData.session.date).toLocaleDateString('ja-JP')}`,
+                text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`,
                 spacing: { after: 200 }
               }),
               // Section count
