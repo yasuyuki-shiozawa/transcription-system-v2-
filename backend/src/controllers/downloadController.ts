@@ -435,16 +435,6 @@ export class DownloadController {
               // Date
               new Paragraph({
                 text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`,
-                spacing: { after: 200 }
-              }),
-              // Section count
-              new Paragraph({
-                text: `出力セクション数: ${manusData.sections.length}`,
-                spacing: { after: 400 }
-              }),
-              // Separator
-              new Paragraph({
-                text: '─'.repeat(50),
                 spacing: { after: 400 }
               }),
               // Sections with proper timestamp format
