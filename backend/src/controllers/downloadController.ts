@@ -98,7 +98,7 @@ const formatToReiwaDate = (date: Date): string => {
 // テキストにハイライトを適用するヘルパー関数
 const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (!highlights || highlights.length === 0) {
-    return [new TextRun({ text })];
+    return [new TextRun({ text, size: 21 })]; // 10.5pt
   }
 
   // ハイライトを開始位置でソート
@@ -112,7 +112,7 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
     if (currentPosition < highlight.startOffset) {
       const beforeText = text.substring(currentPosition, highlight.startOffset);
       if (beforeText) {
-        textRuns.push(new TextRun({ text: beforeText }));
+        textRuns.push(new TextRun({ text: beforeText, size: 21 })); // 10.5pt
       }
     }
 
@@ -121,7 +121,8 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
     if (highlightedText) {
       textRuns.push(new TextRun({
         text: highlightedText,
-        highlight: mapHighlightColor(highlight.color)
+        highlight: mapHighlightColor(highlight.color),
+        size: 21 // 10.5pt
       }));
     }
 
@@ -132,7 +133,7 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (currentPosition < text.length) {
     const remainingText = text.substring(currentPosition);
     if (remainingText) {
-      textRuns.push(new TextRun({ text: remainingText }));
+      textRuns.push(new TextRun({ text: remainingText, size: 21 })); // 10.5pt
     }
   }
 
@@ -428,13 +429,23 @@ export class DownloadController {
             children: [
               // Questioner names (left-aligned)
               new Paragraph({
-                text: questionerNames.length > 0 ? `質問者 ${questionerNames.join(' ')}` : '質問者 （記録なし）',
-                heading: HeadingLevel.TITLE,
+                children: [
+                  new TextRun({
+                    text: questionerNames.length > 0 ? `質問者 ${questionerNames.join(' ')}` : '質問者 （記録なし）',
+                    bold: true,
+                    size: 21 // 10.5pt
+                  })
+                ],
                 alignment: AlignmentType.LEFT
               }),
               // Date
               new Paragraph({
-                text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`,
+                children: [
+                  new TextRun({
+                    text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`,
+                    size: 21 // 10.5pt
+                  })
+                ],
                 spacing: { after: 400 }
               }),
               // Sections with proper timestamp format
@@ -464,7 +475,7 @@ export class DownloadController {
                       new TextRun({
                         text: `（${timestamps.sectionStartTime}）（${timestamps.speakerStartTime}）`,
                         color: '000000',
-                        size: 22
+                        size: 21 // 10.5pt
                       })
                     ],
                     spacing: { before: 200, after: 100 }
@@ -476,7 +487,7 @@ export class DownloadController {
                       new TextRun({
                         text: `${speakerName}：`,
                         bold: true,
-                        size: 24,
+                        size: 21, // 10.5pt
                         font: "MS Gothic" // 固定幅フォントを使用
                       })
                     ],
@@ -500,7 +511,7 @@ export class DownloadController {
                         new TextRun({
                           text: `（${timestamps.sectionEndTime}）（${timestamps.sectionDurationFormatted}）`,
                           color: '000000',
-                          size: 22
+                          size: 21 // 10.5pt
                         })
                       ],
                       spacing: { after: 400 }
