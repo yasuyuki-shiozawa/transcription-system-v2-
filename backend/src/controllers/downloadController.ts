@@ -406,22 +406,31 @@ export class DownloadController {
       }
 
       try {
-        // 話者名のリストを取得（重複除去）
+        // 質問者（議員）のリストを取得
         const uniqueSpeakers = [...new Set(manusData.sections.map(section => section.speaker))];
-        const speakerNames = await Promise.all(
-          uniqueSpeakers.map(speaker => this.speakerService.formatSpeakerForWord(speaker, sessionId))
-        );
+        const questionerNames = [];
+        
+        for (const speaker of uniqueSpeakers) {
+          // 話者マスターから情報を取得
+          const speakerInfo = await this.speakerService.findSpeakerByName(speaker, sessionId);
+          const formattedName = await this.speakerService.formatSpeakerForWord(speaker, sessionId);
+          
+          // 議員かどうかを判定（speakerTypeがMEMBERまたは名前に「議員」が含まれる）
+          if ((speakerInfo && speakerInfo.speakerType === 'MEMBER') || formattedName.includes('議員')) {
+            questionerNames.push(formattedName);
+          }
+        }
 
         // Create Word document
         const doc = new Document({
           sections: [{
             properties: {},
             children: [
-              // Speaker names (instead of title)
+              // Questioner names (left-aligned)
               new Paragraph({
-                text: speakerNames.join('　'),
+                text: questionerNames.length > 0 ? `質問者 ${questionerNames.join(' ')}` : '質問者 （記録なし）',
                 heading: HeadingLevel.TITLE,
-                alignment: AlignmentType.CENTER
+                alignment: AlignmentType.LEFT
               }),
               // Date
               new Paragraph({
