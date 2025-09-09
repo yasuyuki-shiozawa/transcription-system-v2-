@@ -98,7 +98,7 @@ const formatToReiwaDate = (date: Date): string => {
 // テキストにハイライトを適用するヘルパー関数
 const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (!highlights || highlights.length === 0) {
-    return [new TextRun({ text, size: 21 })]; // 10.5pt
+    return [new TextRun({ text })];
   }
 
   // ハイライトを開始位置でソート
@@ -112,7 +112,7 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
     if (currentPosition < highlight.startOffset) {
       const beforeText = text.substring(currentPosition, highlight.startOffset);
       if (beforeText) {
-        textRuns.push(new TextRun({ text: beforeText, size: 21 })); // 10.5pt
+        textRuns.push(new TextRun({ text: beforeText }));
       }
     }
 
@@ -121,8 +121,7 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
     if (highlightedText) {
       textRuns.push(new TextRun({
         text: highlightedText,
-        highlight: mapHighlightColor(highlight.color),
-        size: 21 // 10.5pt
+        highlight: mapHighlightColor(highlight.color)
       }));
     }
 
@@ -133,7 +132,7 @@ const applyHighlightsToText = (text: string, highlights: any[]): TextRun[] => {
   if (currentPosition < text.length) {
     const remainingText = text.substring(currentPosition);
     if (remainingText) {
-      textRuns.push(new TextRun({ text: remainingText, size: 21 })); // 10.5pt
+      textRuns.push(new TextRun({ text: remainingText }));
     }
   }
 
@@ -424,6 +423,16 @@ export class DownloadController {
 
         // Create Word document
         const doc = new Document({
+          styles: {
+            default: {
+              document: {
+                run: {
+                  size: 21, // 10.5pt
+                  font: "MS Gothic"
+                }
+              }
+            }
+          },
           sections: [{
             properties: {},
             children: [
@@ -432,8 +441,7 @@ export class DownloadController {
                 children: [
                   new TextRun({
                     text: questionerNames.length > 0 ? `質問者 ${questionerNames.join(' ')}` : '質問者 （記録なし）',
-                    bold: true,
-                    size: 21 // 10.5pt
+                    bold: true
                   })
                 ],
                 alignment: AlignmentType.LEFT
@@ -442,8 +450,7 @@ export class DownloadController {
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`,
-                    size: 21 // 10.5pt
+                    text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`
                   })
                 ],
                 spacing: { after: 400 }
@@ -474,8 +481,7 @@ export class DownloadController {
                     children: [
                       new TextRun({
                         text: `（${timestamps.sectionStartTime}）（${timestamps.speakerStartTime}）`,
-                        color: '000000',
-                        size: 21 // 10.5pt
+                        color: '000000'
                       })
                     ],
                     spacing: { before: 200, after: 100 }
@@ -487,7 +493,6 @@ export class DownloadController {
                       new TextRun({
                         text: `${speakerName}：`,
                         bold: true,
-                        size: 21, // 10.5pt
                         font: "MS Gothic" // 固定幅フォントを使用
                       })
                     ],
@@ -510,8 +515,7 @@ export class DownloadController {
                       children: [
                         new TextRun({
                           text: `（${timestamps.sectionEndTime}）（${timestamps.sectionDurationFormatted}）`,
-                          color: '000000',
-                          size: 21 // 10.5pt
+                          color: '000000'
                         })
                       ],
                       spacing: { after: 400 }
