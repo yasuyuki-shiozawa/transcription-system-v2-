@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse } from '../types';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, HighlightColor } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HighlightColor } from 'docx';
 import { SpeakerService } from '../services/speakerService';
 
 // ハイライト色をdocxライブラリの色にマッピングする関数
