@@ -11,7 +11,7 @@ import SectionDeleteButton from '@/components/SectionDeleteButton';
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
 
 // API URL configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-v2-backend.onrender.com';
 
 interface Session {
   id: string;

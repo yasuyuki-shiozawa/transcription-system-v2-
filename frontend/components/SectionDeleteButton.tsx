@@ -15,7 +15,7 @@ export default function SectionDeleteButton({
 }: SectionDeleteButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-v2-backend.onrender.com';
 
   const handleDelete = async () => {
     const confirmed = window.confirm(

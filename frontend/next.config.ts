@@ -8,11 +8,11 @@ const nextConfig: NextConfig = {
   
   // Runtime環境変数設定
   publicRuntimeConfig: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-v2-backend.onrender.com',
   },
   
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-v2-backend.onrender.com',
   },
   
   // 画像最適化設定

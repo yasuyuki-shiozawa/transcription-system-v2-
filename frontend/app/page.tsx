@@ -28,7 +28,7 @@ export default function Home() {
   }, []);
 
   // Hardcoded API URL to resolve environment variables issue
-  const API_URL = 'https://transcription-system-obfr.onrender.com';
+  const API_URL = 'https://transcription-system-v2-backend.onrender.com';
 
   const fetchSessions = async () => {
     const apiUrl = `${API_URL}/api/sessions`;

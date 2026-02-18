@@ -19,7 +19,7 @@ const UnifiedSectionInsertButton: React.FC<UnifiedSectionInsertButtonProps> = ({
   const handleInsertSection = async (source: 'NOTTA' | 'MANUS') => {
     setIsLoading(true);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-obfr.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://transcription-system-v2-backend.onrender.com';
       
       const response = await fetch(`${API_URL}/api/sections/session/${sessionId}`, {
         method: 'POST',
