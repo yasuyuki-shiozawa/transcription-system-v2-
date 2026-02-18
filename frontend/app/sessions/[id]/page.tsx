@@ -63,6 +63,8 @@ export default function SessionDetail() {
   const [showTimeCalculation, setShowTimeCalculation] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isEditingSessionName, setIsEditingSessionName] = useState(false);
+  const [editedSessionName, setEditedSessionName] = useState('');
 
   console.log('📊 COMPONENT STATE:', {
     includedSectionsSize: includedSections.size,
@@ -275,6 +277,49 @@ export default function SessionDetail() {
       console.error('Error updating section:', error);
       throw error;
     }
+  };
+
+  const updateSessionName = async () => {
+    if (!editedSessionName.trim()) {
+      alert('セッション名を入力してください');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: editedSessionName.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update session name');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setSession(data.data);
+        setIsEditingSessionName(false);
+        alert('セッション名を更新しました');
+      }
+    } catch (error) {
+      console.error('Error updating session name:', error);
+      alert('セッション名の更新に失敗しました');
+    }
+  };
+
+  const startEditingSessionName = () => {
+    if (session) {
+      setEditedSessionName(session.name);
+      setIsEditingSessionName(true);
+    }
+  };
+
+  const cancelEditingSessionName = () => {
+    setIsEditingSessionName(false);
+    setEditedSessionName('');
   };
 
   const toggleIncludeSection = async (sectionId: string) => {
@@ -550,7 +595,43 @@ export default function SessionDetail() {
           >
             ← セッション一覧に戻る
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">{session.name}</h1>
+          
+          {/* Session Name with Edit Functionality */}
+          {isEditingSessionName ? (
+            <div className="flex items-center gap-3 mb-4">
+              <input
+                type="text"
+                value={editedSessionName}
+                onChange={(e) => setEditedSessionName(e.target.value)}
+                className="text-3xl font-bold text-gray-900 border-2 border-blue-500 rounded px-3 py-1 flex-1"
+                autoFocus
+              />
+              <button
+                onClick={updateSessionName}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                保存
+              </button>
+              <button
+                onClick={cancelEditingSessionName}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+              >
+                キャンセル
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">{session.name}</h1>
+              <button
+                onClick={startEditingSessionName}
+                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                title="セッション名を編集"
+              >
+                ✏️ 編集
+              </button>
+            </div>
+          )}
+          
           <p className="mt-2 text-gray-600">
             開催日: {new Date(session.date).toLocaleDateString('ja-JP')}
           </p>
