@@ -20,10 +20,7 @@ export const undo = async (req: Request, res: Response) => {
     // Undo実行
     const result = await executeUndo(sessionId);
 
-    return res.json({
-      success: true,
-      ...result
-    });
+    return res.json(result);
   } catch (error) {
     console.error('Error executing undo:', error);
     return res.status(500).json({
