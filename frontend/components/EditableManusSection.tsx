@@ -33,9 +33,10 @@ interface EditableManusSectonProps {
   onToggleInclude?: (sectionId: string) => void;
   showWarning?: boolean;
   onSectionDeleted?: () => void;
+  refreshTrigger?: number; // ハイライト再取得のトリガー
 }
 
-export default function EditableManusSection({ section, onUpdate, isIncluded = false, onToggleInclude, showWarning = false, onSectionDeleted }: EditableManusSectonProps) {
+export default function EditableManusSection({ section, onUpdate, isIncluded = false, onToggleInclude, showWarning = false, onSectionDeleted, refreshTrigger }: EditableManusSectonProps) {
   console.log(`📝 EditableManusSection for ${section.id}:`, { isIncluded, sectionNumber: section.sectionNumber });
   const [isEditingTime, setIsEditingTime] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
@@ -113,10 +114,10 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
     }
   };
 
-  // コンポーネントマウント時にハイライトを取得
+  // コンポーネントマウント時とrefreshTrigger変更時にハイライトを取得
   useEffect(() => {
     fetchHighlights();
-  }, [fetchHighlights]);
+  }, [fetchHighlights, refreshTrigger]);
 
   // 時刻入力のハンドラー（シンプルなアプローチ）
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
