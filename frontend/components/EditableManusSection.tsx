@@ -56,10 +56,13 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
 
   // ハイライト一覧を取得
   const fetchHighlights = useCallback(async () => {
+    console.log(`📥 fetchHighlights called for section ${section.id}`);
     try {
       const response = await fetch(`${API_URL}/api/highlights/section/${section.id}`);
       const data = await response.json();
+      console.log(`📦 fetchHighlights response for section ${section.id}:`, data);
       if (data.success) {
+        console.log(`✅ Setting highlights for section ${section.id}:`, data.data.length, 'highlights');
         setHighlights(data.data);
       }
     } catch (error) {
@@ -116,6 +119,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
 
   // コンポーネントマウント時とrefreshTrigger変更時にハイライトを取得
   useEffect(() => {
+    console.log(`🔄 EditableManusSection useEffect triggered for section ${section.id}, refreshTrigger:`, refreshTrigger);
     fetchHighlights();
   }, [fetchHighlights, refreshTrigger]);
 

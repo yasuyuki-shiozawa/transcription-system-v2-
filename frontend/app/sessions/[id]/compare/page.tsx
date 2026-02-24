@@ -32,6 +32,7 @@ export default function ComparePage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchData = async () => {
+    console.log('🔄 fetchData called, current refreshKey:', refreshKey);
     try {
       setLoading(true);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/transcriptions`);
@@ -48,7 +49,10 @@ export default function ComparePage() {
         setManusData(manus || null);
         
         // データ更新時にコンポーネントを強制再マウント
-        setRefreshKey(prev => prev + 1);
+        setRefreshKey(prev => {
+          console.log('🔑 refreshKey updated:', prev, '->', prev + 1);
+          return prev + 1;
+        });
         
         // Next.jsのルーターをリフレッシュしてサーバーデータも更新
         router.refresh();
