@@ -678,29 +678,69 @@ export default function SessionDetail() {
                   <p className="text-sm text-gray-600 mb-4">
                     セクション数: {getNottaSections().length}
                   </p>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/notta`);
-                        if (response.ok) {
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.style.display = 'none';
-                          a.href = url;
-                          a.download = `notta_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
-                          document.body.appendChild(a);
-                          a.click();
-                          window.URL.revokeObjectURL(url);
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/notta`);
+                          if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = `notta_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                          }
+                        } catch (error) {
+                          console.error('Download error:', error);
                         }
-                      } catch (error) {
-                        console.error('Download error:', error);
-                      }
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                  >
-                    セクション番号付きデータをダウンロード
-                  </button>
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                    >
+                      セクション番号付きデータをダウンロード
+                    </button>
+                    <label className="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 cursor-pointer text-center">
+                      🔄 データを入れ替える
+                      <input
+                        type="file"
+                        accept=".txt"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (confirm('既存のNOTTAデータを削除して、新しいファイルに入れ替えますか？\n\n※ この操作は元に戻せません。関連するマッピングやハイライトも削除されます。')) {
+                              setUploadingNotta(true);
+                              try {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                const response = await fetch(`${API_URL}/api/sessions/${sessionId}/upload/notta`, {
+                                  method: 'PUT',
+                                  body: formData,
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                  alert('NOTTAデータの入れ替えが完了しました');
+                                  fetchSessionData();
+                                } else {
+                                  alert('入れ替えエラー: ' + data.error);
+                                }
+                              } catch (error) {
+                                console.error('Replace error:', error);
+                                alert('入れ替え中にエラーが発生しました');
+                              } finally {
+                                setUploadingNotta(false);
+                                e.target.value = '';
+                              }
+                            }
+                          }
+                        }}
+                        disabled={uploadingNotta}
+                      />
+                    </label>
+                  </div>
                 </div>
               ) : (
                 <div>
@@ -733,29 +773,71 @@ export default function SessionDetail() {
                   <p className="text-sm text-gray-600 mb-4">
                     セクション数: {getManusSections().length}
                   </p>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/manus/word`);
-                        if (response.ok) {
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.style.display = 'none';
-                          a.href = url;
-                          a.download = `manus_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
-                          document.body.appendChild(a);
-                          a.click();
-                          window.URL.revokeObjectURL(url);
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`${API_URL}/api/sessions/${params.id}/upload/download/manus/word`);
+                          if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = `manus_sectioned_${new Date().toISOString().split('T')[0]}.txt`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                          }
+                        } catch (error) {
+                          console.error('Download error:', error);
                         }
-                      } catch (error) {
-                        console.error('Download error:', error);
-                      }
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                  >
-                    セクション番号付きデータをダウンロード
-                  </button>
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                    >
+                      セクション番号付きデータをダウンロード
+                    </button>
+                    <label className="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 cursor-pointer text-center">
+                      🔄 データを入れ替える
+                      <input
+                        type="file"
+                        accept=".txt"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (confirm('既存のManusデータを削除して、新しいファイルに入れ替えますか？\n\n※ この操作は元に戻せません。関連するマッピングやハイライトも削除されます。')) {
+                              setUploadingManus(true);
+                              try {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                const response = await fetch(`${API_URL}/api/sessions/${sessionId}/upload/manus`, {
+                                  method: 'PUT',
+                                  body: formData,
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                  alert('Manusデータの入れ替えが完了しました');
+                                  fetchSessionData();
+                                  // 入れ替え後は初期化フラグをリセット
+                                  setIsInitialized(false);
+                                } else {
+                                  alert('入れ替えエラー: ' + data.error);
+                                }
+                              } catch (error) {
+                                console.error('Replace error:', error);
+                                alert('入れ替え中にエラーが発生しました');
+                              } finally {
+                                setUploadingManus(false);
+                                e.target.value = '';
+                              }
+                            }
+                          }
+                        }}
+                        disabled={uploadingManus}
+                      />
+                    </label>
+                  </div>
                 </div>
               ) : (
                 <div>
