@@ -28,6 +28,7 @@ export default function ComparePage() {
   const [manusData, setManusData] = useState<TranscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchData = async () => {
     try {
@@ -44,6 +45,9 @@ export default function ComparePage() {
         
         setNottaData(notta || null);
         setManusData(manus || null);
+        
+        // データ更新時にコンポーネントを強制再マウント
+        setRefreshKey(prev => prev + 1);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
@@ -103,7 +107,7 @@ export default function ComparePage() {
               <div className="space-y-4">
                 {nottaData.sections.map((section) => (
                   <EditableNottaSection
-                    key={section.id}
+                    key={`${section.id}-${refreshKey}`}
                     section={section}
                     onUpdate={async () => {}}
                     onSectionDeleted={async () => {}}
@@ -124,7 +128,7 @@ export default function ComparePage() {
               <div className="space-y-4">
                 {manusData.sections.map((section) => (
                   <EditableManusSection
-                    key={section.id}
+                    key={`${section.id}-${refreshKey}`}
                     section={section}
                     onUpdate={async () => {}}
                   />
