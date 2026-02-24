@@ -68,7 +68,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
     } catch (error) {
       console.error('Error fetching highlights:', error);
     }
-  }, [API_URL, section.id]);
+  }, [API_URL, section.id, refreshTrigger]);
 
   // ハイライト作成
   const handleHighlightCreate = async (startOffset: number, endOffset: number, color: string, text: string) => {
@@ -121,7 +121,7 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
   useEffect(() => {
     console.log(`🔄 EditableManusSection useEffect triggered for section ${section.id}, refreshTrigger:`, refreshTrigger);
     fetchHighlights();
-  }, [fetchHighlights, refreshTrigger]);
+  }, [fetchHighlights]);
 
   // 時刻入力のハンドラー（シンプルなアプローチ）
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
