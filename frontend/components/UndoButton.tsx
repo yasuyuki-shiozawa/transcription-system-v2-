@@ -29,9 +29,16 @@ export default function UndoButton({ sessionId, onUndoSuccess }: UndoButtonProps
     }
   };
 
-  // 初回チェック
+  // 初回チェックと定期的なポーリング
   useEffect(() => {
     checkCanUndo();
+    
+    // 2秒ごとに状態をチェック
+    const interval = setInterval(() => {
+      checkCanUndo();
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, [sessionId]);
 
   // Undo実行
