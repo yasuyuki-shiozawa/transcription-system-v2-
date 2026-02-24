@@ -16,8 +16,14 @@ export class ParserService {
     const lines = content.split('\n');
     const statements: ParsedStatement[] = [];
     
+    console.log('=== NOTTA PARSER DEBUG ===');
+    console.log('File path:', filePath);
+    console.log('Total lines:', lines.length);
+    console.log('First 10 lines:', lines.slice(0, 10));
+    
     let currentStatement: ParsedStatement | null = null;
-    const sectionPattern = /^【セクション：(\d+)】\[話者(\d+)\]\[(\d{2}:\d{2})\]$/;
+    // 話者番号または話者名の両方に対応
+    const sectionPattern = /^【セクション：(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
     const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;  // MM:SSまたはHH:MM:SS形式に対応
     let sectionCounter = 1;
     
@@ -41,7 +47,7 @@ export class ParserService {
         if (match) {
           currentStatement = {
             sectionNumber: match[1],
-            speaker: `話者${match[2]}`,
+            speaker: match[2],  // 話者名をそのまま使用
             timestamp: match[3],
             content: ''
           };
@@ -75,6 +81,10 @@ export class ParserService {
     if (currentStatement) {
       statements.push(currentStatement);
     }
+    
+    console.log('=== NOTTA PARSER RESULT ===');
+    console.log('Total statements parsed:', statements.length);
+    console.log('Statements:', statements.map(s => ({ section: s.sectionNumber, speaker: s.speaker, timestamp: s.timestamp, contentLength: s.content.length })));
     
     return statements;
   }
