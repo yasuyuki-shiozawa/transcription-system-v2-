@@ -6,6 +6,7 @@ import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton'
 import EditableManusSection from '@/components/EditableManusSection';
 import EditableNottaSection from '@/components/EditableNottaSection';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
+import UndoButton from '@/components/UndoButton';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
@@ -635,6 +636,17 @@ export default function SessionDetail() {
           <p className="mt-2 text-gray-600">
             開催日: {new Date(session.date).toLocaleDateString('ja-JP')}
           </p>
+          
+          {/* Undo Button */}
+          <div className="mt-4">
+            <UndoButton 
+              sessionId={sessionId} 
+              onUndoSuccess={() => {
+                // Undo成功後にデータを再取得
+                fetchSessionData();
+              }}
+            />
+          </div>
         </div>
 
         {/* View Mode Tabs */}

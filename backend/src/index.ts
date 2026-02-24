@@ -9,6 +9,7 @@ import routes from './routes';
 import sectionSelectionRoutes from './routes/sectionSelectionRoutes';
 import speakersRoutes from './routes/speakers';
 import highlightRoutes from './routes/highlights';
+import undoRoutes from './routes/undoRoutes';
 import { ApiResponse } from './types';
 import { initDatabase } from './utils/initDatabase';
 
@@ -111,6 +112,7 @@ app.use('/api', routes);
 app.use('/api', sectionSelectionRoutes);
 app.use('/api/speakers', speakersRoutes);
 app.use('/api', highlightRoutes);
+app.use('/api', undoRoutes);
 
 // セッション関連のルートを追加
 import sessionRoutes from './routes/sessions';

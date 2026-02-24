@@ -17,6 +17,7 @@ model Session {
   mappings       SectionMapping[]
   transcriptions TranscriptionData[]
   speakers       SessionSpeaker[]
+  actionHistory  ActionHistory[]     // Undo/Redo履歴
 }
 
 // 話者マスターテーブル
@@ -111,4 +112,30 @@ model SectionMapping {
 
   @@unique([nottaSectionId, manusSectionId])
   @@index([sessionId])
+}
+
+// Undo/Redo機能のための操作履歴
+model ActionHistory {
+  id          String     @id @default(cuid())
+  sessionId   String
+  actionType  ActionType // 操作タイプ
+  targetId    String     // 操作対象のID（ハイライトID、マッピングIDなど）
+  beforeState Json?      // 操作前の状態（JSON形式）
+  afterState  Json?      // 操作後の状態（JSON形式）
+  createdAt   DateTime   @default(now())
+  session     Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+// 操作タイプの列挙型
+enum ActionType {
+  HIGHLIGHT_ADD      // ハイライト追加
+  HIGHLIGHT_DELETE   // ハイライト削除
+  HIGHLIGHT_UPDATE   // ハイライト更新
+  MAPPING_CREATE     // マッピング作成
+  MAPPING_UPDATE     // マッピング更新
+  MAPPING_DELETE     // マッピング削除
+  SECTION_EXCLUDE    // セクション除外
+  SECTION_INCLUDE    // セクション除外解除
 }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { recordAction } from '../services/actionHistoryService';
 
 const prisma = new PrismaClient();
 
@@ -56,6 +57,25 @@ export const createHighlight = async (req: Request, res: Response) => {
         text
       }
     });
+
+    // セクションからセッションIDを取得
+    const sectionWithTranscription = await prisma.section.findUnique({
+      where: { id: sectionId },
+      include: {
+        transcriptionData: true
+      }
+    });
+
+    // 操作履歴を記録
+    if (sectionWithTranscription) {
+      await recordAction(
+        sectionWithTranscription.transcriptionData.sessionId,
+        'HIGHLIGHT_ADD',
+        highlight.id,
+        null,
+        highlight
+      );
+    }
 
     return res.json({
       success: true,
@@ -179,6 +199,25 @@ export const deleteHighlight = async (req: Request, res: Response) => {
         success: false,
         message: 'Highlight not found'
       });
+    }
+
+    // セクションからセッションIDを取得
+    const sectionWithTranscription = await prisma.section.findUnique({
+      where: { id: existingHighlight.sectionId },
+      include: {
+        transcriptionData: true
+      }
+    });
+
+    // 操作履歴を記録（削除前の状態を保存）
+    if (sectionWithTranscription) {
+      await recordAction(
+        sectionWithTranscription.transcriptionData.sessionId,
+        'HIGHLIGHT_DELETE',
+        highlightId,
+        existingHighlight,
+        null
+      );
     }
 
     // ハイライト削除
