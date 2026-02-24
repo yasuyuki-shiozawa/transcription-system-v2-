@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import EditableManusSection from '../../../../components/EditableManusSection';
 import EditableNottaSection from '../../../../components/EditableNottaSection';
+import UndoButton from '../../../../components/UndoButton';
 
 interface Section {
   id: string;
@@ -28,29 +29,30 @@ export default function ComparePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/transcriptions`);
-        if (!response.ok) {
-          throw new Error('データの取得に失敗しました');
-        }
-        const data = await response.json();
-        
-        if (data.success) {
-          const notta = data.data.find((t: TranscriptionData) => t.source === 'notta');
-          const manus = data.data.find((t: TranscriptionData) => t.source === 'manus' || t.source === 'user_test');
-          
-          setNottaData(notta || null);
-          setManusData(manus || null);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'エラーが発生しました');
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${sessionId}/transcriptions`);
+      if (!response.ok) {
+        throw new Error('データの取得に失敗しました');
       }
-    };
+      const data = await response.json();
+      
+      if (data.success) {
+        const notta = data.data.find((t: TranscriptionData) => t.source === 'notta');
+        const manus = data.data.find((t: TranscriptionData) => t.source === 'manus' || t.source === 'user_test');
+        
+        setNottaData(notta || null);
+        setManusData(manus || null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'エラーが発生しました');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (sessionId) {
       fetchData();
     }
@@ -75,13 +77,20 @@ export default function ComparePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => window.history.back()}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           >
             ← セッション詳細に戻る
           </button>
+          <UndoButton 
+            sessionId={sessionId} 
+            onUndoSuccess={() => {
+              // Undo成功後にデータを再取得
+              fetchData();
+            }}
+          />
         </div>
 
         <h1 className="text-2xl font-bold mb-6">データ比較</h1>
