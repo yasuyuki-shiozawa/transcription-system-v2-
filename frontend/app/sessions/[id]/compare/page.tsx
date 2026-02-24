@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '../../../../components/EditableManusSection';
 import EditableNottaSection from '../../../../components/EditableNottaSection';
 import UndoButton from '../../../../components/UndoButton';
@@ -23,6 +23,7 @@ interface TranscriptionData {
 
 export default function ComparePage() {
   const params = useParams();
+  const router = useRouter();
   const sessionId = params.id as string;
   const [nottaData, setNottaData] = useState<TranscriptionData | null>(null);
   const [manusData, setManusData] = useState<TranscriptionData | null>(null);
@@ -48,6 +49,9 @@ export default function ComparePage() {
         
         // データ更新時にコンポーネントを強制再マウント
         setRefreshKey(prev => prev + 1);
+        
+        // Next.jsのルーターをリフレッシュしてサーバーデータも更新
+        router.refresh();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
