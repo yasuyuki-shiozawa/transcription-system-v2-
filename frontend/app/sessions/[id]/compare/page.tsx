@@ -42,8 +42,8 @@ export default function ComparePage() {
       const data = await response.json();
       
       if (data.success) {
-        const notta = data.data.find((t: TranscriptionData) => t.source === 'notta');
-        const manus = data.data.find((t: TranscriptionData) => t.source === 'manus' || t.source === 'user_test');
+        const notta = data.data.find((t: TranscriptionData) => t.source.toUpperCase() === 'NOTTA');
+        const manus = data.data.find((t: TranscriptionData) => t.source.toUpperCase() === 'MANUS' || t.source === 'user_test');
         
         setNottaData(notta || null);
         setManusData(manus || null);
