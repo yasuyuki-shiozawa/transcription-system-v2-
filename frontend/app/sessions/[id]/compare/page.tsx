@@ -136,7 +136,7 @@ export default function ComparePage() {
               <div className="space-y-4">
                 {manusData.sections.map((section) => (
                   <EditableManusSection
-                    key={section.id}
+                    key={`${section.id}-${refreshKey}`}
                     section={section}
                     onUpdate={async () => {}}
                     refreshTrigger={refreshKey}
