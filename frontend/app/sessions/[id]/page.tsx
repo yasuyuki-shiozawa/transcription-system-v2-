@@ -66,6 +66,7 @@ export default function SessionDetail() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isEditingSessionName, setIsEditingSessionName] = useState(false);
   const [editedSessionName, setEditedSessionName] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   console.log('📊 COMPONENT STATE:', {
     includedSectionsSize: includedSections.size,
@@ -644,6 +645,8 @@ export default function SessionDetail() {
               onUndoSuccess={() => {
                 // Undo成功後にデータを再取得
                 fetchSessionData();
+                // ハイライトの再取得をトリガー
+                setRefreshKey(prev => prev + 1);
               }}
             />
           </div>
@@ -1091,6 +1094,7 @@ export default function SessionDetail() {
                                 onToggleInclude={toggleIncludeSection}
                                 showWarning={showTimeCalculation}
                                 onSectionDeleted={fetchSessionData}
+                                refreshTrigger={refreshKey}
                               />
                             ) : (
                               <p className="text-sm text-gray-400">データなし</p>
