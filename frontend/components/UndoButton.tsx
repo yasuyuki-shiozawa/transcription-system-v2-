@@ -54,8 +54,6 @@ export default function UndoButton({ sessionId, onUndoSuccess }: UndoButtonProps
       const data = await response.json();
 
       if (data.success) {
-        alert(data.message || '操作を取り消しました');
-        
         // 状態を更新
         await checkCanUndo();
         
@@ -64,11 +62,11 @@ export default function UndoButton({ sessionId, onUndoSuccess }: UndoButtonProps
           onUndoSuccess();
         }
       } else {
-        alert('Undoに失敗しました: ' + data.message);
+        console.error('Undoに失敗しました:', data.message);
       }
     } catch (error) {
       console.error('Error executing undo:', error);
-      alert('Undo中にエラーが発生しました');
+      console.error('Undo中にエラーが発生しました:', error);
     } finally {
       setIsUndoing(false);
     }
