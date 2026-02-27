@@ -151,6 +151,9 @@ export default function UndoRedoButtons({ sessionId, onUndoSuccess, onRedoSucces
       'MAPPING_DELETE': 'マッピング削除',
       'SECTION_EXCLUDE': 'セクション除外',
       'SECTION_INCLUDE': 'セクション除外解除',
+      'SECTION_EDIT': 'テキスト編集',
+      'SECTION_INSERT': 'セクション挿入',
+      'SECTION_DELETE': 'セクション削除',
     };
 
     return labels[actionType] || actionType;

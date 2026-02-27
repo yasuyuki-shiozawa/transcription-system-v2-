@@ -168,6 +168,18 @@ export const executeUndo = async (sessionId: string) => {
         await undoSectionInclude(lastAction.targetId);
         break;
 
+      case 'SECTION_EDIT':
+        await undoSectionEdit(lastAction.targetId, lastAction.beforeState);
+        break;
+
+      case 'SECTION_INSERT':
+        await undoSectionInsert(lastAction.targetId);
+        break;
+
+      case 'SECTION_DELETE':
+        await undoSectionDelete(lastAction.targetId, lastAction.beforeState);
+        break;
+
       default:
         throw new Error(`Unknown action type: ${lastAction.actionType}`);
     }
@@ -234,6 +246,18 @@ export const executeRedo = async (sessionId: string) => {
 
       case 'SECTION_INCLUDE':
         await redoSectionInclude(lastUndone.targetId);
+        break;
+
+      case 'SECTION_EDIT':
+        await redoSectionEdit(lastUndone.targetId, lastUndone.afterState);
+        break;
+
+      case 'SECTION_INSERT':
+        await redoSectionInsert(lastUndone.targetId, lastUndone.afterState);
+        break;
+
+      case 'SECTION_DELETE':
+        await redoSectionDelete(lastUndone.targetId);
         break;
 
       default:
@@ -375,6 +399,101 @@ const undoSectionInclude = async (sectionId: string) => {
   });
 };
 
+/**
+ * セクションテキスト編集のUndo（beforeStateに戻す）
+ */
+const undoSectionEdit = async (sectionId: string, beforeState: any) => {
+  if (!beforeState) {
+    throw new Error('Before state is missing for section edit undo');
+  }
+
+  await prisma.section.update({
+    where: { id: sectionId },
+    data: {
+      speaker: beforeState.speaker,
+      timestamp: beforeState.timestamp,
+      endTimestamp: beforeState.endTimestamp,
+      content: beforeState.content,
+    }
+  });
+};
+
+/**
+ * セクション挿入のUndo（削除）
+ */
+const undoSectionInsert = async (sectionId: string) => {
+  // 挿入されたセクションを取得
+  const section = await prisma.section.findUnique({
+    where: { id: sectionId }
+  });
+
+  if (!section) {
+    throw new Error('Section not found for insert undo');
+  }
+
+  // セクションを削除
+  await prisma.section.delete({
+    where: { id: sectionId }
+  });
+
+  // 残りのセクションの番号を再整理
+  const remainingSections = await prisma.section.findMany({
+    where: { transcriptionDataId: section.transcriptionDataId },
+    orderBy: { sectionNumber: 'asc' }
+  });
+
+  if (remainingSections.length > 0) {
+    await prisma.$transaction(
+      remainingSections.map((s, index) =>
+        prisma.section.update({
+          where: { id: s.id },
+          data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
+        })
+      )
+    );
+  }
+};
+
+/**
+ * セクション削除のUndo（復元）
+ */
+const undoSectionDelete = async (sectionId: string, beforeState: any) => {
+  if (!beforeState) {
+    throw new Error('Before state is missing for section delete undo');
+  }
+
+  // セクションを復元
+  await prisma.section.create({
+    data: {
+      id: sectionId,
+      transcriptionDataId: beforeState.transcriptionDataId,
+      sectionNumber: beforeState.sectionNumber,
+      speaker: beforeState.speaker,
+      speakerId: beforeState.speakerId || null,
+      timestamp: beforeState.timestamp,
+      endTimestamp: beforeState.endTimestamp || null,
+      content: beforeState.content,
+      order: beforeState.order,
+      isExcluded: beforeState.isExcluded || false,
+    }
+  });
+
+  // セクション番号を再整理
+  const allSections = await prisma.section.findMany({
+    where: { transcriptionDataId: beforeState.transcriptionDataId },
+    orderBy: { order: 'asc' }
+  });
+
+  await prisma.$transaction(
+    allSections.map((s, index) =>
+      prisma.section.update({
+        where: { id: s.id },
+        data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
+      })
+    )
+  );
+};
+
 // ===== Redo処理 =====
 
 /**
@@ -493,6 +612,99 @@ const redoSectionInclude = async (sectionId: string) => {
   });
 };
 
+/**
+ * セクションテキスト編集のRedo（afterStateに更新）
+ */
+const redoSectionEdit = async (sectionId: string, afterState: any) => {
+  if (!afterState) {
+    throw new Error('After state is missing for section edit redo');
+  }
+
+  await prisma.section.update({
+    where: { id: sectionId },
+    data: {
+      speaker: afterState.speaker,
+      timestamp: afterState.timestamp,
+      endTimestamp: afterState.endTimestamp,
+      content: afterState.content,
+    }
+  });
+};
+
+/**
+ * セクション挿入のRedo（再挿入）
+ */
+const redoSectionInsert = async (sectionId: string, afterState: any) => {
+  if (!afterState) {
+    throw new Error('After state is missing for section insert redo');
+  }
+
+  // セクションを再作成
+  await prisma.section.create({
+    data: {
+      id: sectionId,
+      transcriptionDataId: afterState.transcriptionDataId,
+      sectionNumber: afterState.sectionNumber,
+      speaker: afterState.speaker,
+      speakerId: afterState.speakerId || null,
+      timestamp: afterState.timestamp,
+      endTimestamp: afterState.endTimestamp || null,
+      content: afterState.content,
+      order: afterState.order,
+      isExcluded: afterState.isExcluded || false,
+    }
+  });
+
+  // セクション番号を再整理
+  const allSections = await prisma.section.findMany({
+    where: { transcriptionDataId: afterState.transcriptionDataId },
+    orderBy: { order: 'asc' }
+  });
+
+  await prisma.$transaction(
+    allSections.map((s, index) =>
+      prisma.section.update({
+        where: { id: s.id },
+        data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
+      })
+    )
+  );
+};
+
+/**
+ * セクション削除のRedo（再削除）
+ */
+const redoSectionDelete = async (sectionId: string) => {
+  const section = await prisma.section.findUnique({
+    where: { id: sectionId }
+  });
+
+  if (!section) {
+    throw new Error('Section not found for delete redo');
+  }
+
+  await prisma.section.delete({
+    where: { id: sectionId }
+  });
+
+  // 残りのセクション番号を再整理
+  const remainingSections = await prisma.section.findMany({
+    where: { transcriptionDataId: section.transcriptionDataId },
+    orderBy: { sectionNumber: 'asc' }
+  });
+
+  if (remainingSections.length > 0) {
+    await prisma.$transaction(
+      remainingSections.map((s, index) =>
+        prisma.section.update({
+          where: { id: s.id },
+          data: { sectionNumber: (index + 1).toString().padStart(4, '0') }
+        })
+      )
+    );
+  }
+};
+
 // ===== メッセージ =====
 
 /**
@@ -508,6 +720,9 @@ const getUndoMessage = (actionType: ActionType): string => {
     MAPPING_DELETE: 'マッピングの削除を取り消しました',
     SECTION_EXCLUDE: 'セクションの除外を取り消しました',
     SECTION_INCLUDE: 'セクションの除外解除を取り消しました',
+    SECTION_EDIT: 'テキスト編集を取り消しました',
+    SECTION_INSERT: 'セクション挿入を取り消しました',
+    SECTION_DELETE: 'セクション削除を取り消しました',
   };
 
   return messages[actionType] || '操作を取り消しました';
@@ -526,6 +741,9 @@ const getRedoMessage = (actionType: ActionType): string => {
     MAPPING_DELETE: 'マッピングの削除をやり直しました',
     SECTION_EXCLUDE: 'セクションの除外をやり直しました',
     SECTION_INCLUDE: 'セクションの除外解除をやり直しました',
+    SECTION_EDIT: 'テキスト編集をやり直しました',
+    SECTION_INSERT: 'セクション挿入をやり直しました',
+    SECTION_DELETE: 'セクション削除をやり直しました',
   };
 
   return messages[actionType] || '操作をやり直しました';

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../utils/prisma';
 import { ApiResponse, CreateSectionDto, ReorderSectionsDto } from '../types';
+import { recordAction } from '../services/actionHistoryService';
 
 export class SectionController {
   updateSection = async (req: Request, res: Response, next: NextFunction) => {
@@ -24,9 +25,10 @@ export class SectionController {
         return;
       }
 
-      // Check if section exists
+      // Check if section exists (include transcriptionData to get sessionId)
       const existingSection = await prisma.section.findUnique({
-        where: { id: sectionId }
+        where: { id: sectionId },
+        include: { transcriptionData: true }
       });
 
       if (!existingSection) {
@@ -37,6 +39,22 @@ export class SectionController {
         res.status(404).json(response);
         return;
       }
+
+      const sessionId = existingSection.transcriptionData.sessionId;
+
+      // テキスト編集の場合（content, speaker, timestampの変更）、操作履歴を記録
+      const isTextEdit = (content !== undefined && content !== existingSection.content) ||
+                         (speaker !== undefined && speaker !== existingSection.speaker) ||
+                         (timestamp !== undefined && timestamp !== existingSection.timestamp) ||
+                         (endTimestamp !== undefined && endTimestamp !== existingSection.endTimestamp);
+
+      // beforeStateを保存
+      const beforeState = {
+        speaker: existingSection.speaker,
+        timestamp: existingSection.timestamp,
+        endTimestamp: existingSection.endTimestamp,
+        content: existingSection.content,
+      };
 
       // Update section
       const updatedSection = await prisma.section.update({
@@ -49,6 +67,25 @@ export class SectionController {
           ...(isExcluded !== undefined && { isExcluded })
         }
       });
+
+      // テキスト編集の操作履歴を記録（isExcludedの変更は既存のSECTION_EXCLUDE/INCLUDEで処理される）
+      if (isTextEdit) {
+        const afterState = {
+          speaker: updatedSection.speaker,
+          timestamp: updatedSection.timestamp,
+          endTimestamp: updatedSection.endTimestamp,
+          content: updatedSection.content,
+        };
+
+        await recordAction(
+          sessionId,
+          'SECTION_EDIT',
+          sectionId,
+          beforeState,
+          afterState
+        );
+        console.log('Recorded SECTION_EDIT action for section:', sectionId);
+      }
       
       console.log('Section updated successfully:', {
         id: updatedSection.id,
@@ -205,6 +242,28 @@ export class SectionController {
         return newSection;
       });
 
+      // セクション挿入の操作履歴を記録
+      const afterState = {
+        transcriptionDataId: result.transcriptionDataId,
+        sectionNumber: result.sectionNumber,
+        speaker: result.speaker,
+        speakerId: result.speakerId,
+        timestamp: result.timestamp,
+        endTimestamp: result.endTimestamp,
+        content: result.content,
+        order: result.order,
+        isExcluded: result.isExcluded,
+      };
+
+      await recordAction(
+        sessionId,
+        'SECTION_INSERT',
+        result.id,
+        null, // beforeState: 挿入前は存在しない
+        afterState
+      );
+      console.log('Recorded SECTION_INSERT action for section:', result.id);
+
       console.log('Section created successfully:', {
         id: result.id,
         sectionNumber: result.sectionNumber,
@@ -230,7 +289,7 @@ export class SectionController {
       
       console.log('DELETE /sections/:sectionId received:', { sectionId });
 
-      // Check if section exists
+      // Check if section exists (include transcriptionData to get sessionId)
       const existingSection = await prisma.section.findUnique({
         where: { id: sectionId },
         include: { transcriptionData: true }
@@ -244,6 +303,30 @@ export class SectionController {
         res.status(404).json(response);
         return;
       }
+
+      const sessionId = existingSection.transcriptionData.sessionId;
+
+      // セクション削除の操作履歴を記録（削除前に記録）
+      const beforeState = {
+        transcriptionDataId: existingSection.transcriptionDataId,
+        sectionNumber: existingSection.sectionNumber,
+        speaker: existingSection.speaker,
+        speakerId: existingSection.speakerId,
+        timestamp: existingSection.timestamp,
+        endTimestamp: existingSection.endTimestamp,
+        content: existingSection.content,
+        order: existingSection.order,
+        isExcluded: existingSection.isExcluded,
+      };
+
+      await recordAction(
+        sessionId,
+        'SECTION_DELETE',
+        sectionId,
+        beforeState,
+        null // afterState: 削除後は存在しない
+      );
+      console.log('Recorded SECTION_DELETE action for section:', sectionId);
 
       // Delete the section
       await prisma.section.delete({
@@ -346,4 +429,3 @@ export class SectionController {
     }
   };
 }
-

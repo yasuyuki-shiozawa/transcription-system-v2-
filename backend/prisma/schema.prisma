@@ -139,4 +139,7 @@ enum ActionType {
   MAPPING_DELETE     // マッピング削除
   SECTION_EXCLUDE    // セクション除外
   SECTION_INCLUDE    // セクション除外解除
+  SECTION_EDIT       // セクションテキスト編集
+  SECTION_INSERT     // セクション挿入
+  SECTION_DELETE     // セクション削除
 }
