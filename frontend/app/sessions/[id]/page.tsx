@@ -1088,6 +1088,7 @@ export default function SessionDetail() {
                             <h3 className="font-semibold text-green-600 mb-2">Manus</h3>
                             {manus ? (
                               <EditableManusSection 
+                                key={manus.id}
                                 section={manus} 
                                 onUpdate={updateManusSection}
                                 isIncluded={includedSections.has(manus.id)}

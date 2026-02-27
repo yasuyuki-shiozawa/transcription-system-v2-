@@ -117,6 +117,15 @@ export default function EditableManusSection({ section, onUpdate, isIncluded = f
     }
   };
 
+  // section propsが変更された時にstateを同期
+  useEffect(() => {
+    console.log(`🔄 EditableManusSection: section props changed for ${section.id}, syncing state`);
+    setEditedSpeaker(section.speaker);
+    setEditedTimestamp(section.timestamp);
+    setEditedEndTimestamp(section.endTimestamp || '');
+    setEditedContent(section.content);
+  }, [section.id, section.speaker, section.timestamp, section.endTimestamp, section.content]);
+
   // コンポーネントマウント時とrefreshTrigger変更時にハイライトを取得
   useEffect(() => {
     console.log(`🔄 EditableManusSection useEffect triggered for section ${section.id}, refreshTrigger:`, refreshTrigger);
