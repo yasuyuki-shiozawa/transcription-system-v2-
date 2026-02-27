@@ -391,6 +391,13 @@ export class DownloadController {
         return;
       }
       
+      // セクションをタイムスタンプ順にソート（order値がタイムスタンプ順と一致しない場合に対応）
+      manusData.sections.sort((a, b) => {
+        const timeA = timeToSeconds(a.timestamp);
+        const timeB = timeToSeconds(b.timestamp);
+        return timeA - timeB;
+      });
+
       if (manusData.sections.length === 0) {
         console.log('MANUS data found but no sections matched included IDs:', {
           sessionId,
