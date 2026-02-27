@@ -37,17 +37,6 @@ export class ParserService {
     return normalized;
   }
 
-  // 話者名の区切り文字を正規化する関数
-  // 話者行では半角コロンも全角コロンとして扱う
-  private normalizeSpeakerLine(line: string): string {
-    let normalized = line;
-    // 行末の半角コロンを全角コロンに変換（話者パターンマッチ用）
-    // ただし、タイムスタンプ内のコロンは変換しない
-    if (normalized.match(/^.+:$/) && !normalized.match(/\d:\d/)) {
-      normalized = normalized.slice(0, -1) + ':';
-    }
-    return normalized;
-  }
 
   // Parse NOTTA format with section numbers
   async parseNottaFile(filePath: string): Promise<ParsedStatement[]> {
