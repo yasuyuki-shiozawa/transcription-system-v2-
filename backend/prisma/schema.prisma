@@ -122,6 +122,7 @@ model ActionHistory {
   targetId    String     // 操作対象のID（ハイライトID、マッピングIDなど）
   beforeState Json?      // 操作前の状態（JSON形式）
   afterState  Json?      // 操作後の状態（JSON形式）
+  isUndone    Boolean    @default(false) // Undo済みフラグ（Redo用）
   createdAt   DateTime   @default(now())
   session     Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 

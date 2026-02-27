@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import EditableManusSection from '../../../../components/EditableManusSection';
 import EditableNottaSection from '../../../../components/EditableNottaSection';
-import UndoButton from '../../../../components/UndoButton';
+import UndoRedoButtons from '../../../../components/UndoRedoButtons';
 
 interface Section {
   id: string;
@@ -96,10 +96,14 @@ export default function ComparePage() {
           >
             ← セッション詳細に戻る
           </button>
-          <UndoButton 
+          <UndoRedoButtons 
             sessionId={sessionId} 
             onUndoSuccess={() => {
               // Undo成功後にデータを再取得
+              fetchData();
+            }}
+            onRedoSuccess={() => {
+              // Redo成功後にデータを再取得
               fetchData();
             }}
           />

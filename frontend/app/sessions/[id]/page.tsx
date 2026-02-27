@@ -6,7 +6,7 @@ import UnifiedSectionInsertButton from '@/components/UnifiedSectionInsertButton'
 import EditableManusSection from '@/components/EditableManusSection';
 import EditableNottaSection from '@/components/EditableNottaSection';
 import SectionDeleteButton from '@/components/SectionDeleteButton';
-import UndoButton from '@/components/UndoButton';
+import UndoRedoButtons from '@/components/UndoRedoButtons';
 
 // DEBUG: Add console log at module load
 console.log('=== SESSION DETAIL PAGE MODULE LOADED ===', new Date().toISOString());
@@ -638,12 +638,18 @@ export default function SessionDetail() {
             開催日: {new Date(session.date).toLocaleDateString('ja-JP')}
           </p>
           
-          {/* Undo Button */}
+          {/* Undo/Redo Buttons */}
           <div className="mt-4">
-            <UndoButton 
+            <UndoRedoButtons 
               sessionId={sessionId} 
               onUndoSuccess={() => {
                 // Undo成功後にデータを再取得
+                fetchSessionData();
+                // ハイライトの再取得をトリガー
+                setRefreshKey(prev => prev + 1);
+              }}
+              onRedoSuccess={() => {
+                // Redo成功後にデータを再取得
                 fetchSessionData();
                 // ハイライトの再取得をトリガー
                 setRefreshKey(prev => prev + 1);
