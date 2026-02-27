@@ -12,6 +12,8 @@ model Session {
   name           String
   date           DateTime
   status         String              @default("DRAFT")
+  audioSource    String?             // 音源情報
+  questionItems  String?             // 質問項目（複数行テキスト）
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
   mappings       SectionMapping[]

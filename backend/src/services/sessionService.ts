@@ -58,6 +58,8 @@ export class SessionService {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.date !== undefined) updateData.date = new Date(data.date);
     if (data.status !== undefined) updateData.status = data.status;
+    if (data.audioSource !== undefined) updateData.audioSource = data.audioSource;
+    if (data.questionItems !== undefined) updateData.questionItems = data.questionItems;
 
     return await prisma.session.update({
       where: { id },

@@ -18,6 +18,8 @@ export interface UpdateSessionDto {
   name?: string;
   date?: string;
   status?: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
+  audioSource?: string | null;
+  questionItems?: string | null;
 }
 
 // Export Prisma types for convenience

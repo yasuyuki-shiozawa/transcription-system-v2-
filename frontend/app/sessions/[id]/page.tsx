@@ -19,6 +19,8 @@ interface Session {
   name: string;
   date: string;
   status: string;
+  audioSource?: string | null;
+  questionItems?: string | null;
 }
 
 interface Section {
@@ -67,6 +69,10 @@ export default function SessionDetail() {
   const [isEditingSessionName, setIsEditingSessionName] = useState(false);
   const [editedSessionName, setEditedSessionName] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isEditingAudioSource, setIsEditingAudioSource] = useState(false);
+  const [editedAudioSource, setEditedAudioSource] = useState('');
+  const [isEditingQuestionItems, setIsEditingQuestionItems] = useState(false);
+  const [editedQuestionItems, setEditedQuestionItems] = useState('');
 
   console.log('📊 COMPONENT STATE:', {
     includedSectionsSize: includedSections.size,
@@ -322,6 +328,82 @@ export default function SessionDetail() {
   const cancelEditingSessionName = () => {
     setIsEditingSessionName(false);
     setEditedSessionName('');
+  };
+
+  // 音源の更新
+  const updateAudioSource = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audioSource: editedAudioSource.trim() || null }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update audio source');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setSession(data.data);
+        setIsEditingAudioSource(false);
+      }
+    } catch (error) {
+      console.error('Error updating audio source:', error);
+      alert('音源の更新に失敗しました');
+    }
+  };
+
+  const startEditingAudioSource = () => {
+    if (session) {
+      setEditedAudioSource(session.audioSource || '');
+      setIsEditingAudioSource(true);
+    }
+  };
+
+  const cancelEditingAudioSource = () => {
+    setIsEditingAudioSource(false);
+    setEditedAudioSource('');
+  };
+
+  // 質問項目の更新
+  const updateQuestionItems = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ questionItems: editedQuestionItems.trim() || null }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update question items');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setSession(data.data);
+        setIsEditingQuestionItems(false);
+      }
+    } catch (error) {
+      console.error('Error updating question items:', error);
+      alert('質問項目の更新に失敗しました');
+    }
+  };
+
+  const startEditingQuestionItems = () => {
+    if (session) {
+      setEditedQuestionItems(session.questionItems || '');
+      setIsEditingQuestionItems(true);
+    }
+  };
+
+  const cancelEditingQuestionItems = () => {
+    setIsEditingQuestionItems(false);
+    setEditedQuestionItems('');
   };
 
   const toggleIncludeSection = async (sectionId: string) => {
@@ -637,6 +719,96 @@ export default function SessionDetail() {
           <p className="mt-2 text-gray-600">
             開催日: {new Date(session.date).toLocaleDateString('ja-JP')}
           </p>
+
+          {/* 音源 */}
+          <div className="mt-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">音源:</span>
+              {isEditingAudioSource ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <input
+                    type="text"
+                    value={editedAudioSource}
+                    onChange={(e) => setEditedAudioSource(e.target.value)}
+                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="例: 沖縄県議会 6.次呂久成崇 録音"
+                  />
+                  <button
+                    onClick={updateAudioSource}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={cancelEditingAudioSource}
+                    className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">
+                    {session.audioSource || '未設定'}
+                  </span>
+                  <button
+                    onClick={startEditingAudioSource}
+                    className="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    title="音源を編集"
+                  >
+                    ✏️ 編集
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 質問項目 */}
+          <div className="mt-3">
+            <div className="flex items-start gap-2">
+              <span className="text-sm font-medium text-gray-700 mt-1">質問項目:</span>
+              {isEditingQuestionItems ? (
+                <div className="flex-1">
+                  <textarea
+                    value={editedQuestionItems}
+                    onChange={(e) => setEditedQuestionItems(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={8}
+                    placeholder="発注書の質問項目をコピペしてください"
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={updateQuestionItems}
+                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      保存
+                    </button>
+                    <button
+                      onClick={cancelEditingQuestionItems}
+                      className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 flex-1">
+                  {session.questionItems ? (
+                    <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans flex-1">{session.questionItems}</pre>
+                  ) : (
+                    <span className="text-sm text-gray-400">未設定</span>
+                  )}
+                  <button
+                    onClick={startEditingQuestionItems}
+                    className="px-2 py-0.5 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 shrink-0"
+                    title="質問項目を編集"
+                  >
+                    ✏️ 編集
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           
           {/* Undo/Redo Buttons */}
           <div className="mt-4">
