@@ -10,6 +10,45 @@ interface ParsedStatement {
 }
 
 export class ParserService {
+  // 全角文字を半角に正規化する関数（パターンマッチ用）
+  private normalizeForMatching(line: string): string {
+    let normalized = line;
+    
+    // 全角数字 → 半角数字
+    normalized = normalized.replace(/[０-９]/g, (ch) => 
+      String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+    );
+    
+    // 全角コロン → 半角コロン
+    normalized = normalized.replace(/：/g, ':');
+    
+    // 全角括弧 → 対応する括弧に変換
+    // 半角丸括弧 → 全角丸括弧（Manusフォーマットは全角括弧を期待）
+    normalized = normalized.replace(/\(/g, '（');
+    normalized = normalized.replace(/\)/g, '）');
+    
+    // 全角角括弧 → 半角角括弧
+    normalized = normalized.replace(/［/g, '[');
+    normalized = normalized.replace(/］/g, ']');
+    
+    // 全角スペース → 半角スペース
+    normalized = normalized.replace(/　/g, ' ');
+    
+    return normalized;
+  }
+
+  // 話者名の区切り文字を正規化する関数
+  // 話者行では半角コロンも全角コロンとして扱う
+  private normalizeSpeakerLine(line: string): string {
+    let normalized = line;
+    // 行末の半角コロンを全角コロンに変換（話者パターンマッチ用）
+    // ただし、タイムスタンプ内のコロンは変換しない
+    if (normalized.match(/^.+:$/) && !normalized.match(/\d:\d/)) {
+      normalized = normalized.slice(0, -1) + ':';
+    }
+    return normalized;
+  }
+
   // Parse NOTTA format with section numbers
   async parseNottaFile(filePath: string): Promise<ParsedStatement[]> {
     const content = await fs.readFile(filePath, 'utf-8');
@@ -23,8 +62,9 @@ export class ParserService {
     
     let currentStatement: ParsedStatement | null = null;
     // 話者番号または話者名の両方に対応
-    const sectionPattern = /^【セクション：(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
-    const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;  // MM:SSまたはHH:MM:SS形式に対応
+    // 正規化後は全角コロンが半角になるので、パターンも半角コロンで定義
+    const sectionPattern = /^【セクション:(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
+    const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;  // MM:SSまたHH:MM:SS形式に対応
     let sectionCounter = 1;
     
     for (let i = 0; i < lines.length; i++) {
@@ -35,15 +75,18 @@ export class ParserService {
         continue;
       }
       
+      // パターンマッチ用に全角・半角を正規化
+      const normalizedLine = this.normalizeForMatching(line);
+      
       // Check for section pattern first
-      if (sectionPattern.test(line)) {
+      if (sectionPattern.test(normalizedLine)) {
         // Save previous statement if exists
         if (currentStatement) {
           statements.push(currentStatement);
         }
         
         // Parse new section header
-        const match = line.match(sectionPattern);
+        const match = normalizedLine.match(sectionPattern);
         if (match) {
           currentStatement = {
             sectionNumber: match[1],
@@ -54,14 +97,14 @@ export class ParserService {
         }
       } 
       // Check for NOTTA standard format
-      else if (nottaPattern.test(line)) {
+      else if (nottaPattern.test(normalizedLine)) {
         // Save previous statement if exists
         if (currentStatement) {
           statements.push(currentStatement);
         }
         
         // Parse NOTTA format
-        const match = line.match(nottaPattern);
+        const match = normalizedLine.match(nottaPattern);
         if (match) {
           currentStatement = {
             sectionNumber: String(sectionCounter).padStart(4, '0'),
@@ -96,12 +139,12 @@ export class ParserService {
     const statements: ParsedStatement[] = [];
     
     let currentStatement: ParsedStatement | null = null;
-    // 従来のセクションパターン
-    const sectionPattern = /^【セクション：(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
+    // 従来のセクションパターン（正規化後は半角コロン）
+    const sectionPattern = /^【セクション:(\d+)】\[(.+?)\]\[(\d{2}:\d{2})\]$/;
     // 新しいManusフォーマットのパターン（タイムスタンプが括弧で囲まれている）
     const manusTimestampPattern = /^\（(\d{2}:\d{2})\）(?:\（(\d{2}:\d{2}:\d{2})\）)?$/;
-    // 話者行のパターン（「話者名：」の形式）
-    const speakerPattern = /^(.+?)：$/;
+    // 話者行のパターン（「話者名:」の形式、正規化後は半角コロン）
+    const speakerPattern = /^(.+?):$/;
     // 従来のNOTTAパターン
     const nottaPattern = /^話者\s*(\d+)\s+(\d{1,2}:\d{2}(?::\d{2})?)$/;
     
@@ -121,19 +164,22 @@ export class ParserService {
       }
       
       // ヘッダー情報をスキップ（「議事録」や「質問者名：」などの行）
-      if (i < 10 && (line === '議事録' || line.startsWith('質問者名：') || line.startsWith('日時：') || line.startsWith('質問事項：') || line === '---')) {
+      if (i < 10 && (line === '議事録' || line.startsWith('質問者名：') || line.startsWith('質問者名:') || line.startsWith('日時：') || line.startsWith('日時:') || line.startsWith('質問事項：') || line.startsWith('質問事項:') || line === '---')) {
         continue;
       }
       
+      // パターンマッチ用に全角・半角を正規化
+      const normalizedLine = this.normalizeForMatching(line);
+      
       // 従来のセクションパターンをチェック
-      if (sectionPattern.test(line)) {
+      if (sectionPattern.test(normalizedLine)) {
         // Save previous statement if exists
         if (currentStatement) {
           statements.push(currentStatement);
         }
         
         // Parse new section header
-        const match = line.match(sectionPattern);
+        const match = normalizedLine.match(sectionPattern);
         if (match) {
           currentStatement = {
             sectionNumber: match[1],
@@ -144,22 +190,23 @@ export class ParserService {
         }
       } 
       // 新しいManusフォーマットのタイムスタンプをチェック
-      else if (manusTimestampPattern.test(line)) {
+      else if (manusTimestampPattern.test(normalizedLine)) {
         // タイムスタンプ行を見つけた場合、次の行が話者行であることを期待
-        const match = line.match(manusTimestampPattern);
+        const match = normalizedLine.match(manusTimestampPattern);
         if (match) {
           pendingTimestamp = match[1]; // 最初のタイムスタンプを使用
           inManusFormat = true;
         }
       }
       // 話者行をチェック（Manusフォーマットの場合）
-      else if (inManusFormat && speakerPattern.test(line)) {
+      // 正規化後は全角コロンも半角コロンになっている
+      else if (inManusFormat && speakerPattern.test(normalizedLine)) {
         // Save previous statement if exists
         if (currentStatement) {
           statements.push(currentStatement);
         }
         
-        const match = line.match(speakerPattern);
+        const match = normalizedLine.match(speakerPattern);
         if (match && pendingTimestamp) {
           pendingSpeaker = match[1];
           currentStatement = {
@@ -173,14 +220,14 @@ export class ParserService {
         }
       }
       // 従来のNOTTAパターンをチェック
-      else if (nottaPattern.test(line)) {
+      else if (nottaPattern.test(normalizedLine)) {
         // Save previous statement if exists
         if (currentStatement) {
           statements.push(currentStatement);
         }
         
         // Parse NOTTA format
-        const match = line.match(nottaPattern);
+        const match = normalizedLine.match(nottaPattern);
         if (match) {
           currentStatement = {
             sectionNumber: String(sectionCounter).padStart(4, '0'),
