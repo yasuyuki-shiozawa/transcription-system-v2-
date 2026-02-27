@@ -422,6 +422,85 @@ export class DownloadController {
         }
 
         // Create Word document
+        // セッションのメタデータを取得
+        const sessionData = await prisma.session.findUnique({
+          where: { id: sessionId }
+        });
+        const audioSource = sessionData?.audioSource || '';
+        const questionItems = sessionData?.questionItems || '';
+
+        // ヘッダー部分のパラグラフを構築
+        const headerParagraphs: Paragraph[] = [
+          // 質問者：
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: questionerNames.length > 0 ? `質問者：${questionerNames.join(' ')}` : '質問者：（記録なし）',
+              })
+            ],
+            alignment: AlignmentType.LEFT
+          }),
+          // 開催日：
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `開催日：${formatToReiwaDate(new Date(manusData.session.date))}`
+              })
+            ],
+          }),
+        ];
+
+        // 音源が設定されている場合のみ追加
+        if (audioSource) {
+          headerParagraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `音\u3000源：${audioSource}`
+                })
+              ],
+            })
+          );
+        }
+
+        // 質問項目が設定されている場合のみ追加
+        if (questionItems) {
+          const questionLines = questionItems.split('\n');
+          // 最初の行は「質　問：」ラベル付き
+          headerParagraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `質\u3000問：${questionLines[0]}`
+                })
+              ],
+            })
+          );
+          // 2行目以降はインデント付き
+          for (let i = 1; i < questionLines.length; i++) {
+            if (questionLines[i].trim()) {
+              headerParagraphs.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: questionLines[i]
+                    })
+                  ],
+                  indent: { left: 720 }, // 「質　問：」の後の位置に合わせるインデント
+                })
+              );
+            }
+          }
+        }
+
+        // ヘッダーと本文の間に空行を追加
+        headerParagraphs.push(
+          new Paragraph({
+            children: [],
+            spacing: { after: 200 }
+          })
+        );
+
         const doc = new Document({
           styles: {
             default: {
@@ -435,25 +514,8 @@ export class DownloadController {
           sections: [{
             properties: {},
             children: [
-              // Questioner names (left-aligned)
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: questionerNames.length > 0 ? `質問者 ${questionerNames.join(' ')}` : '質問者 （記録なし）',
-                    bold: true
-                  })
-                ],
-                alignment: AlignmentType.LEFT
-              }),
-              // Date
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `開催日: ${formatToReiwaDate(new Date(manusData.session.date))}`
-                  })
-                ],
-                spacing: { after: 400 }
-              }),
+              // ヘッダー部分（質問者、開催日、音源、質問項目）
+              ...headerParagraphs,
               // Sections with proper timestamp format
               ...await Promise.all(manusData.sections.map(async (section, index) => {
                 // 現在のセクションまでの全体経過時間を計算
